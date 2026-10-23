@@ -83,7 +83,7 @@ const href = articleUrl(article);
   .dek { font-size: var(--step-1); line-height: 1.5; color: var(--ink-2); }
   .byline { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem var(--space-s); }
 
-  .card--feature .title { font-size: var(--step-4); line-height: 1.06; letter-spacing: -0.03em; font-weight: 700; }
+  .card--feature .title { font-size: clamp(2rem, 1.1rem + 2vw, 3rem); line-height: 1.06; letter-spacing: -0.03em; font-weight: 700; }
   .card--feature .dek { font-size: var(--step-1); max-width: 42ch; }
   .more { margin-top: var(--space-2xs); }
   .more a { font-weight: 600; }

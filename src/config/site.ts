@@ -16,17 +16,18 @@ export const site = {
   articlesPerPage: 12,
 };
 
-// Main navigation. `href` may point at a topic, a content type or a page.
+// Main navigation, shown in the sidebar. `href` may point at a topic, a content type or a page.
+// `icon` names a glyph in src/components/NavIcon.astro.
 export const nav = [
-  { label: 'Home', href: '/' },
-  { label: 'Science', href: '/topics/' },
-  { label: 'Artificial Intelligence', href: '/topics/artificial-intelligence/' },
-  { label: 'Research Ideas', href: '/type/research-idea/' },
-  { label: 'Questions', href: '/questions/' },
-  { label: 'Discoveries', href: '/type/research-discovery/' },
-  { label: 'Future & Society', href: '/topics/future-society/' },
-  { label: 'About', href: '/about/' },
-];
+  { label: 'Home', href: '/', icon: 'home' },
+  { label: 'Science', href: '/topics/', icon: 'science' },
+  { label: 'Artificial Intelligence', href: '/topics/artificial-intelligence/', icon: 'ai' },
+  { label: 'Research Ideas', href: '/type/research-idea/', icon: 'idea' },
+  { label: 'Questions', href: '/questions/', icon: 'question' },
+  { label: 'Discoveries', href: '/type/research-discovery/', icon: 'discovery' },
+  { label: 'Future & Society', href: '/topics/future-society/', icon: 'future' },
+  { label: 'About', href: '/about/', icon: 'about' },
+] as const;
 
 // Social links render only when a URL is filled in.
 export const social: { label: string; href: string }[] = [

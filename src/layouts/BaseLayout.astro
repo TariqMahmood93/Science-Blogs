@@ -69,13 +69,21 @@ const ld = [orgLd, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [])]
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <Header />
-    <main id="main" tabindex="-1" data-pagefind-body={pagefind ? '' : undefined}>
-      <slot />
-    </main>
-    <Footer />
+    <div class="shell">
+      <Header />
+      <div class="content">
+        <main id="main" tabindex="-1" data-pagefind-body={pagefind ? '' : undefined}>
+          <slot />
+        </main>
+        <Footer />
+      </div>
+    </div>
   </body>
 </html>
 <style>
   main:focus { outline: none; }
+  .content { min-width: 0; }
+  @media (min-width: 64rem) {
+    .shell { display: grid; grid-template-columns: 16.5rem minmax(0, 1fr); align-items: start; }
+  }
 </style>

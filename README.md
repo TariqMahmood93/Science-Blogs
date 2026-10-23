@@ -113,7 +113,7 @@ The founder profile on About comes from the `tariq-mahmood` entry in `src/conten
 
 ### Topics, types and navigation
 - Topics: `src/content/categories.yaml` — rename, reorder (`order`) or hide (`hidden: true`) without touching layouts.
-- Main navigation, footer links and social links: `src/config/site.ts`. Social links appear only once filled in.
+- Sidebar navigation, footer links and social links: `src/config/site.ts`. Each nav item has an `icon` (see `src/components/NavIcon.astro`). Social links appear only once filled in.
 
 ## Sample content — remove before launch
 

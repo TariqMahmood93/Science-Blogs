@@ -1,5 +1,10 @@
 # QA report (23 October 2026)
 
+## Update 5: left sidebar navigation
+- Navigation moved from the top header into a sticky left sidebar (logo, search, grouped links with icons, newsletter card, theme switch). Below 1024 px it becomes a top bar with a slide-out drawer.
+- Drawer: opens from the menu button, moves focus inside, closes with Escape, the close button or a tap outside, and returns focus to the menu button; while closed its links are not reachable by keyboard.
+- 64 pages build; 2,829 links resolve; axe-core finds no violations on 18 pages in both themes; no horizontal overflow at 390, 768, 1024, 1280 or 1920 px.
+
 ## Update 4: animated cover illustrations
 - Six original animated SVG covers (brain, code scan, data gaps, agent boundary, hypotheses, uncertainty), coloured by content type.
 - Animations pause off-screen and are switched off when the reader asks for reduced motion (checked: animation-name is `none` under reduced motion).
