@@ -1,0 +1,41 @@
+---
+interface Props { title: string; url: string }
+const { title, url } = Astro.props;
+const mail = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`;
+---
+<div class="share" data-share data-url={url} data-title={title}>
+  <p class="label">Share this article</p>
+  <ul>
+    <li><button type="button" class="button button--quiet" data-copy>Copy link</button></li>
+    <li><a class="button button--quiet" href={mail}>Email</a></li>
+    <li><button type="button" class="button button--quiet" data-native hidden>More options</button></li>
+  </ul>
+  <p class="status meta" role="status" aria-live="polite"></p>
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-share]').forEach((el) => {
+    const url = el.dataset.url!;
+    const title = el.dataset.title!;
+    const status = el.querySelector<HTMLElement>('.status')!;
+    el.querySelector('[data-copy]')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        status.textContent = 'Link copied.';
+      } catch {
+        status.textContent = `Copy this link: ${url}`;
+      }
+    });
+    const native = el.querySelector<HTMLButtonElement>('[data-native]');
+    if (native && 'share' in navigator) {
+      native.hidden = false;
+      native.addEventListener('click', () => navigator.share({ title, url }).catch(() => {}));
+    }
+  });
+</script>
+<style>
+  .label { font-weight: 600; font-size: var(--step--1); margin-bottom: var(--space-2xs); }
+  ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  [hidden] { display: none !important; }
+  .status:empty { display: none; }
+  .status { margin-top: var(--space-2xs); }
+</style>

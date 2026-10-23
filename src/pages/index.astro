@@ -1,0 +1,207 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import EvidenceSpectrum from '../components/EvidenceSpectrum.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import FillGlyph from '../components/FillGlyph.astro';
+import { site } from '../config/site';
+import { articleUrl, getCategories, getPublishedArticles } from '../lib/content';
+
+const articles = await getPublishedArticles();
+const categories = await getCategories();
+
+const featured = articles.find((a) => a.data.featured) ?? articles[0];
+const picks = articles.filter((a) => a.data.editorsPick && a !== featured).slice(0, 3);
+const spotlight = articles.find((a) => a.data.type.id === 'research-idea');
+const latest = articles.filter((a) => a !== featured).slice(0, 6);
+const questions = articles
+  .map((a) => ({ a, q: a.data.researchQuestion ?? a.data.openQuestion }))
+  .filter((x): x is { a: (typeof articles)[number]; q: string } => Boolean(x.q))
+  .slice(0, 5);
+const counts = new Map<string, number>();
+for (const a of articles) counts.set(a.data.category.id, (counts.get(a.data.category.id) ?? 0) + 1);
+---
+<BaseLayout>
+  <section class="wrap hero" aria-labelledby="hero-h">
+    <div class="hero-text">
+      <h1 id="hero-h">Science, with the evidence showing.</h1>
+      <p class="mission">
+        Plain-language articles on artificial intelligence, computing and emerging research. Each one tells you what is
+        established, what is interpretation, and what is still an open question, and links to the sources so you can check.
+      </p>
+      <div class="ctas">
+        <a class="button" href="/articles/">Explore articles</a>
+        <a class="button button--quiet" href="/type/research-idea/">Explore research ideas</a>
+      </div>
+    </div>
+    <EvidenceSpectrum />
+  </section>
+
+  {featured && (
+    <section class="wrap block" aria-labelledby="featured-h">
+      <h2 id="featured-h" class="visually-hidden">Featured story</h2>
+      <ArticleCard article={featured} variant="feature" headingLevel="h3" />
+    </section>
+  )}
+
+  {picks.length > 0 && (
+    <section class="wrap block picks" aria-labelledby="picks-h">
+      <div class="section-head"><h2 id="picks-h">Editors' selection</h2></div>
+      <div class="picks-list">
+        {picks.map((a) => <ArticleCard article={a} variant="text" />)}
+      </div>
+    </section>
+  )}
+
+  <section class="wrap block" aria-labelledby="topics-h">
+    <div class="section-head">
+      <h2 id="topics-h">Explore by discipline</h2>
+      <a href="/topics/">All topics</a>
+    </div>
+    <ul class="topics">
+      {categories.map((c) => (
+        <li>
+          <a href={`/topics/${c.id}/`}>
+            <span class="tname">{c.data.name}</span>
+            <span class="tcount meta">{counts.get(c.id) ? `${counts.get(c.id)} article${counts.get(c.id) === 1 ? '' : 's'}` : 'Coming soon'}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="wrap block" aria-labelledby="latest-h">
+    <div class="section-head">
+      <h2 id="latest-h">Latest articles</h2>
+      <a href="/articles/">All articles</a>
+    </div>
+    <div class="grid">
+      {latest.map((a) => <ArticleCard article={a} />)}
+    </div>
+  </section>
+
+  <section class="questions-band block" aria-labelledby="questions-h">
+    <div class="wrap qwrap">
+      <div class="qintro">
+        <h2 id="questions-h">Questions worth investigating</h2>
+        <p>Open problems raised by our articles. None of them has an agreed answer yet.</p>
+      </div>
+      <ul class="qlist">
+        {questions.map(({ a, q }) => (
+          <li>
+            <FillGlyph fill={0} dashed size={18} />
+            <div>
+              <p class="q">{q}</p>
+              <a class="meta" href={articleUrl(a)}>From: {a.data.title}</a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {spotlight && (
+    <section class="wrap block spotlight" aria-labelledby="spot-h">
+      <div class="spot-inner">
+        <p class="spot-label"><FillGlyph fill={0.26} size={16} /> Research idea spotlight</p>
+        <h2 id="spot-h"><a href={articleUrl(spotlight)}>{spotlight.data.title}</a></h2>
+        {spotlight.data.researchQuestion && <p class="spot-q">{spotlight.data.researchQuestion}</p>}
+        <p class="meta">A proposal for investigation, not an established result. Read the method and what would prove it wrong.</p>
+        {spotlight.data.sample && <span class="sample-flag">Sample content</span>}
+      </div>
+    </section>
+  )}
+
+  <section class="wrap block split" aria-labelledby="nl-h" id="newsletter">
+    <div>
+      <h2 id="nl-h">The monthly letter</h2>
+      <p class="lede">
+        {site.newsletter.cadence.charAt(0).toUpperCase() + site.newsletter.cadence.slice(1)}: new articles, one open research
+        question explained, and the sources behind them. We use your address only to send the newsletter, never share or
+        sell it, and every email has an unsubscribe link.
+      </p>
+    </div>
+    <NewsletterForm id="home-newsletter" />
+  </section>
+
+  <section class="wrap block split about" aria-labelledby="about-h">
+    <h2 id="about-h">About the publication</h2>
+    <div class="about-text">
+      <p>
+        {site.name} is an independent publication for readers who want rigorous ideas without jargon walls. We explain
+        research, propose questions worth asking, and say clearly where the evidence stops.
+      </p>
+      <p>
+        Articles are written and checked by people. We link to primary sources, correct mistakes in the open, and never
+        present a hypothesis as a discovery. <a href="/editorial-policy/">Read our editorial policy</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .block { margin-top: var(--space-2xl); }
+
+  .hero {
+    display: grid;
+    gap: var(--space-l);
+    padding-top: var(--space-xl);
+    align-items: center;
+  }
+  @media (min-width: 60rem) {
+    .hero { grid-template-columns: 1.15fr 1fr; gap: var(--space-xl); }
+  }
+  .hero h1 {
+    font-size: var(--step-5);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    font-weight: 450;
+    max-width: 11ch;
+  }
+  .mission {
+    margin-top: var(--space-m);
+    font: 400 var(--step-2) / 1.4 var(--font-serif);
+    color: var(--ink-2);
+    max-width: 34ch;
+  }
+  .ctas { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-l); }
+
+  .picks-list { display: grid; gap: var(--space-l); }
+  @media (min-width: 52rem) {
+    .picks-list { grid-template-columns: repeat(3, 1fr); }
+    .picks-list > :global(* + *) { border-left: var(--border); padding-left: var(--space-l); }
+  }
+
+  .topics { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); border-top: 2px solid var(--ink); }
+  .topics li { border-bottom: var(--border); }
+  .topics a { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-s); padding: var(--space-s) var(--space-xs) var(--space-s) 0; color: var(--ink); text-decoration: none; min-height: 2.75rem; }
+  .topics a:hover .tname { text-decoration: underline; }
+  .tname { font: 500 var(--step-1) / 1.25 var(--font-serif); }
+  .tcount { white-space: nowrap; }
+
+  .grid { display: grid; gap: var(--space-xl) var(--space-l); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+
+  .questions-band { background: var(--panel); padding-block: var(--space-xl); }
+  .qwrap { display: grid; gap: var(--space-l); }
+  @media (min-width: 60rem) { .qwrap { grid-template-columns: 1fr 2fr; } }
+  .qintro h2 { font-size: var(--step-3); }
+  .qintro p { margin-top: var(--space-xs); color: var(--ink-2); max-width: 28ch; }
+  .qlist { list-style: none; margin: 0; padding: 0; display: grid; }
+  .qlist li { display: grid; grid-template-columns: auto 1fr; gap: var(--space-s); padding-block: var(--space-s); border-bottom: 1px solid var(--rule-strong); color: var(--tone-idea); }
+  .qlist li:first-child { padding-top: 0; }
+  .q { font: 500 var(--step-2) / 1.3 var(--font-serif); color: var(--ink); }
+  .qlist a { display: inline-block; margin-top: 0.3rem; }
+
+  .spotlight .spot-inner { border-left: 4px solid var(--tone-idea); padding-left: var(--space-m); max-width: 50rem; display: grid; gap: var(--space-xs); justify-items: start; }
+  .spot-label { display: inline-flex; gap: 0.45rem; align-items: center; color: var(--tone-idea); font-weight: 600; font-size: var(--step--1); }
+  .spotlight h2 { font-size: var(--step-4); line-height: 1.05; }
+  .spotlight h2 a { color: var(--ink); text-decoration: none; }
+  .spotlight h2 a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+  .spot-q { font: italic 400 var(--step-2) / 1.35 var(--font-serif); color: var(--ink-2); }
+
+  .split { display: grid; gap: var(--space-m) var(--space-xl); padding-top: var(--space-l); border-top: 2px solid var(--ink); }
+  @media (min-width: 52rem) { .split { grid-template-columns: 1fr 1fr; } }
+  .split h2 { font-size: var(--step-3); }
+  .lede { margin-top: var(--space-xs); font: var(--step-1) / 1.5 var(--font-serif); color: var(--ink-2); max-width: 38ch; }
+  .about-text { display: grid; gap: var(--space-s); font: var(--step-1) / 1.55 var(--font-serif); max-width: 38rem; }
+</style>

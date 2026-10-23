@@ -1,0 +1,13 @@
+---
+// Inline citation. Write <Cite id="key" /> in MDX; the number is filled in at build time.
+interface Props { id: string; n?: string; occurrence?: string; verified?: string; summary?: string }
+const { id, n = '?', occurrence = '1', verified = 'true', summary = '' } = Astro.props;
+const unverified = verified !== 'true';
+---
+<sup class:list={['cite', { unverified }]}><a id={`cite-${id}-${occurrence}`} href={`#ref-${id}`} title={summary} aria-label={`Reference ${n}${unverified ? ', unverified placeholder' : ''}`}>[{n}]</a></sup>
+<style>
+  .cite { line-height: 0; font-family: var(--font-sans); font-size: 0.7em; font-weight: 600; }
+  .cite a { text-decoration: none; padding: 0.2em 0.1em; }
+  .cite a:hover { text-decoration: underline; }
+  .unverified a { color: var(--tone-future); }
+</style>

@@ -1,0 +1,33 @@
+# Topics. Reorder with `order`, hide with `hidden: true`.
+- id: artificial-intelligence
+  name: Artificial Intelligence
+  description: How learning systems work, where they fail, and what it would take to trust them.
+  order: 1
+- id: computer-science-cybersecurity
+  name: Computer Science & Cybersecurity
+  description: Algorithms, data, software and the security of the systems built on them.
+  order: 2
+- id: emerging-technologies
+  name: Emerging Technologies
+  description: Technologies moving from the lab towards everyday use.
+  order: 3
+- id: physics-space
+  name: Physics & Space
+  description: From the smallest particles to the largest structures in the universe.
+  order: 4
+- id: biology-life-sciences
+  name: Biology & Life Sciences
+  description: Living systems, from molecules to ecosystems.
+  order: 5
+- id: mathematics
+  name: Mathematics
+  description: Structures, proofs and the tools science runs on.
+  order: 6
+- id: philosophy-of-science
+  name: Philosophy of Science
+  description: What counts as evidence, explanation and discovery.
+  order: 7
+- id: future-society
+  name: Future & Society
+  description: How research and technology could reshape work, institutions and everyday life.
+  order: 8

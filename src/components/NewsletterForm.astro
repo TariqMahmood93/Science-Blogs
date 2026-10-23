@@ -1,0 +1,72 @@
+---
+import { site } from '../config/site';
+interface Props { id?: string; compact?: boolean }
+const { id = 'newsletter-form', compact = false } = Astro.props;
+const { action, emailField, cadence } = site.newsletter;
+---
+<div class:list={['newsletter', { compact }]}>
+  {action ? (
+    <form class="nl-form" method="post" action={action} novalidate data-newsletter>
+      <div class="field">
+        <label for={`${id}-email`}>Email address</label>
+        <input id={`${id}-email`} name={emailField} type="email" autocomplete="email" required aria-describedby={`${id}-error`} />
+      </div>
+      <div class="consent">
+        <input id={`${id}-consent`} type="checkbox" required aria-describedby={`${id}-error`} />
+        <label for={`${id}-consent`}>
+          Send me {cadence} with new articles and research questions. I can unsubscribe from any email. See the <a href="/privacy/#newsletter">privacy notice</a>.
+        </label>
+      </div>
+      <p class="error" id={`${id}-error`} role="alert" aria-live="assertive"></p>
+      <button class="button" type="submit">Subscribe</button>
+      <p class="meta note">You'll be taken to our email provider to confirm. Your subscription starts only once you confirm there.</p>
+    </form>
+  ) : (
+    <div class="disabled" role="note">
+      <p><strong>Newsletter signup isn't open yet.</strong> Follow new articles through the <a href="/rss.xml">RSS feed</a> in the meantime.</p>
+    </div>
+  )}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      const email = form.querySelector<HTMLInputElement>('input[type="email"]')!;
+      const consent = form.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
+      const error = form.querySelector<HTMLElement>('.error')!;
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      let message = '';
+      if (!email.value.trim()) message = 'Enter your email address.';
+      else if (!email.validity.valid) message = 'Enter an email address in the format name@example.org.';
+      else if (!consent.checked) message = 'Tick the box to confirm you want to receive the newsletter.';
+      email.setAttribute('aria-invalid', String(!email.value.trim() || !email.validity.valid));
+      consent.setAttribute('aria-invalid', String(!consent.checked));
+      if (message) {
+        e.preventDefault();
+        error.textContent = message;
+        (email.getAttribute('aria-invalid') === 'true' ? email : consent).focus();
+        return;
+      }
+      error.textContent = '';
+      button.disabled = true;
+      button.textContent = 'Sending…';
+    });
+  });
+  // Re-enable if the user navigates back to this page.
+  window.addEventListener('pageshow', () => {
+    document.querySelectorAll<HTMLButtonElement>('form[data-newsletter] button[type="submit"]').forEach((b) => {
+      b.disabled = false;
+      b.textContent = 'Subscribe';
+    });
+  });
+</script>
+
+<style>
+  .nl-form { display: grid; gap: var(--space-s); max-width: 30rem; }
+  .consent { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2xs); align-items: start; font-size: var(--step--1); }
+  .consent input { width: 1.25rem; height: 1.25rem; margin-top: 0.15rem; accent-color: var(--accent); }
+  .error { color: var(--focus); font-weight: 600; font-size: var(--step--1); min-height: 0; }
+  .error:empty { display: none; }
+  .nl-form .button { justify-self: start; }
+  .disabled { padding: var(--space-s); border: 1px dashed var(--rule-strong); border-radius: var(--radius-m); max-width: 32rem; }
+</style>

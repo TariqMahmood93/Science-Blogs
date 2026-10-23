@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ListingHeader from '../../components/ListingHeader.astro';
+import { getCategories, getPublishedArticles } from '../../lib/content';
+const categories = await getCategories();
+const articles = await getPublishedArticles();
+const count = (id: string) => articles.filter((a) => a.data.category.id === id).length;
+---
+<BaseLayout title="Topics" description="Browse The Research Frontier by scientific discipline.">
+  <ListingHeader title="Science, by discipline" intro="We start with artificial intelligence and computing, and are growing into the wider sciences. Pick a field to see what we've published." />
+  <div class="wrap">
+    <ul class="topics">
+      {categories.map((c) => {
+        const n = count(c.id);
+        return (
+          <li>
+            <h2><a href={`/topics/${c.id}/`}>{c.data.name}</a></h2>
+            <p>{c.data.description}</p>
+            <p class="meta">{n ? `${n} article${n === 1 ? '' : 's'}` : 'No articles yet'}</p>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</BaseLayout>
+<style>
+  .topics { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 0 var(--space-l); border-top: 2px solid var(--ink); }
+  li { padding: var(--space-m) 0; border-bottom: var(--border); display: grid; gap: var(--space-2xs); align-content: start; }
+  h2 { font-size: var(--step-2); }
+  h2 a { color: var(--ink); text-decoration: none; }
+  h2 a:hover { text-decoration: underline; }
+  li p:not(.meta) { font-family: var(--font-serif); font-size: var(--step-1); color: var(--ink-2); }
+</style>

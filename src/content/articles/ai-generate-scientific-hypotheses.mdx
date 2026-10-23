@@ -1,0 +1,59 @@
+---
+title: Can AI generate scientific hypotheses rather than just answers?
+dek: Language models answer questions fluently. A harder test is whether they can propose testable hypotheses that experts judge both new and worth pursuing.
+type: research-idea
+category: philosophy-of-science
+tags: [scientific discovery, large language models, hypothesis generation, evaluation]
+authors: [editors]
+publishDate: 2026-09-22
+featured: false
+sample: true
+researchQuestion: Do hypotheses proposed by language models, given the same literature as a researcher, lead to tests that succeed more often than hypotheses chosen by simple baselines?
+related: [ai-discover-something-new]
+references:
+  - id: hypothesis-gen-study
+    text: "To source: an existing study in which experts rated machine-generated research hypotheses for novelty and feasibility."
+  - id: novelty-metrics
+    text: "To source: work on measuring the novelty of scientific claims against prior literature."
+---
+
+This **research idea** proposes a question and a way to test it. It is a proposal, not a result.
+
+## Research question
+
+Do hypotheses proposed by language models, given the same literature as a researcher, lead to tests that succeed more often than hypotheses chosen by simple baselines?
+
+## What is currently known
+
+Outline: summarise studies in which experts rated machine-generated hypotheses for novelty and plausibility<Cite id="hypothesis-gen-study" />. Note that ratings are not the same as experimental success.
+
+## Proposed hypothesis
+
+<Evidence kind="speculation">
+Model-generated hypotheses will be rated as more novel than baselines but will not succeed more often when tested, because fluency rewards surprising combinations over well-grounded ones.
+</Evidence>
+
+## Rationale and supporting evidence
+
+Novelty is easy to produce by recombination; plausibility depends on knowledge of what has already failed, which is under-reported in the literature models learn from.
+
+## Potential method
+
+1. Pick a field with cheap, fast experiments (for example a well-studied computational benchmark).
+2. Give a model and two baselines (random recombination of keywords; hypotheses mined from paper future-work sections) the same corpus.
+3. Have blinded experts rate a sample of each for novelty and feasibility<Cite id="novelty-metrics" />.
+4. Run the top-rated hypotheses from each source and record which hold.
+
+## What would support or falsify it
+
+- **Support:** model hypotheses rated more novel, with success rates no higher than baselines.
+- **Falsify:** model hypotheses succeed significantly more often than both baselines.
+
+## Limitations and alternative explanations
+
+- Results in one fast-feedback field may not transfer to slow, expensive sciences.
+- Expert raters may recognise machine-written phrasing despite blinding.
+
+## References
+
+Listed below. All are unverified placeholders in this sample.

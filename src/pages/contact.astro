@@ -1,0 +1,34 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import ContactEmail from '../components/ContactEmail.astro';
+import { site } from '../config/site';
+---
+<PageLayout title="Contact and corrections" description="How to contact the editors, report a factual error or a security issue." intro="We read everything that comes in. Here is how to reach the right place.">
+  <h2>General enquiries</h2>
+  <p>Write to <ContactEmail />.</p>
+
+  <h2 id="corrections">Report a correction</h2>
+  <p data-article-note hidden>You are reporting an issue with: <strong data-article-name></strong>.</p>
+  <p>Tell us which article, the sentence that is wrong, and a source that shows the correct information. Email <ContactEmail subject="Correction" />.</p>
+  {site.contactEmail && <p><a class="button" data-correction-link href={`mailto:${site.contactEmail}?subject=${encodeURIComponent('Correction')}`}>Email a correction</a></p>}
+  <p>We review every report. If a change is needed, we update the article and add a dated note describing what changed.</p>
+
+  <h2 id="security">Report a security issue</h2>
+  <p>If you find a security problem with this website, email <ContactEmail subject="Security report" /> with steps to reproduce it. Please don't test against other readers' data or disrupt the service. We'll acknowledge reports and keep you informed.</p>
+
+  <h2>Pitching an article</h2>
+  <p>See <a href="/submit/">write for us</a>.</p>
+</PageLayout>
+<script>
+  const slug = new URLSearchParams(location.search).get('article');
+  if (slug && /^[a-z0-9-]+$/.test(slug)) {
+    const note = document.querySelector<HTMLElement>('[data-article-note]');
+    const name = document.querySelector<HTMLElement>('[data-article-name]');
+    if (note && name) { name.textContent = `/article/${slug}/`; note.hidden = false; }
+    const link = document.querySelector<HTMLAnchorElement>('[data-correction-link]');
+    if (link) {
+      const url = new URL(link.href);
+      link.href = `${url.protocol}${url.pathname}?subject=${encodeURIComponent(`Correction: /article/${slug}/`)}`;
+    }
+  }
+</script>

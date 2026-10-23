@@ -1,0 +1,40 @@
+---
+import FillGlyph from './FillGlyph.astro';
+import type { ContentType } from '../lib/content';
+interface Props {
+  type: ContentType;
+  link?: boolean;
+  size?: 's' | 'm';
+}
+const { type, link = false, size = 's' } = Astro.props;
+const fill = 1 - type.data.position;
+const href = `/type/${type.id}/`;
+---
+{link ? (
+  <a class:list={['typemark', `tone-${type.data.tone}`, `typemark--${size}`]} href={href}>
+    <FillGlyph fill={fill} dashed={type.data.position > 0.85} />
+    <span>{type.data.name}</span>
+  </a>
+) : (
+  <span class:list={['typemark', `tone-${type.data.tone}`, `typemark--${size}`]}>
+    <FillGlyph fill={fill} dashed={type.data.position > 0.85} />
+    <span>{type.data.name}</span>
+  </span>
+)}
+<style>
+  .typemark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font: 600 var(--step--1) / 1.2 var(--font-sans);
+    color: var(--tone);
+    text-decoration: none;
+  }
+  a.typemark:hover { text-decoration: underline; color: var(--tone); }
+  .typemark--m { font-size: var(--step-0); }
+  .tone-established { --tone: var(--tone-established); }
+  .tone-discovery { --tone: var(--tone-discovery); }
+  .tone-commentary { --tone: var(--tone-commentary); }
+  .tone-idea { --tone: var(--tone-idea); }
+  .tone-future { --tone: var(--tone-future); }
+</style>

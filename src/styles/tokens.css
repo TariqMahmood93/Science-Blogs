@@ -1,0 +1,101 @@
+/* Design tokens. Change the publication's look here, not in components. */
+
+:root {
+  /* Colour — light theme (default) */
+  --paper: #fafbfb;
+  --panel: #edf1f3;
+  --ink: #17202b;
+  --ink-2: #485462;
+  --rule: #d3dadf;
+  --rule-strong: #9aa6b1;
+  --accent: #1d4e89;
+  --accent-hover: #123a69;
+  --accent-ink: #ffffff;
+  --focus: #c2410c;
+  --mark-bg: #fde7a6;
+
+  /* Content-type tones (all ≥ 4.5:1 on --paper and --panel). Always paired with a text label and a fill glyph. */
+  --tone-established: #2b6248;
+  --tone-discovery: #1d4e89;
+  --tone-commentary: #7a3b4a;
+  --tone-idea: #5b3f99;
+  --tone-future: #82500f;
+
+  /* Typography */
+  --font-serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-sans: 'Schibsted Grotesk Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-code: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Modular scale, ratio ~1.25 from a 1rem base */
+  --step--1: 0.875rem;
+  --step-0: 1rem;
+  --step-1: 1.1875rem;
+  --step-2: 1.5rem;
+  --step-3: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);
+  --step-4: clamp(2.1rem, 1.5rem + 2.6vw, 3.25rem);
+  --step-5: clamp(2.6rem, 1.6rem + 4.4vw, 4.75rem);
+
+  /* Spacing */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2.25rem;
+  --space-xl: 3.5rem;
+  --space-2xl: 5.5rem;
+
+  /* Layout */
+  --measure: 38rem; /* ~70 characters of Newsreader at body size */
+  --page-max: 78rem;
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
+
+  /* Shape */
+  --radius-s: 3px;
+  --radius-m: 8px;
+  --border: 1px solid var(--rule);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #12171d;
+    --panel: #1a2129;
+    --ink: #e6eaee;
+    --ink-2: #a9b3bd;
+    --rule: #2e3842;
+    --rule-strong: #56636f;
+    --accent: #93b8ec;
+    --accent-hover: #b9d1f4;
+    --accent-ink: #0d1a2c;
+    --focus: #fb923c;
+    --mark-bg: #5c4a12;
+    --tone-established: #82c7a3;
+    --tone-discovery: #93b8ec;
+    --tone-commentary: #e3a0b0;
+    --tone-idea: #bba6ec;
+    --tone-future: #e5b26c;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #12171d;
+  --panel: #1a2129;
+  --ink: #e6eaee;
+  --ink-2: #a9b3bd;
+  --rule: #2e3842;
+  --rule-strong: #56636f;
+  --accent: #93b8ec;
+  --accent-hover: #b9d1f4;
+  --accent-ink: #0d1a2c;
+  --focus: #fb923c;
+  --mark-bg: #5c4a12;
+  --tone-established: #82c7a3;
+  --tone-discovery: #93b8ec;
+  --tone-commentary: #e3a0b0;
+  --tone-idea: #bba6ec;
+  --tone-future: #e5b26c;
+  color-scheme: dark;
+}

@@ -1,0 +1,32 @@
+# The five content types. `position` places the type on the evidence
+# spectrum shown on the homepage (0 = established knowledge, 1 = open speculation).
+- id: scientific-explainer
+  name: Scientific explainer
+  plural: Explainers
+  description: Explains established knowledge and how we came to know it.
+  position: 0.08
+  tone: established
+- id: research-discovery
+  name: Research discovery
+  plural: Discoveries
+  description: Explains and critiques a published study, keeping the authors' findings separate from our interpretation.
+  position: 0.3
+  tone: discovery
+- id: commentary
+  name: Commentary
+  plural: Commentary
+  description: A reasoned argument or interpretation, signed by its author.
+  position: 0.52
+  tone: commentary
+- id: research-idea
+  name: Research idea
+  plural: Research ideas
+  description: A proposed question or hypothesis, with what would support or falsify it. A proposal, not a result.
+  position: 0.74
+  tone: idea
+- id: future-hypothesis
+  name: Future hypothesis
+  plural: Future hypotheses
+  description: A possible future scenario that states its assumptions up front.
+  position: 0.93
+  tone: future

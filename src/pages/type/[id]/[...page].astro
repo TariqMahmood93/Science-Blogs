@@ -1,0 +1,34 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ListingHeader from '../../../components/ListingHeader.astro';
+import ArticleGrid from '../../../components/ArticleGrid.astro';
+import Pagination from '../../../components/Pagination.astro';
+import TypeMark from '../../../components/TypeMark.astro';
+import { site } from '../../../config/site';
+import { getContentTypes, getPublishedArticles, type Article, type ContentType } from '../../../lib/content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const [types, articles] = await Promise.all([getContentTypes(), getPublishedArticles()]);
+  return types.flatMap((type) =>
+    paginate(articles.filter((a) => a.data.type.id === type.id), {
+      params: { id: type.id },
+      props: { type },
+      pageSize: site.articlesPerPage,
+    }),
+  );
+}) satisfies GetStaticPaths;
+const { page, type } = Astro.props as { page: Page<Article>; type: ContentType };
+---
+<BaseLayout title={type.data.plural} description={type.data.description}>
+  <ListingHeader title={type.data.plural} intro={type.data.description}>
+    <p slot="above"><TypeMark type={type} size="m" /></p>
+    {type.id === 'research-idea' && (
+      <p class="note">Research ideas follow a fixed structure: the question, what is known, the hypothesis, a method, and what would prove it wrong. <a href="/submit/">Propose one</a>.</p>
+    )}
+  </ListingHeader>
+  <ArticleGrid articles={page.data} empty={`No ${type.data.plural.toLowerCase()} published yet.`}>
+    <Pagination page={page} />
+  </ArticleGrid>
+</BaseLayout>
+<style>.note { max-width: 46ch; color: var(--ink-2); }</style>

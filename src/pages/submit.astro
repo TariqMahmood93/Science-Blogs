@@ -1,0 +1,29 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import ContactEmail from '../components/ContactEmail.astro';
+---
+<PageLayout title="Write for us" description="How to propose an article or research idea, and how editorial review works." intro="We welcome proposals for explainers, critiques of new studies and well-structured research ideas.">
+  <h2>What to send</h2>
+  <p>Email <ContactEmail subject="Article proposal" /> with:</p>
+  <ul>
+    <li>your name and how to reach you;</li>
+    <li>a proposed title and a summary of two or three sentences;</li>
+    <li>the content type (explainer, research discovery, research idea, future hypothesis or commentary) and topic;</li>
+    <li>a draft or outline, and the main sources you rely on;</li>
+    <li>confirmation that the work is your own, or that you have permission to submit it;</li>
+    <li>any conflict of interest.</li>
+  </ul>
+  <p>For research ideas, please follow our structure: research question, what is currently known, the hypothesis, rationale, a possible method, what would support or falsify it, and limitations.</p>
+  <h2>What happens next</h2>
+  <p>Proposals move through these stages. We'll tell you when yours changes stage.</p>
+  <ol>
+    <li><strong>Received.</strong> We confirm we have it.</li>
+    <li><strong>Under editorial review.</strong> An editor reads it and checks key sources.</li>
+    <li><strong>Revision requested</strong>, if changes are needed.</li>
+    <li><strong>Accepted</strong> or <strong>declined</strong>, with a short reason.</li>
+    <li><strong>Published</strong>, after final checks.</li>
+  </ol>
+  <p>This is editorial review, not formal peer review. Nothing is published without an editor's approval.</p>
+  <h2>Your information</h2>
+  <p>We use your contact details only to handle your proposal. See the <a href="/privacy/#submissions">privacy notice</a> for how long we keep them.</p>
+</PageLayout>

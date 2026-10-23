@@ -1,0 +1,19 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ListingHeader from '../../components/ListingHeader.astro';
+import ArticleGrid from '../../components/ArticleGrid.astro';
+import Pagination from '../../components/Pagination.astro';
+import { site } from '../../config/site';
+import { getPublishedArticles, type Article } from '../../lib/content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  return paginate(await getPublishedArticles(), { pageSize: site.articlesPerPage });
+}) satisfies GetStaticPaths;
+const { page } = Astro.props as { page: Page<Article> };
+const title = page.currentPage > 1 ? `All articles, page ${page.currentPage}` : 'All articles';
+---
+<BaseLayout title={title} description="Every article in The Research Frontier, newest first.">
+  <ListingHeader title="All articles" intro="Everything we have published, newest first. Each article is labelled with the kind of claim it makes." />
+  <ArticleGrid articles={page.data}><Pagination page={page} /></ArticleGrid>
+</BaseLayout>

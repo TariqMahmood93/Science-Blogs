@@ -1,0 +1,22 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import { site } from '../config/site';
+---
+<PageLayout title="About" description={`What ${site.name} is, who it is for and how it works.`} intro={site.tagline}>
+  <h2>What we publish</h2>
+  <p>{site.name} is an independent publication about scientific ideas, with a starting focus on artificial intelligence, computer science and trustworthy technology. We explain research, critique new studies, propose questions worth investigating and think carefully about where technology could lead.</p>
+  <h2>Who it is for</h2>
+  <p>Researchers who care about accurate references, students working through difficult ideas, professionals following emerging science, and curious readers who want rigour without a jargon wall.</p>
+  <h2>How to read an article</h2>
+  <p>Every article says what kind of claim it makes, using a small filled circle: the fuller the circle, the more settled the knowledge.</p>
+  <ul>
+    <li><a href="/type/scientific-explainer/">Scientific explainers</a> cover established knowledge.</li>
+    <li><a href="/type/research-discovery/">Research discoveries</a> explain a published study and keep the authors' findings separate from our interpretation.</li>
+    <li><a href="/type/commentary/">Commentary</a> is a signed argument.</li>
+    <li><a href="/type/research-idea/">Research ideas</a> propose a question and how to test it. They are proposals, not results.</li>
+    <li><a href="/type/future-hypothesis/">Future hypotheses</a> explore possible futures and state their assumptions.</li>
+  </ul>
+  <p>Inside articles, passages are marked as established evidence, interpretation, speculation or an open question.</p>
+  <h2>Independence</h2>
+  <p>We carry no advertising and no tracking. Our standards are set out in the <a href="/editorial-policy/">editorial policy</a>.</p>
+</PageLayout>

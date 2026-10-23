@@ -1,0 +1,29 @@
+# Stage 5 — QA report (23 October 2026)
+
+All checks below were run against the production build (`npm run build`) served locally in headless Chromium.
+
+## What was tested and passed
+- **Build:** 48 pages built, search index generated, `astro check` reports 0 errors and 0 warnings. `npm audit`: 0 vulnerabilities.
+- **Links:** 1,725 internal links and in-page anchors across all 48 pages resolve.
+- **Accessibility (automated):** axe-core with WCAG 2.0/2.1/2.2 A and AA rules plus best practices found **no violations** on 13 representative pages (home, two articles, listings, topic, type, tag, search with results, contact, newsletter, about, 404), in both light and dark themes.
+- **Keyboard:** tab order starts with "Skip to content", then logo, Search, theme toggle, Subscribe, navigation. Mobile menu opens with Enter, reports `aria-expanded`, closes with Escape and returns focus to the button.
+- **Responsive:** no horizontal overflow at 390 px on any tested page; layouts checked visually at 390 px and 1366 px.
+- **Search:** finds articles by body text ("imputation"), topic and type filters, author name, and tolerates a missing letter ("calibraton" found the calibration article). Empty results give guidance and topic links. Filter state is kept in the URL.
+- **Newsletter:** with no provider configured the site says signup isn't open. With a provider URL set, the form validates empty email, malformed email and missing consent with specific messages and moves focus to the field.
+- **Integrity guards:** a test article with an unverified reference failed the build with a clear message; a `<Cite>` to a missing reference failed the build.
+- **SEO:** with `DEPLOY_ENV=production`, `robots.txt` allows crawling and links the sitemap; sample articles are `noindex` and excluded from the sitemap and RSS; tag and search pages are excluded from the sitemap. Previews are `noindex` site-wide.
+
+## Not tested
+- A real screen reader (NVDA, VoiceOver). Only automated checks and keyboard flows were run.
+- Real newsletter provider round-trip (no account configured).
+- Performance scores (Lighthouse / Core Web Vitals) — not measured; no claims made.
+- Safari and Firefox rendering; only Chromium was used.
+- Deployment to a live host.
+
+## Known limitations
+- No admin interface: articles are published by editing files in Git (see PLAN.md for the CMS upgrade path).
+- No public submission form; proposals arrive by email.
+- No "Was this useful?" widget: it can't record anything without a backend or analytics, so it was left out rather than faked.
+- Equations are not enabled (the usual KaTeX plugin chain had an open vulnerability at build time).
+- Search requires JavaScript; listings and topic pages work without it.
+- Legal pages are drafts for review.

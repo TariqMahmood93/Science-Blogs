@@ -1,0 +1,27 @@
+---
+// A circle filled to show how settled the knowledge is: full = established,
+// empty ring = speculative, dashed ring = open question. Shape carries the
+// meaning so colour is never the only signal.
+interface Props {
+  fill: number; // 0..1
+  dashed?: boolean;
+  size?: number;
+}
+const { fill, dashed = false, size = 14 } = Astro.props;
+const r = 6;
+const f = Math.max(0, Math.min(1, fill));
+// Pie slice from 12 o'clock clockwise.
+const angle = f * 2 * Math.PI;
+const x = 8 + r * Math.sin(angle);
+const y = 8 - r * Math.cos(angle);
+const large = f > 0.5 ? 1 : 0;
+const slice = f >= 0.999 ? null : `M8 8 L8 ${8 - r} A${r} ${r} 0 ${large} 1 ${x.toFixed(2)} ${y.toFixed(2)} Z`;
+---
+<svg class="glyph" width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+  <circle cx="8" cy="8" r={r} fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray={dashed ? '2.2 2' : undefined} />
+  {f >= 0.999 && <circle cx="8" cy="8" r={r} fill="currentColor" />}
+  {slice && f > 0 && <path d={slice} fill="currentColor" />}
+</svg>
+<style>
+  .glyph { flex: none; display: inline-block; vertical-align: -0.12em; }
+</style>

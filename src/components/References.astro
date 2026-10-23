@@ -1,0 +1,30 @@
+---
+interface Ref { id: string; text: string; url?: string; doi?: string; verified: boolean }
+interface Props { references: Ref[] }
+const { references } = Astro.props;
+---
+{references.length > 0 && (
+  <section class="refs" aria-labelledby="references">
+    <h2 id="references">References</h2>
+    <ol>
+      {references.map((r) => (
+        <li id={`ref-${r.id}`} class:list={{ unverified: !r.verified }}>
+          {!r.verified && <strong class="ph">Editorial placeholder, not yet verified: </strong>}
+          <span>{r.text}</span>
+          {r.doi && <> <a href={`https://doi.org/${r.doi}`}>doi:{r.doi}</a></>}
+          {r.url && !r.doi && <> <a href={r.url}>Source</a></>}
+          {' '}<a class="back" href={`#cite-${r.id}-1`} aria-label="Back to the first citation in the text">Back to text</a>
+        </li>
+      ))}
+    </ol>
+  </section>
+)}
+<style>
+  .refs { margin-top: var(--space-xl); padding-top: var(--space-m); border-top: var(--border); }
+  .refs h2 { font-size: var(--step-2); margin-bottom: var(--space-s); }
+  ol { padding-left: 1.5rem; display: grid; gap: var(--space-xs); font-size: var(--step--1); line-height: 1.5; }
+  li:target { background: var(--mark-bg); outline: 6px solid var(--mark-bg); border-radius: 2px; }
+  .ph { color: var(--tone-future); }
+  .unverified span { color: var(--ink-2); }
+  .back { white-space: nowrap; }
+</style>

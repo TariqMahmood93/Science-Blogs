@@ -1,0 +1,15 @@
+---
+interface Props { title: string; intro?: string; eyebrow?: string }
+const { title, intro } = Astro.props;
+---
+<header class="wrap lh">
+  <slot name="above" />
+  <h1>{title}</h1>
+  {intro && <p class="intro">{intro}</p>}
+  <slot />
+</header>
+<style>
+  .lh { padding-top: var(--space-xl); padding-bottom: var(--space-l); display: grid; gap: var(--space-s); }
+  h1 { font-size: var(--step-5); line-height: 1; letter-spacing: -0.025em; font-weight: 450; max-width: 18ch; }
+  .intro { font: var(--step-2) / 1.4 var(--font-serif); color: var(--ink-2); max-width: 40ch; }
+</style>

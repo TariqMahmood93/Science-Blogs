@@ -1,0 +1,23 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import ContactEmail from '../components/ContactEmail.astro';
+---
+<PageLayout title="Accessibility" description="Our accessibility commitments and how to report a barrier." intro="We aim for everyone to be able to read and use this site.">
+  <h2>Our target</h2>
+  <p>We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA.</p>
+  <h2>What we do</h2>
+  <ul>
+    <li>Pages use semantic headings, landmarks and labelled forms.</li>
+    <li>Everything works with a keyboard, with a visible focus indicator.</li>
+    <li>Text and controls meet AA contrast in both the light and dark themes.</li>
+    <li>Content types are shown with words and shapes, never colour alone.</li>
+    <li>Images have alternative text; decorative illustrations are hidden from screen readers.</li>
+    <li>We respect your reduced-motion setting.</li>
+  </ul>
+  <h2>Known limitations</h2>
+  <ul>
+    <li>Site search needs JavaScript. Topic and article listings work without it.</li>
+  </ul>
+  <h2>Report a barrier</h2>
+  <p>If something doesn't work for you, write to <ContactEmail subject="Accessibility" /> with the page and what happened. We'll reply and fix it where we can.</p>
+</PageLayout>

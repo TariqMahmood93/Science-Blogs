@@ -1,0 +1,15 @@
+---
+import type { Page } from 'astro';
+interface Props { page: Page<unknown> }
+const { page } = Astro.props;
+---
+{page.lastPage > 1 && (
+  <nav class="pager" aria-label="Pages">
+    {page.url.prev ? <a class="button button--quiet" href={page.url.prev} rel="prev">Newer articles</a> : <span />}
+    <p class="meta">Page {page.currentPage} of {page.lastPage}</p>
+    {page.url.next ? <a class="button button--quiet" href={page.url.next} rel="next">Older articles</a> : <span />}
+  </nav>
+)}
+<style>
+  .pager { margin-top: var(--space-xl); display: flex; justify-content: space-between; align-items: center; gap: var(--space-s); flex-wrap: wrap; }
+</style>

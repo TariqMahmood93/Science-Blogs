@@ -1,0 +1,263 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import ContourArt from '../../components/ContourArt.astro';
+import TypeMark from '../../components/TypeMark.astro';
+import References from '../../components/References.astro';
+import Cite from '../../components/Cite.astro';
+import Evidence from '../../components/Evidence.astro';
+import Callout from '../../components/Callout.astro';
+import Figure from '../../components/Figure.astro';
+import ShareTools from '../../components/ShareTools.astro';
+import { site } from '../../config/site';
+import { formatDate, getLookups, getPublishedArticles, readingTime, relatedArticles, slugifyTag, type Article } from '../../lib/content';
+import '../../styles/prose.css';
+
+export async function getStaticPaths() {
+  const articles = await getPublishedArticles();
+  return articles.map((article) => ({ params: { id: article.id }, props: { article, all: articles } }));
+}
+
+interface Props { article: Article; all: Article[] }
+const { article, all } = Astro.props;
+const { data } = article;
+const { Content, headings } = await render(article);
+const look = await getLookups();
+const type = look.type(data.type.id)!;
+const category = look.category(data.category.id)!;
+const authors = data.authors.map((a) => look.author(a.id)!).filter(Boolean);
+const minutes = readingTime(article.body);
+const related = relatedArticles(article, all);
+const toc = headings.filter((h) => h.depth === 2);
+const showToc = data.toc && toc.length >= 3;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: data.title,
+  description: data.dek,
+  datePublished: data.publishDate.toISOString(),
+  ...(data.updatedDate && { dateModified: data.updatedDate.toISOString() }),
+  author: authors.map((a) => ({
+    '@type': a.data.organization ? 'Organization' : 'Person',
+    name: a.data.name,
+    ...(a.data.url && { url: a.data.url }),
+  })),
+  publisher: { '@type': 'Organization', name: site.name },
+  mainEntityOfPage: canonical,
+  articleSection: category.data.name,
+  keywords: data.tags.join(', '),
+};
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 2, name: category.data.name, item: new URL(`/topics/${category.id}/`, Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: data.title },
+  ],
+};
+const contact = `/contact/?article=${encodeURIComponent(article.id)}#corrections`;
+---
+<BaseLayout
+  title={data.seoTitle ?? data.title}
+  description={data.seoDescription ?? data.dek}
+  ogType="article"
+  ogImage={data.heroImage?.src.src}
+  noindex={data.sample}
+  jsonLd={[jsonLd, breadcrumbLd]}
+>
+  <article class="article">
+    {data.sample && (
+      <div class="sample-banner wrap" role="note">
+        <p><strong>Sample content.</strong> This page shows how the layout handles a {type.data.name.toLowerCase()}. It is an editorial outline, not a published article, and its references are unverified placeholders.</p>
+      </div>
+    )}
+
+    <header class="wrap head">
+      <nav class="crumbs meta" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href={`/topics/${category.id}/`}>{category.data.name}</a></li>
+          <li aria-current="page"><span class="visually-hidden">{data.title}</span><span aria-hidden="true">This article</span></li>
+        </ol>
+      </nav>
+      <div class="typeline">
+        <TypeMark type={type} link size="m" />
+        <span class="typedesc">{type.data.description}</span>
+      </div>
+      <h1 class="title" data-pagefind-meta="title">{data.title}</h1>
+      {data.subtitle && <p class="subtitle">{data.subtitle}</p>}
+      <p class="dek">{data.dek}</p>
+      <div class="byline">
+        <p>By {authors.map((a, i) => <>{i > 0 && (i === authors.length - 1 ? ' and ' : ', ')}<a href={`#author-${a.id}`}>{a.data.name}</a></>)}</p>
+        <p class="meta dates">
+          <span>Published <time datetime={data.publishDate.toISOString()}>{formatDate(data.publishDate)}</time></span>
+          {data.updatedDate && <span>Updated <time datetime={data.updatedDate.toISOString()}>{formatDate(data.updatedDate)}</time></span>}
+          <span>{minutes} min read</span>
+        </p>
+      </div>
+    </header>
+
+    <div class="wrap hero">
+      {data.heroImage ? (
+        <figure>
+          <Image src={data.heroImage.src} alt={data.heroImage.alt} widths={[640, 1024, 1600]} sizes="(min-width: 78rem) 74rem, 100vw" loading="eager" fetchpriority="high" />
+          <figcaption class="meta">{data.heroImage.credit}</figcaption>
+        </figure>
+      ) : (
+        <ContourArt seed={article.id} tone={type.data.tone} ratio="16/9" class="hero-art" />
+      )}
+    </div>
+
+    <div class="wrap layout">
+      {showToc && (
+        <aside class="toc-rail">
+          <details class="toc" open>
+            <summary>In this article</summary>
+            <ol>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+          </details>
+        </aside>
+      )}
+
+      <div class="main-col">
+        {data.researchQuestion && (
+          <section class="rq" aria-labelledby="rq-label">
+            <p id="rq-label" class="rq-label">Research question</p>
+            <p class="rq-text">{data.researchQuestion}</p>
+            <p class="meta">This is a proposal for investigation, not a reported result.</p>
+          </section>
+        )}
+        {data.sourceLink && (
+          <p class="source meta">Original source: <a href={data.sourceLink.url}>{data.sourceLink.label}</a></p>
+        )}
+
+        <div
+          class="prose"
+          data-pagefind-body
+        >
+          <span hidden data-pagefind-filter="topic">{category.data.name}</span>
+          <span hidden data-pagefind-filter="type">{type.data.name}</span>
+          <span hidden data-pagefind-filter="year">{data.publishDate.getUTCFullYear()}</span>
+          <span hidden data-pagefind-meta="author">{authors.map((a) => a.data.name).join(', ')}</span>
+          <span class="visually-hidden" aria-hidden="true">{data.tags.join(', ')}. {authors.map((a) => a.data.name).join(', ')}. {type.data.name}. {category.data.name}.</span>
+          <Content components={{ Cite, Evidence, Callout, Figure }} />
+        </div>
+
+        {(data.updateNote || data.corrections.length > 0) && (
+          <section class="notes" aria-labelledby="updates">
+            <h2 id="updates">Updates and corrections</h2>
+            {data.updateNote && <p>{data.updateNote}</p>}
+            {data.corrections.length > 0 && (
+              <ul>{data.corrections.map((c) => <li><time datetime={c.date.toISOString()}>{formatDate(c.date)}</time>: {c.note}</li>)}</ul>
+            )}
+          </section>
+        )}
+
+        {data.aiAssistance && (
+          <p class="ai meta"><strong>Use of AI tools:</strong> {data.aiAssistance}</p>
+        )}
+
+        <References references={data.references} />
+
+        {data.tags.length > 0 && (
+          <div class="tags">
+            <h2 class="visually-hidden">Tags</h2>
+            <ul>{data.tags.map((t) => <li><a href={`/tags/${slugifyTag(t)}/`}>{t}</a></li>)}</ul>
+          </div>
+        )}
+
+        <section class="authors" aria-label="About the authors">
+          {authors.map((a) => (
+            <div class="author" id={`author-${a.id}`}>
+              <p class="aname">{a.data.name}{a.data.role && <span class="meta">, {a.data.role}</span>}</p>
+              {a.data.bio && <p class="meta">{a.data.bio}</p>}
+            </div>
+          ))}
+        </section>
+
+        <div class="after">
+          <ShareTools title={data.title} url={canonical} />
+          <p class="meta">Spotted a factual error? <a href={contact}>Report a correction</a>. We review every report and note changes on the article.</p>
+        </div>
+      </div>
+    </div>
+
+    {related.length > 0 && (
+      <section class="wrap related" aria-labelledby="related-h">
+        <h2 id="related-h">Related reading</h2>
+        <div class="related-grid">
+          {related.map((r) => <ArticleCard article={r} />)}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .sample-banner p {
+    margin-top: var(--space-m);
+    padding: var(--space-xs) var(--space-s);
+    border: 1px dashed var(--rule-strong);
+    border-radius: var(--radius-m);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+  .head { padding-top: var(--space-l); display: grid; gap: var(--space-s); }
+  .crumbs ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .crumbs li + li::before { content: '/'; margin-right: 0.4rem; color: var(--rule-strong); }
+  .crumbs a { color: var(--ink-2); }
+  .typeline { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-3xs) var(--space-s); }
+  .typedesc { font-size: var(--step--1); color: var(--ink-2); }
+  .title { font-size: var(--step-5); line-height: 1.02; letter-spacing: -0.025em; font-weight: 500; max-width: 18ch; }
+  .subtitle { font: italic 400 var(--step-3) / 1.2 var(--font-serif); color: var(--ink-2); }
+  .dek { font: 400 var(--step-2) / 1.4 var(--font-serif); color: var(--ink-2); max-width: 40ch; }
+  .byline { max-width: 48rem; display: grid; gap: 0.15rem; padding-top: var(--space-xs); border-top: var(--border); }
+  .byline a { color: var(--ink); font-weight: 600; text-decoration: none; }
+  .byline a:hover { text-decoration: underline; }
+  .dates { display: flex; flex-wrap: wrap; gap: 0 var(--space-s); }
+
+  .hero { margin-top: var(--space-l); }
+  .hero figure { margin: 0; }
+  .hero :global(img) { width: 100%; border-radius: var(--radius-m); }
+  .hero figcaption { margin-top: var(--space-2xs); }
+  .hero :global(.hero-art) { max-height: 26rem; width: 100%; }
+
+  .layout { margin-top: var(--space-xl); display: grid; gap: var(--space-l); }
+  @media (min-width: 64rem) {
+    .layout { grid-template-columns: 14rem minmax(0, var(--measure)); gap: var(--space-xl); }
+    .layout:not(:has(.toc-rail)) { grid-template-columns: 14rem minmax(0, var(--measure)); }
+    .layout:not(:has(.toc-rail)) .main-col { grid-column: 2; }
+    .toc-rail { position: relative; }
+    .toc { position: sticky; top: var(--space-m); }
+  }
+  .toc { font-size: var(--step--1); border: var(--border); border-radius: var(--radius-m); padding: var(--space-xs) var(--space-s); }
+  .toc summary { font-weight: 600; cursor: pointer; padding: 0.25rem 0; }
+  .toc ol { margin: var(--space-2xs) 0 0; padding-left: 1.2rem; display: grid; gap: 0.35rem; }
+  .toc a { color: var(--ink-2); text-decoration: none; }
+  .toc a:hover { color: var(--ink); text-decoration: underline; }
+
+  .rq { margin-bottom: var(--space-l); padding: var(--space-m); border-radius: var(--radius-m); background: var(--panel); border-top: 3px solid var(--tone-idea); }
+  .rq-label { font: 600 var(--step--1) / 1.3 var(--font-sans); color: var(--tone-idea); }
+  .rq-text { font: 500 var(--step-2) / 1.3 var(--font-serif); margin-block: var(--space-2xs); }
+  .source { margin-bottom: var(--space-m); }
+
+  .notes { margin-top: var(--space-l); padding: var(--space-s) var(--space-m); border-left: 3px solid var(--rule-strong); font-size: var(--step--1); }
+  .notes h2 { font: 600 var(--step-0) / 1.3 var(--font-sans); margin-bottom: var(--space-2xs); }
+  .ai { margin-top: var(--space-m); }
+
+  .tags ul { list-style: none; padding: 0; margin: var(--space-l) 0 0; display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .tags a { display: inline-block; padding: 0.3rem 0.7rem; border: var(--border); border-radius: 999px; font-size: var(--step--1); color: var(--ink-2); text-decoration: none; }
+  .tags a:hover { border-color: var(--ink-2); color: var(--ink); }
+
+  .authors { margin-top: var(--space-l); display: grid; gap: var(--space-s); }
+  .aname { font-weight: 600; }
+  .after { margin-top: var(--space-l); padding-top: var(--space-m); border-top: var(--border); display: grid; gap: var(--space-s); }
+
+  .related { margin-top: var(--space-2xl); }
+  .related h2 { font-size: var(--step-3); margin-bottom: var(--space-m); }
+  .related-grid { display: grid; gap: var(--space-l); grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
+</style>

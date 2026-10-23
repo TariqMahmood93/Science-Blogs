@@ -1,0 +1,41 @@
+---
+title: What makes an AI agent trustworthy?
+dek: An agent that books, buys and edits on our behalf needs more than accuracy. It needs limits we can see, and evidence that it stays inside them.
+type: commentary
+category: artificial-intelligence
+tags: [AI agents, trustworthy AI, AI safety, evaluation]
+authors: [editors]
+publishDate: 2026-09-29
+sample: true
+openQuestion: "Can we measure an agent's trustworthiness in advance, or only by watching it in deployment?"
+references:
+  - id: trust-framework
+    text: "To source: a published framework for trustworthy AI from a standards body or public authority."
+  - id: agent-eval
+    text: "To source: a study evaluating whether language-model agents respect stated constraints during multi-step tasks."
+---
+
+This is **commentary**: a reasoned argument, signed by its author, that readers are invited to disagree with.
+
+## Trust is about behaviour under pressure
+
+A chatbot that gives a wrong answer wastes a reader's time. An agent that takes a wrong action can spend money, send a message or delete a file. The argument of this piece is that trust in agents should rest less on how often they are right and more on how they fail.
+
+## Four properties worth asking for
+
+1. **Visible scope.** People can see what the agent may and may not do before it starts.
+2. **Enforced limits.** Those limits are enforced outside the model, not only stated in its instructions.
+3. **Checkpoints.** Irreversible actions pause for confirmation.
+4. **A record.** Every action can be inspected afterwards.
+
+<Evidence kind="interpretation">
+Existing trustworthy-AI frameworks emphasise transparency and human oversight<Cite id="trust-framework" />. Applying them to agents means turning those principles into runtime checks rather than documentation.
+</Evidence>
+
+## Why instructions alone are not enough
+
+Outline: describe evaluations in which agents are given explicit constraints and later measured on whether they kept them across long tasks<Cite id="agent-eval" />. Report rates only from verified sources.
+
+<Evidence kind="open">
+Can we measure an agent's trustworthiness in advance, or only by watching how it behaves in deployment?
+</Evidence>

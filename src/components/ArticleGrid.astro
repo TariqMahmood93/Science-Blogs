@@ -1,0 +1,21 @@
+---
+import ArticleCard from './ArticleCard.astro';
+import type { Article } from '../lib/content';
+interface Props { articles: Article[]; empty?: string }
+const { articles, empty = 'Nothing published here yet.' } = Astro.props;
+---
+<div class="wrap">
+  {articles.length > 0 ? (
+    <div class="grid">{articles.map((a) => <ArticleCard article={a} headingLevel="h2" />)}</div>
+  ) : (
+    <div class="empty">
+      <p>{empty}</p>
+      <p><a href="/articles/">Browse all articles</a> or <a href="/newsletter/">get new articles by email</a>.</p>
+    </div>
+  )}
+  <slot />
+</div>
+<style>
+  .grid { display: grid; gap: var(--space-xl) var(--space-l); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); padding-top: var(--space-l); border-top: 2px solid var(--ink); }
+  .empty { padding: var(--space-l); border: 1px dashed var(--rule-strong); border-radius: var(--radius-m); display: grid; gap: var(--space-2xs); font-family: var(--font-serif); font-size: var(--step-1); }
+</style>

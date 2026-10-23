@@ -1,0 +1,16 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+interface Props { src: ImageMetadata; alt: string; caption?: string; credit: string }
+const { src, alt, caption, credit } = Astro.props;
+---
+<figure class="figure">
+  <Image src={src} alt={alt} widths={[480, 800, 1200]} sizes="(min-width: 44rem) 40rem, 100vw" />
+  <figcaption>{caption} <span class="credit">{credit}</span></figcaption>
+</figure>
+<style>
+  .figure { margin: var(--space-l) 0; }
+  .figure :global(img) { border-radius: var(--radius-m); width: 100%; }
+  figcaption { margin-top: var(--space-2xs); font: var(--step--1)/1.45 var(--font-sans); color: var(--ink-2); }
+  .credit { font-style: italic; }
+</style>

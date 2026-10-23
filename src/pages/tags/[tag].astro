@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ListingHeader from '../../components/ListingHeader.astro';
+import ArticleGrid from '../../components/ArticleGrid.astro';
+import { getPublishedArticles, slugifyTag, type Article } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const articles = await getPublishedArticles();
+  const tags = new Map<string, { label: string; articles: Article[] }>();
+  for (const a of articles) {
+    for (const t of a.data.tags) {
+      const slug = slugifyTag(t);
+      const entry = tags.get(slug) ?? { label: t, articles: [] };
+      entry.articles.push(a);
+      tags.set(slug, entry);
+    }
+  }
+  return [...tags].map(([tag, v]) => ({ params: { tag }, props: v }));
+}
+const { label, articles } = Astro.props;
+---
+<BaseLayout title={`Tagged: ${label}`} description={`Articles tagged ${label}.`} noindex>
+  <ListingHeader title={label} intro={`${articles.length} article${articles.length === 1 ? '' : 's'} with this tag.`}>
+    <nav slot="above" class="meta" aria-label="Breadcrumb"><a href="/articles/">All articles</a></nav>
+  </ListingHeader>
+  <ArticleGrid articles={articles} />
+</BaseLayout>

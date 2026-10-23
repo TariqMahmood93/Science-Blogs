@@ -1,0 +1,150 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ListingHeader from '../components/ListingHeader.astro';
+import { getCategories } from '../lib/content';
+const categories = await getCategories();
+---
+<BaseLayout title="Search" description="Search articles by title, text, topic, tag, author or type." noindex>
+  <ListingHeader title="Search" />
+  <div class="wrap search">
+    <form class="sform" role="search" action="/search/" method="get" data-search-form>
+      <div class="field q">
+        <label for="q">Search articles</label>
+        <input id="q" name="q" type="search" autocomplete="off" placeholder="Try “fairness” or “uncertainty”" />
+      </div>
+      <div class="filters" data-filters hidden>
+        <div class="field"><label for="f-topic">Topic</label><select id="f-topic" data-filter="topic"><option value="">All topics</option></select></div>
+        <div class="field"><label for="f-type">Type</label><select id="f-type" data-filter="type"><option value="">All types</option></select></div>
+        <div class="field"><label for="f-year">Year</label><select id="f-year" data-filter="year"><option value="">Any year</option></select></div>
+      </div>
+      <button class="button" type="submit">Search</button>
+    </form>
+
+    <p class="status meta" role="status" aria-live="polite" data-status></p>
+    <ol class="results" data-results></ol>
+    <button class="button button--quiet more" type="button" data-more hidden>Show more results</button>
+
+    <noscript>
+      <p class="fallback">Search needs JavaScript. You can still <a href="/topics/">browse by topic</a> or see <a href="/articles/">all articles</a>.</p>
+    </noscript>
+
+    <div class="help" data-help>
+      <h2>Or browse a topic</h2>
+      <ul>{categories.map((c) => <li><a href={`/topics/${c.id}/`}>{c.data.name}</a></li>)}</ul>
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline type="module">
+  const form = document.querySelector('[data-search-form]');
+  const input = document.getElementById('q');
+  const statusEl = document.querySelector('[data-status]');
+  const list = document.querySelector('[data-results]');
+  const more = document.querySelector('[data-more]');
+  const filtersBox = document.querySelector('[data-filters]');
+  const selects = [...document.querySelectorAll('[data-filter]')];
+  const PAGE = 10;
+  let pagefind, results = [], shown = 0, timer, seq = 0;
+
+  try {
+    pagefind = await import('/pagefind/pagefind.js');
+    await pagefind.options({ excerptLength: 28 });
+    const filters = await pagefind.filters();
+    for (const sel of selects) {
+      const values = Object.keys(filters[sel.dataset.filter] ?? {}).sort();
+      for (const v of values) sel.add(new Option(v, v));
+    }
+    filtersBox.hidden = false;
+  } catch {
+    statusEl.textContent = 'Search is available on the published site. Run a production build to generate the search index.';
+  }
+
+  const params = new URLSearchParams(location.search);
+  input.value = params.get('q') ?? '';
+  for (const sel of selects) sel.value = params.get(sel.dataset.filter) ?? '';
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  }
+
+  async function renderMore() {
+    const slice = results.slice(shown, shown + PAGE);
+    const data = await Promise.all(slice.map((r) => r.data()));
+    for (const d of data) {
+      const li = document.createElement('li');
+      // Excerpts come from Pagefind with only <mark> tags; titles are escaped.
+      li.innerHTML = `<a class="rt" href="${encodeURI(d.url)}">${escapeHtml(d.meta.title ?? d.url)}</a>
+        <p class="meta">${escapeHtml([d.filters?.type?.[0], d.filters?.topic?.[0]].filter(Boolean).join(', '))}</p>
+        <p class="ex">${d.excerpt}</p>`;
+      list.append(li);
+    }
+    shown += slice.length;
+    more.hidden = shown >= results.length;
+  }
+
+  async function run(push = true) {
+    if (!pagefind) return;
+    const q = input.value.trim();
+    const filters = {};
+    for (const sel of selects) if (sel.value) filters[sel.dataset.filter] = sel.value;
+    const hasFilter = Object.keys(filters).length > 0;
+    const mine = ++seq;
+    if (push) {
+      const p = new URLSearchParams();
+      if (q) p.set('q', q);
+      for (const [k, v] of Object.entries(filters)) p.set(k, v);
+      history.replaceState(null, '', p.toString() ? `?${p}` : location.pathname);
+    }
+    list.replaceChildren();
+    shown = 0;
+    more.hidden = true;
+    document.querySelector('[data-help]').hidden = Boolean(q || hasFilter);
+    if (!q && !hasFilter) { statusEl.textContent = ''; return; }
+    statusEl.textContent = 'Searching…';
+    const search = await pagefind.search(q || null, { filters });
+    if (mine !== seq) return;
+    results = search.results;
+    const what = q ? `“${q}”` : 'these filters';
+    statusEl.textContent = results.length
+      ? `${results.length} result${results.length === 1 ? '' : 's'} for ${what}.`
+      : `No articles match ${what}. Check the spelling, try a broader word, or clear the filters.`;
+    if (!results.length) document.querySelector('[data-help]').hidden = false;
+    await renderMore();
+  }
+
+  form.addEventListener('submit', (e) => { e.preventDefault(); run(); });
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 250); });
+  selects.forEach((s) => s.addEventListener('change', () => run()));
+  more.addEventListener('click', async () => {
+    const first = shown;
+    await renderMore();
+    list.children[first]?.querySelector('a')?.focus();
+  });
+  if (input.value || selects.some((s) => s.value)) run(false);
+</script>
+
+<style>
+  .sform { display: grid; gap: var(--space-s); align-items: end; padding-bottom: var(--space-m); border-bottom: 2px solid var(--ink); }
+  @media (min-width: 52rem) {
+    .sform { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto; }
+  }
+  .q input { font-size: var(--step-1); }
+  .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--space-xs); }
+  .filters[hidden] { display: none; }
+  .status { margin-top: var(--space-m); }
+  .status:empty { display: none; }
+  .results { list-style: none; padding: 0; margin: var(--space-m) 0 0; display: grid; max-width: 46rem; }
+  .results :global(li) { padding: var(--space-m) 0; border-bottom: var(--border); display: grid; gap: var(--space-3xs); }
+  .results :global(.rt) { font: 500 var(--step-2) / 1.25 var(--font-serif); color: var(--ink); text-decoration: none; }
+  .results :global(.rt:hover) { text-decoration: underline; }
+  .results :global(.ex) { font-family: var(--font-serif); color: var(--ink-2); }
+  .results :global(mark) { background: var(--mark-bg); color: var(--ink); padding: 0 0.1em; }
+  .more { margin-top: var(--space-m); }
+  .help { margin-top: var(--space-xl); }
+  .help[hidden] { display: none; }
+  .help h2 { font-size: var(--step-2); margin-bottom: var(--space-s); }
+  .help ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .help a { display: inline-block; padding: 0.4rem 0.8rem; border: var(--border); border-radius: 999px; text-decoration: none; color: var(--ink); }
+  .help a:hover { border-color: var(--ink-2); }
+  .fallback { margin-top: var(--space-m); }
+</style>

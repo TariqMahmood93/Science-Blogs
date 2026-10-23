@@ -1,0 +1,17 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import ListingHeader from '../components/ListingHeader.astro';
+import '../styles/prose.css';
+interface Props { title: string; description: string; intro?: string; updated?: string }
+const { title, description, intro, updated } = Astro.props;
+---
+<BaseLayout title={title} description={description}>
+  <ListingHeader title={title} intro={intro}>
+    {updated && <p class="meta">Last updated {updated}</p>}
+  </ListingHeader>
+  <div class="wrap"><div class="prose page"><slot /></div></div>
+</BaseLayout>
+<style>
+  .page { padding-top: var(--space-l); border-top: 2px solid var(--ink); }
+  .page :global(h2:first-child) { margin-top: 0; }
+</style>

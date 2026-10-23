@@ -1,0 +1,100 @@
+/* Long-form reading styles, applied inside .prose */
+
+.prose {
+  font-family: var(--font-serif);
+  font-size: var(--step-1);
+  line-height: 1.65;
+  max-width: var(--measure);
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  hanging-punctuation: first;
+}
+.prose > * + * {
+  margin-top: 1.1em;
+}
+.prose h2 {
+  font-size: var(--step-3);
+  margin-top: 2em;
+  scroll-margin-top: var(--space-l);
+}
+.prose h3 {
+  font-size: var(--step-2);
+  margin-top: 1.6em;
+}
+.prose h2 + *,
+.prose h3 + * {
+  margin-top: 0.6em;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.3em;
+}
+.prose li + li {
+  margin-top: 0.35em;
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-left: var(--space-m);
+  border-left: 2px solid var(--ink);
+  font-style: italic;
+  color: var(--ink-2);
+}
+.prose code {
+  font-family: var(--font-code);
+  font-size: 0.82em;
+  background: var(--panel);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-s);
+}
+.prose pre {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius-m);
+  overflow-x: auto;
+  border: var(--border);
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+/* Shiki dual themes */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .astro-code,
+  :root:not([data-theme='light']) .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+:root[data-theme='dark'] .astro-code,
+:root[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+.prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: var(--step--1);
+  font-variant-numeric: lining-nums;
+}
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: var(--border);
+  vertical-align: top;
+}
+.prose th {
+  border-bottom: 2px solid var(--ink);
+}
+.prose hr {
+  border: 0;
+  border-top: var(--border);
+  margin-block: var(--space-xl);
+}
+.prose strong {
+  font-weight: 650;
+}

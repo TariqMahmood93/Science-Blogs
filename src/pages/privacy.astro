@@ -1,0 +1,18 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import ContactEmail from '../components/ContactEmail.astro';
+import { site } from '../config/site';
+---
+<PageLayout title="Privacy notice" description="What personal information we collect, why, and your rights." intro="We collect as little as we can." updated="draft for review">
+  <p><em>Draft. Have this reviewed against the GDPR and Italian requirements before launch; it is not legal advice.</em></p>
+  <h2>Who we are</h2>
+  <p>{site.name} is the data controller for information described here. Contact: <ContactEmail subject="Privacy" />.</p>
+  <h2>Reading the site</h2>
+  <p>We do not use analytics, advertising trackers or non-essential cookies. Your browser may store your light or dark theme choice locally; it never leaves your device. Our hosting provider keeps standard server logs (such as IP address and pages requested) for security and reliability, under its own retention policy.</p>
+  <h2 id="newsletter">Newsletter</h2>
+  <p>If you subscribe, we keep your email address to send you {site.newsletter.cadence}. Our email provider stores the address on our behalf and handles confirmation and unsubscribes. You can unsubscribe from any email, and we delete your address from the list when you do. Legal basis: your consent.</p>
+  <h2 id="submissions">Submissions and corrections</h2>
+  <p>If you email us a proposal or correction, we use your name and email to respond and keep them for up to two years after the matter closes, unless your work is published, in which case we keep the correspondence for as long as the article is online.</p>
+  <h2>Your rights</h2>
+  <p>You can ask to see, correct or delete your information, or object to its use, by writing to <ContactEmail subject="Privacy request" />. You can also complain to your data protection authority (in Italy, the Garante per la protezione dei dati personali).</p>
+</PageLayout>

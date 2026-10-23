@@ -1,0 +1,9 @@
+---
+import { site } from '../config/site';
+interface Props { subject?: string }
+const { subject } = Astro.props;
+const email = site.contactEmail;
+const href = email ? `mailto:${email}${subject ? `?subject=${encodeURIComponent(subject)}` : ''}` : '';
+---
+{email ? <a href={href}>{email}</a> : <strong class="unset">[contact address not yet configured — set PUBLIC_CONTACT_EMAIL]</strong>}
+<style>.unset { color: var(--tone-future); font-family: var(--font-sans); font-size: 0.85em; }</style>

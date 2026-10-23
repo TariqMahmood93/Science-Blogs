@@ -1,0 +1,48 @@
+---
+import FillGlyph from './FillGlyph.astro';
+import { getContentTypes } from '../lib/content';
+const types = await getContentTypes();
+---
+<figure class="spectrum" aria-labelledby="spectrum-cap">
+  <figcaption id="spectrum-cap">Every article says what kind of claim it makes</figcaption>
+  <div class="ends meta" aria-hidden="true"><span>Settled knowledge</span><span>Open speculation</span></div>
+  <ol class="track">
+    {types.map((t) => (
+      <li class={`tone-${t.data.tone}`} style={`--pos: ${t.data.position}`}>
+        <a href={`/type/${t.id}/`}>
+          <FillGlyph fill={1 - t.data.position} dashed={t.data.position > 0.85} size={20} />
+          <span class="name">{t.data.name}</span>
+        </a>
+        <span class="desc">{t.data.description}</span>
+      </li>
+    ))}
+  </ol>
+</figure>
+<style>
+  .spectrum { margin: 0; padding: var(--space-m); border-radius: var(--radius-m); background: var(--panel); }
+  figcaption { font: 500 var(--step-2) / 1.25 var(--font-serif); margin-bottom: var(--space-m); max-width: 24ch; }
+  .ends { display: flex; justify-content: space-between; padding-bottom: var(--space-2xs); border-bottom: 2px solid var(--ink); }
+  .track { list-style: none; margin: 0; padding: 0; display: grid; }
+  li { display: grid; grid-template-columns: 1fr; gap: 0.1rem; padding: var(--space-xs) 0; border-bottom: var(--border); position: relative; }
+  li a {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    color: var(--tone); font-weight: 600; text-decoration: none;
+    margin-left: calc(var(--pos) * (100% - 13rem));
+  }
+  li a:hover .name { text-decoration: underline; }
+  .desc { font-size: var(--step--1); color: var(--ink-2); margin-left: calc(var(--pos) * (100% - 13rem) + 1.75rem); max-width: 30ch; }
+  li::before {
+    content: ''; position: absolute; top: -1px; height: 3px; width: 1.25rem;
+    left: calc(var(--pos) * (100% - 13rem)); background: var(--tone);
+  }
+  .tone-established { --tone: var(--tone-established); }
+  .tone-discovery { --tone: var(--tone-discovery); }
+  .tone-commentary { --tone: var(--tone-commentary); }
+  .tone-idea { --tone: var(--tone-idea); }
+  .tone-future { --tone: var(--tone-future); }
+  @media (max-width: 30rem) {
+    li a, .desc { margin-left: 0; }
+    .desc { padding-left: 1.75rem; }
+    li::before { left: 0; }
+  }
+</style>

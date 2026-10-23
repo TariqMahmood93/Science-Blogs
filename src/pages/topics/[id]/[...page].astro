@@ -1,0 +1,30 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ListingHeader from '../../../components/ListingHeader.astro';
+import ArticleGrid from '../../../components/ArticleGrid.astro';
+import Pagination from '../../../components/Pagination.astro';
+import { site } from '../../../config/site';
+import { getCategories, getPublishedArticles, type Article, type Category } from '../../../lib/content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const [cats, articles] = await Promise.all([getCategories(), getPublishedArticles()]);
+  return cats.flatMap((category) =>
+    paginate(articles.filter((a) => a.data.category.id === category.id), {
+      params: { id: category.id },
+      props: { category },
+      pageSize: site.articlesPerPage,
+    }),
+  );
+}) satisfies GetStaticPaths;
+const { page, category } = Astro.props as { page: Page<Article>; category: Category };
+---
+<BaseLayout title={category.data.name} description={category.data.description}>
+  <ListingHeader title={category.data.name} intro={category.data.description}>
+    <nav slot="above" class="meta crumbs" aria-label="Breadcrumb"><a href="/topics/">All topics</a></nav>
+  </ListingHeader>
+  <ArticleGrid articles={page.data} empty={`We haven't published anything in ${category.data.name} yet.`}>
+    <Pagination page={page} />
+  </ArticleGrid>
+</BaseLayout>
+<style>.crumbs a { color: var(--ink-2); }</style>

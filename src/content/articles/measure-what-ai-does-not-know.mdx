@@ -1,0 +1,45 @@
+---
+title: How can we measure what an AI system does not know?
+dek: A model that says "I'm not sure" at the right moments is more useful than one that is slightly more accurate. Measuring that kind of honesty is a research field of its own.
+type: scientific-explainer
+category: artificial-intelligence
+tags: [uncertainty, calibration, machine learning, evaluation]
+authors: [editors]
+publishDate: 2026-09-15
+sample: true
+openQuestion: "How do we measure uncertainty for open-ended outputs, where there is no single right answer?"
+related: [missing-data-unfair-ai]
+references:
+  - id: uncertainty-types
+    text: "To source: a review distinguishing aleatoric from epistemic uncertainty in machine learning."
+  - id: calibration
+    text: "To source: a study measuring the calibration of modern neural networks."
+---
+
+When a weather forecast says 70% chance of rain, we can check it: on days given that forecast, it should rain about seven times in ten. That property is called **calibration**, and it is one of the main ways researchers measure whether a model knows what it does not know.
+
+## Two kinds of not knowing
+
+<Evidence kind="established">
+Researchers usually separate uncertainty that comes from noise in the world, which more data cannot remove, from uncertainty that comes from the model's limited knowledge, which more data can reduce<Cite id="uncertainty-types" />.
+</Evidence>
+
+## Calibration, explained
+
+Outline: explain reliability diagrams and expected calibration error in plain terms, with one worked example<Cite id="calibration" />.
+
+```text
+# Expected calibration error, in outline
+for each confidence bin:
+    gap = |accuracy_in_bin - mean_confidence_in_bin|
+    ece += (examples_in_bin / total) * gap
+```
+
+## Beyond calibration
+
+- Abstention: letting the model decline to answer, and measuring the accuracy of what it does answer.
+- Out-of-distribution detection: noticing when an input is unlike anything seen in training.
+
+<Evidence kind="open">
+How do we measure uncertainty for open-ended outputs, like a paragraph of text, where there is no single right answer?
+</Evidence>
