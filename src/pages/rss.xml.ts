@@ -8,12 +8,12 @@ export async function GET(context: APIContext) {
   return rss({
     title: site.name,
     description: site.description,
-    site: context.site!,
+    site: new URL(import.meta.env.BASE_URL, context.site!).toString(),
     items: articles.map((a) => ({
       title: a.data.title,
       description: a.data.dek,
       pubDate: a.data.publishDate,
-      link: `/article/${a.id}/`,
+      link: `${import.meta.env.BASE_URL}article/${a.id}/`,
       categories: [a.data.category.id, ...a.data.tags],
     })),
   });

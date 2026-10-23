@@ -7,6 +7,7 @@ import remarkCite from './src/lib/remark-cite.mjs';
 import { readdirSync, readFileSync } from 'node:fs';
 
 const site = process.env.SITE_URL || 'https://example.org';
+const base = process.env.BASE_PATH || '/';
 
 // Sample and draft articles are kept out of the sitemap.
 const articleDir = new URL('./src/content/articles/', import.meta.url);
@@ -17,6 +18,7 @@ const excluded = readdirSync(articleDir)
 
 export default defineConfig({
   site,
+  base,
   trailingSlash: 'always',
   integrations: [
     mdx(),
