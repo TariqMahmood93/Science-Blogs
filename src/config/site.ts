@@ -20,7 +20,6 @@ export const site = {
 // `icon` names a glyph in src/components/NavIcon.astro.
 export const nav = [
   { label: 'Science', href: '/topics/', icon: 'science' },
-  { label: 'Artificial Intelligence', href: '/topics/artificial-intelligence/', icon: 'ai' },
   { label: 'Research Ideas', href: '/type/research-idea/', icon: 'idea' },
   { label: 'Questions', href: '/questions/', icon: 'question' },
   { label: 'Discoveries', href: '/type/research-discovery/', icon: 'discovery' },
