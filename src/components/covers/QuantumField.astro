@@ -1,0 +1,85 @@
+---
+// Quantum field: a lattice of nodes with a wave of excitation sweeping across
+// it, plus a central particle-antiparticle flash.
+const COLS = 14;
+const ROWS = 8;
+const nodes = Array.from({ length: COLS * ROWS }, (_, i) => {
+  const col = i % COLS;
+  const row = Math.floor(i / COLS);
+  const x = 100 + (col * 1400) / (COLS - 1);
+  const y = 90 + (row * 720) / (ROWS - 1);
+  // Delay a sweep so it reads as a travelling wave.
+  const d = (col * 0.14 + row * 0.07) % 2.6;
+  return { x, y, d };
+});
+---
+<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" class="qfield">
+  <defs>
+    <radialGradient id="qf-flash" cx="800" cy="450" r="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="var(--art-line)" stop-opacity="0.75" />
+      <stop offset="60%" stop-color="var(--dot)" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="var(--dot)" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <g class="lattice">
+    {nodes.map((n) => (
+      <circle cx={n.x} cy={n.y} r="3" style={`animation-delay:${n.d}s`} />
+    ))}
+  </g>
+
+  <!-- Entanglement arcs -->
+  <g class="arcs">
+    <path d="M200 300 Q 500 100 800 300" />
+    <path d="M1400 600 Q 1100 800 800 600" />
+    <path d="M300 700 Q 500 500 800 450" />
+    <path d="M1300 200 Q 1100 400 800 450" />
+  </g>
+
+  <!-- Travelling wavefronts -->
+  <g class="waves">
+    <circle class="wave" cx="800" cy="450" r="80" />
+    <circle class="wave" cx="800" cy="450" r="80" style="animation-delay: 2s;" />
+    <circle class="wave" cx="800" cy="450" r="80" style="animation-delay: 4s;" />
+  </g>
+
+  <circle class="flash" cx="800" cy="450" r="320" fill="url(#qf-flash)" />
+
+  <!-- Particle pair -->
+  <g class="pair">
+    <circle class="particle" cx="800" cy="450" r="10" />
+    <circle class="anti" cx="800" cy="450" r="7" />
+  </g>
+</svg>
+
+<style>
+  .qfield { width: 100%; height: 100%; display: block; }
+  .lattice circle { fill: var(--dot); opacity: 0.5; animation: pulse 2.6s ease-in-out infinite; filter: drop-shadow(0 0 4px var(--dot)); }
+  .arcs path { fill: none; stroke: var(--art-line); stroke-width: 1.2; opacity: 0.35; stroke-dasharray: 4 6; animation: slide 8s linear infinite; }
+  .arcs path:nth-child(2) { animation-duration: 11s; }
+  .arcs path:nth-child(3) { animation-duration: 9s; }
+  .arcs path:nth-child(4) { animation-duration: 13s; }
+  .waves .wave { fill: none; stroke: var(--art-line); stroke-width: 2; opacity: 0; transform-origin: 800px 450px; animation: expand 6s ease-out infinite; }
+  .flash { animation: flash 6s ease-in-out infinite; transform-origin: 800px 450px; }
+  .pair .particle { fill: var(--art-line); filter: drop-shadow(0 0 10px var(--art-line)); transform-origin: 800px 450px; animation: split 6s ease-in-out infinite; }
+  .pair .anti { fill: var(--dot); filter: drop-shadow(0 0 10px var(--dot)); transform-origin: 800px 450px; animation: split-rev 6s ease-in-out infinite; }
+
+  @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+  @keyframes slide { to { stroke-dashoffset: -40; } }
+  @keyframes expand {
+    0% { opacity: 0.9; transform: scale(0.2); }
+    80% { opacity: 0; transform: scale(5); }
+    100% { opacity: 0; transform: scale(5); }
+  }
+  @keyframes flash { 0%, 90%, 100% { opacity: 0.1; transform: scale(0.8); } 45% { opacity: 1; transform: scale(1.1); } }
+  @keyframes split {
+    0%, 95%, 100% { transform: translate(0, 0); opacity: 1; }
+    45% { transform: translate(-70px, -40px); opacity: 1; }
+    80% { transform: translate(-70px, -40px); opacity: 0; }
+  }
+  @keyframes split-rev {
+    0%, 95%, 100% { transform: translate(0, 0); opacity: 1; }
+    45% { transform: translate(70px, 40px); opacity: 1; }
+    80% { transform: translate(70px, 40px); opacity: 0; }
+  }
+</style>

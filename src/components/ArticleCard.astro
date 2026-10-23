@@ -60,9 +60,14 @@ const href = articleUrl(article);
 
 <style>
   .card { position: relative; display: grid; gap: var(--space-s); align-content: start; }
-  .art { overflow: hidden; border-radius: var(--radius-m); }
-  .art :global(.contour), .art :global(.cover), .img { transition: transform 0.4s ease; }
-  .card:hover .art :global(.contour), .card:hover .art :global(.cover), .card:hover .img { transform: scale(1.025); }
+  .art {
+    overflow: hidden; border-radius: var(--radius-m);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+    transition: box-shadow 0.4s ease, transform 0.4s ease;
+  }
+  .art :global(.contour), .art :global(.cover), .img { transition: transform 0.5s ease; }
+  .card:hover .art { box-shadow: 0 12px 28px -12px color-mix(in srgb, var(--ink) 25%, transparent); transform: translateY(-2px); }
+  .card:hover .art :global(.contour), .card:hover .art :global(.cover), .card:hover .img { transform: scale(1.035); }
   .img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
   .body { display: grid; gap: 0.55rem; }
   .kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem var(--space-s); }

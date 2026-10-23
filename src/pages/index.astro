@@ -5,6 +5,7 @@ import ArticleCard from '../components/ArticleCard.astro';
 import ContourArt from '../components/ContourArt.astro';
 import CoverArt from '../components/CoverArt.astro';
 import EvidenceSpectrum from '../components/EvidenceSpectrum.astro';
+import HeroArt from '../components/HeroArt.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import QuestionCard from '../components/QuestionCard.astro';
 import { site } from '../config/site';
@@ -34,11 +35,14 @@ const topicMeta = (id: string) => {
 ---
 <BaseLayout>
   <section class="wrap intro" aria-labelledby="hero-h">
-    <h1 id="hero-h">Science, with the evidence showing.</h1>
-    <p class="mission">
-      Research explained in plain language, with every article clear about what is established, what is interpretation,
-      and what is still open.
-    </p>
+    <div class="intro-text">
+      <h1 id="hero-h">Science, with the evidence showing.</h1>
+      <p class="mission">
+        Research explained in plain language, with every article clear about what is established, what is interpretation,
+        and what is still open.
+      </p>
+    </div>
+    <HeroArt />
   </section>
 
   {featured && (
@@ -157,6 +161,7 @@ const topicMeta = (id: string) => {
   </section>
 
   <section class="block band-dark newsletter" aria-labelledby="nl-h" id="newsletter">
+    <div class="aurora" aria-hidden="true"></div>
     <div class="wrap nl">
       <div>
         <h2 id="nl-h">Get the monthly letter</h2>
@@ -189,6 +194,18 @@ const topicMeta = (id: string) => {
     });
   }
 
+  // Fade-in reveal for grid cells as they scroll into view. One-shot.
+  const reveals = document.querySelectorAll<HTMLElement>('[data-tab-grid] .cell');
+  if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    reveals.forEach((el) => el.classList.add('reveal'));
+    const ro = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) { e.target.classList.add('is-in'); ro.unobserve(e.target); }
+      }
+    }, { threshold: 0.15 });
+    reveals.forEach((el) => ro.observe(el));
+  }
+
   // Question rail controls.
   const rail = document.querySelector<HTMLElement>('[data-rail]');
   const controls = document.querySelector<HTMLElement>('[data-rail-controls]');
@@ -213,15 +230,18 @@ const topicMeta = (id: string) => {
   .block { margin-top: var(--space-2xl); }
 
   .intro {
+    position: relative;
     display: grid;
-    gap: var(--space-s) var(--space-xl);
+    gap: var(--space-l) var(--space-xl);
     padding-top: var(--space-xl);
     padding-bottom: var(--space-l);
-    align-items: end;
+    align-items: center;
   }
-  @media (min-width: 60rem) { .intro { grid-template-columns: 1.3fr 1fr; } }
+  .intro-text { display: grid; gap: var(--space-s); align-content: end; }
+  @media (min-width: 60rem) { .intro { grid-template-columns: 1.25fr 1fr; } }
   .intro h1 { font-size: var(--step-5); line-height: 1; letter-spacing: -0.04em; font-weight: 700; max-width: 14ch; }
   .mission { font-size: var(--step-1); line-height: 1.5; color: var(--ink-2); max-width: 38ch; }
+  @media (max-width: 60rem) { .intro :global(.hero-art) { max-width: 320px; margin-inline: auto; } }
 
   .featured { padding-top: var(--space-m); border-top: var(--border); }
   .secondary {
@@ -309,9 +329,29 @@ const topicMeta = (id: string) => {
     display: grid; place-items: center; font: 700 1.05rem/1 var(--font-sans); background: var(--paper);
   }
 
-  .newsletter { padding-block: var(--space-2xl); margin-bottom: calc(-1 * var(--space-2xl)); }
-  .nl { display: grid; gap: var(--space-l) var(--space-2xl); align-items: start; }
+  .newsletter { position: relative; padding-block: var(--space-2xl); margin-bottom: calc(-1 * var(--space-2xl)); overflow: hidden; }
+  .nl { position: relative; display: grid; gap: var(--space-l) var(--space-2xl); align-items: start; }
   @media (min-width: 56rem) { .nl { grid-template-columns: 1fr 1fr; } }
   .nl h2 { font-size: var(--step-4); letter-spacing: -0.035em; font-weight: 700; }
   .lede { margin-top: var(--space-s); font-size: var(--step-1); line-height: 1.55; color: var(--ink-2); max-width: 40ch; }
+  .aurora {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.55;
+    background:
+      radial-gradient(60% 90% at 15% 20%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 60%),
+      radial-gradient(55% 85% at 85% 80%, color-mix(in srgb, var(--tone-idea) 45%, transparent), transparent 60%),
+      radial-gradient(80% 60% at 50% 50%, color-mix(in srgb, var(--tone-discovery) 25%, transparent), transparent 70%);
+    filter: blur(28px);
+    animation: aurora 18s ease-in-out infinite alternate;
+  }
+  @keyframes aurora {
+    0%   { transform: translate3d(-3%, -2%, 0) scale(1.05); }
+    50%  { transform: translate3d(2%, 1%, 0) scale(1.1); }
+    100% { transform: translate3d(-1%, 3%, 0) scale(1.05); }
+  }
+  @media (prefers-reduced-motion: reduce) { .aurora { animation: none; } }
+
+  /* Scroll-triggered reveal for the latest-articles grid. The class is only
+     added by script, so a non-JS or reduced-motion visitor sees everything. */
+  .cell.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .cell.reveal.is-in { opacity: 1; transform: none; }
 </style>

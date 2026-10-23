@@ -1,0 +1,224 @@
+---
+// Signature hero illustration: an orbital system of science motifs around a
+// softly pulsing core. Decorative, hidden from assistive tech, respects
+// reduced motion.
+
+const orbits = [
+  { r: 170, dur: 42, start: 0 },
+  { r: 240, dur: 68, start: 55 },
+  { r: 310, dur: 96, start: 190 },
+];
+
+// Glyphs placed on each orbit at a fixed angular offset. Each glyph has a
+// short SVG path drawn centred on its anchor.
+type Glyph = { orbit: number; angle: number; render: 'atom' | 'molecule' | 'dna' | 'wave' | 'cell' | 'satellite' | 'spark' | 'chart' };
+const glyphs: Glyph[] = [
+  { orbit: 0, angle: 20, render: 'atom' },
+  { orbit: 0, angle: 200, render: 'spark' },
+  { orbit: 1, angle: 10, render: 'molecule' },
+  { orbit: 1, angle: 135, render: 'wave' },
+  { orbit: 1, angle: 265, render: 'cell' },
+  { orbit: 2, angle: 50, render: 'dna' },
+  { orbit: 2, angle: 165, render: 'chart' },
+  { orbit: 2, angle: 300, render: 'satellite' },
+];
+
+const stars = Array.from({ length: 60 }, (_, i) => ({
+  x: ((i * 173) % 1600) - 800,
+  y: ((i * 97) % 900) - 450,
+  r: 0.6 + (i % 4) * 0.45,
+  d: (i % 11) * 0.4,
+}));
+---
+<div class="hero-art" aria-hidden="true">
+  <svg viewBox="-800 -450 1600 900" preserveAspectRatio="xMidYMid meet" focusable="false">
+    <defs>
+      <radialGradient id="hero-core" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="var(--hero-core-hi)" stop-opacity="0.95" />
+        <stop offset="55%" stop-color="var(--hero-core-mid)" stop-opacity="0.5" />
+        <stop offset="100%" stop-color="var(--hero-core-lo)" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="hero-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="var(--hero-glow)" stop-opacity="0.5" />
+        <stop offset="100%" stop-color="var(--hero-glow)" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+
+    <g class="stars">
+      {stars.map((s) => <circle cx={s.x} cy={s.y} r={s.r} style={`animation-delay:${s.d}s`} />)}
+    </g>
+
+    <circle class="aura" cx="0" cy="0" r="420" fill="url(#hero-glow)" />
+
+    {orbits.map((o) => (
+      <circle class="orbit" cx="0" cy="0" r={o.r} />
+    ))}
+
+    <g class="constellations">
+      <!-- A faint connecting polygon that drifts slowly behind the orbits -->
+      <polygon points="-260,-120 220,-180 320,80 60,290 -300,220" />
+    </g>
+
+    <circle class="core-outer" cx="0" cy="0" r="140" fill="url(#hero-core)" />
+    <circle class="core" cx="0" cy="0" r="42" />
+    <circle class="core-ring" cx="0" cy="0" r="60" />
+
+    <!-- Rotating ring with glyphs. Each orbit group gets its own duration and
+         starting angle; each glyph rides at its angular offset. -->
+    {orbits.map((o, oi) => (
+      <g class="orbit-group" style={`--dur:${o.dur}s; --start:${o.start}deg;`}>
+        {glyphs.filter((g) => g.orbit === oi).map((g) => (
+          <g class="glyph-anchor" style={`transform: rotate(${g.angle}deg) translate(${o.r}px, 0);`}>
+            <g class="glyph-counter" style={`--dur:${o.dur}s;`}>
+              {g.render === 'atom' && (
+                <g class="g-atom">
+                  <ellipse cx="0" cy="0" rx="28" ry="10" />
+                  <ellipse cx="0" cy="0" rx="28" ry="10" style="transform: rotate(60deg);" />
+                  <ellipse cx="0" cy="0" rx="28" ry="10" style="transform: rotate(-60deg);" />
+                  <circle class="dot" cx="0" cy="0" r="4" />
+                </g>
+              )}
+              {g.render === 'molecule' && (
+                <g class="g-mol">
+                  <line x1="-16" y1="-10" x2="0" y2="0" />
+                  <line x1="0" y1="0" x2="18" y2="-12" />
+                  <line x1="0" y1="0" x2="4" y2="18" />
+                  <circle class="dot" cx="-16" cy="-10" r="5" />
+                  <circle class="dot" cx="0" cy="0" r="6" />
+                  <circle class="dot" cx="18" cy="-12" r="5" />
+                  <circle class="dot" cx="4" cy="18" r="4" />
+                </g>
+              )}
+              {g.render === 'dna' && (
+                <g class="g-dna">
+                  <path d="M-18 -24 C 0 -14 0 -4 -18 6 C 0 16 0 26 -18 36" fill="none" />
+                  <path d="M18 -24 C 0 -14 0 -4 18 6 C 0 16 0 26 18 36" fill="none" />
+                  <line x1="-14" y1="-18" x2="14" y2="-18" />
+                  <line x1="-14" y1="0" x2="14" y2="0" />
+                  <line x1="-14" y1="18" x2="14" y2="18" />
+                  <line x1="-14" y1="34" x2="14" y2="34" />
+                </g>
+              )}
+              {g.render === 'wave' && (
+                <g class="g-wave">
+                  <path d="M-28 0 Q -14 -16 0 0 T 28 0" fill="none" />
+                  <path d="M-28 10 Q -14 -6 0 10 T 28 10" fill="none" style="opacity: 0.6;" />
+                </g>
+              )}
+              {g.render === 'cell' && (
+                <g class="g-cell">
+                  <circle cx="0" cy="0" r="20" fill="none" />
+                  <circle class="dot" cx="-4" cy="-2" r="5" />
+                  <circle cx="8" cy="6" r="2.5" />
+                  <circle cx="-9" cy="8" r="2" />
+                </g>
+              )}
+              {g.render === 'satellite' && (
+                <g class="g-sat">
+                  <rect x="-6" y="-5" width="12" height="10" rx="2" fill="none" />
+                  <line x1="-18" y1="-10" x2="-6" y2="0" />
+                  <line x1="18" y1="-10" x2="6" y2="0" />
+                  <line x1="0" y1="5" x2="0" y2="14" />
+                  <circle class="dot" cx="0" cy="14" r="2.5" />
+                </g>
+              )}
+              {g.render === 'spark' && (
+                <g class="g-spark">
+                  <path d="M0 -16 L4 -4 L16 0 L4 4 L0 16 L-4 4 L-16 0 L-4 -4 Z" />
+                </g>
+              )}
+              {g.render === 'chart' && (
+                <g class="g-chart">
+                  <polyline points="-20,8 -8,-2 2,4 14,-10" fill="none" />
+                  <circle class="dot" cx="-20" cy="8" r="2.5" />
+                  <circle class="dot" cx="-8" cy="-2" r="2.5" />
+                  <circle class="dot" cx="2" cy="4" r="2.5" />
+                  <circle class="dot" cx="14" cy="-10" r="2.5" />
+                </g>
+              )}
+            </g>
+          </g>
+        ))}
+      </g>
+    ))}
+  </svg>
+</div>
+
+<style>
+  .hero-art {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 560px;
+    justify-self: center;
+    --hero-core-hi: #ffffff;
+    --hero-core-mid: var(--accent);
+    --hero-core-lo: var(--accent);
+    --hero-glow: var(--accent);
+    --orbit-stroke: color-mix(in srgb, var(--ink) 24%, transparent);
+    --glyph-stroke: color-mix(in srgb, var(--ink) 68%, transparent);
+    --glyph-fill: color-mix(in srgb, var(--accent) 90%, var(--ink));
+    --star: color-mix(in srgb, var(--ink) 55%, transparent);
+  }
+  :root[data-theme='dark'] .hero-art,
+  :root:not([data-theme='light']) .hero-art {
+    --hero-core-hi: #f4f8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .hero-art { --hero-core-hi: #f4f8ff; }
+  }
+  .hero-art svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+  .stars circle { fill: var(--star); animation: twinkle 5s ease-in-out infinite; }
+  .aura { animation: pulse 7s ease-in-out infinite; transform-origin: center; }
+  .orbit { fill: none; stroke: var(--orbit-stroke); stroke-width: 1; stroke-dasharray: 2 6; }
+  .constellations polygon { fill: none; stroke: var(--orbit-stroke); stroke-width: 1; opacity: 0.5; animation: drift 32s linear infinite; transform-origin: center; }
+
+  .core-outer { opacity: 0.9; animation: pulse 5s ease-in-out infinite; transform-origin: center; }
+  .core { fill: var(--accent); filter: drop-shadow(0 0 24px var(--accent)); animation: pulse 3.5s ease-in-out infinite; transform-origin: center; }
+  .core-ring {
+    fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 160 24;
+    opacity: 0.9; transform-origin: center; animation: spin 24s linear infinite;
+  }
+
+  .orbit-group {
+    transform-box: fill-box; transform-origin: center;
+    animation: spin var(--dur) linear infinite;
+    animation-delay: calc(-1 * var(--dur) * var(--start) / 360deg);
+  }
+  .glyph-anchor { transform-box: fill-box; }
+  /* Counter-rotate the glyph so it stays upright while its orbit rotates. */
+  .glyph-counter {
+    transform-box: fill-box; transform-origin: center;
+    animation: spin-reverse var(--dur) linear infinite;
+  }
+  .glyph-counter > g { transform-box: fill-box; transform-origin: center; }
+
+  .glyph-counter line,
+  .glyph-counter ellipse,
+  .glyph-counter rect,
+  .glyph-counter polyline,
+  .glyph-counter path:not(.filled),
+  .glyph-counter circle:not(.dot) {
+    stroke: var(--glyph-stroke); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .glyph-counter .dot { fill: var(--glyph-fill); }
+  .g-spark path { fill: var(--glyph-fill); stroke: none; animation: twinkle 2.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .g-atom { animation: spin 6s linear infinite; transform-box: fill-box; transform-origin: center; }
+  .g-dna { animation: breathe 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .g-wave path { animation: shimmer 3s ease-in-out infinite; }
+  .g-sat { animation: tilt 6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin-reverse { to { transform: rotate(-360deg); } }
+  @keyframes twinkle { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.95; } }
+  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.85; } 50% { transform: scale(1.08); opacity: 1; } }
+  @keyframes drift { to { transform: rotate(360deg); } }
+  @keyframes breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.08); } }
+  @keyframes shimmer { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+  @keyframes tilt { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-art * { animation: none !important; }
+  }
+</style>
