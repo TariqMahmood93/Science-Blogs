@@ -6,11 +6,19 @@ import { articleUrl, formatDate, getLookups, readingTime, type Article } from '.
 
 interface Props {
   article: Article;
+  /** feature: large image beside text. standard: image above text. text: no image. */
   variant?: 'feature' | 'standard' | 'text';
   headingLevel?: 'h2' | 'h3';
   showArt?: boolean;
+  showDek?: boolean;
 }
-const { article, variant = 'standard', headingLevel = 'h3', showArt = variant !== 'text' } = Astro.props;
+const {
+  article,
+  variant = 'standard',
+  headingLevel = 'h3',
+  showArt = variant !== 'text',
+  showDek = variant === 'feature',
+} = Astro.props;
 const { data } = article;
 const look = await getLookups();
 const type = look.type(data.type.id)!;
@@ -24,76 +32,60 @@ const href = articleUrl(article);
   {showArt && (
     <div class="art">
       {data.heroImage ? (
-        <Image src={data.heroImage.src} alt="" widths={[400, 800, 1200]} sizes="(min-width: 60rem) 50vw, 100vw" class="img" />
+        <Image src={data.heroImage.src} alt="" widths={[480, 800, 1200]} sizes="(min-width: 60rem) 50vw, 100vw" class="img" />
       ) : (
-        <ContourArt seed={article.id} tone={type.data.tone} ratio={variant === 'feature' ? '4/3' : '3/2'} />
+        <ContourArt seed={article.id} tone={type.data.tone} ratio="16/9" />
       )}
     </div>
   )}
   <div class="body">
     <p class="kicker">
-      <TypeMark type={type} />
       <a class="cat" href={`/topics/${category.id}/`}>{category.data.name}</a>
-      {data.sample && <span class="sample-flag">Sample content</span>}
+      <TypeMark type={type} />
     </p>
     <Heading class="title"><a href={href}>{data.title}</a></Heading>
-    {variant !== 'text' && <p class="dek">{data.dek}</p>}
+    {showDek && <p class="dek">{data.dek}</p>}
     <p class="meta byline">
-      <span>{authors}</span>
       <time datetime={data.publishDate.toISOString()}>{formatDate(data.publishDate)}</time>
       <span>{minutes} min read</span>
+      {variant === 'feature' && authors && <span>By {authors}</span>}
+      {data.sample && <span class="sample-flag">Sample content</span>}
     </p>
+    {variant === 'feature' && <p class="more"><a href={href} tabindex="-1" aria-hidden="true">Read the article</a></p>}
   </div>
 </article>
 
 <style>
-  .card {
-    position: relative;
-    display: grid;
-    gap: var(--space-s);
-    align-content: start;
-  }
+  .card { position: relative; display: grid; gap: var(--space-s); align-content: start; }
   .art { overflow: hidden; border-radius: var(--radius-m); }
-  .img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
-  .body { display: grid; gap: var(--space-2xs); }
-  .kicker {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3xs) var(--space-s);
-  }
+  .art :global(.contour), .img { transition: transform 0.4s ease; }
+  .card:hover .art :global(.contour), .card:hover .img { transform: scale(1.025); }
+  .img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  .body { display: grid; gap: 0.55rem; }
+  .kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem var(--space-s); }
   .cat {
-    font-size: var(--step--1);
-    color: var(--ink-2);
-    text-decoration: none;
+    position: relative; z-index: 1;
+    font: 600 var(--step--1) / 1.2 var(--font-sans);
+    color: var(--accent); text-decoration: none;
   }
-  .cat:hover { text-decoration: underline; color: var(--ink); }
-  .title {
-    font-size: var(--step-2);
-    line-height: 1.18;
-  }
+  .cat:hover { text-decoration: underline; }
+  .kicker :global(.typemark) { position: relative; z-index: 1; font-weight: 500; }
+  .title { font-size: 1.25rem; line-height: 1.25; font-weight: 650; letter-spacing: -0.015em; }
   .title a { color: var(--ink); text-decoration: none; }
-  .title a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
-  .dek {
-    font-family: var(--font-serif);
-    font-size: var(--step-1);
-    line-height: 1.45;
-    color: var(--ink-2);
-  }
-  .byline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--space-s);
-  }
+  /* The whole card is clickable through the title link. */
+  .title a::after { content: ''; position: absolute; inset: 0; }
+  .title a:focus-visible { outline: none; }
+  .title a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 4px; border-radius: var(--radius-m); }
+  .card:hover .title a { text-decoration: underline; text-decoration-thickness: 1px; }
+  .dek { font-size: var(--step-1); line-height: 1.5; color: var(--ink-2); }
+  .byline { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem var(--space-s); }
 
-  .card--feature .title { font-size: var(--step-4); line-height: 1.05; letter-spacing: -0.02em; }
-  .card--feature .dek { font-size: var(--step-2); line-height: 1.35; max-width: 34ch; }
-  @media (min-width: 56rem) {
-    .card--feature {
-      grid-template-columns: 1.1fr 1fr;
-      gap: var(--space-l);
-      align-items: center;
-    }
+  .card--feature .title { font-size: var(--step-4); line-height: 1.06; letter-spacing: -0.03em; font-weight: 700; }
+  .card--feature .dek { font-size: var(--step-1); max-width: 42ch; }
+  .more { margin-top: var(--space-2xs); }
+  .more a { font-weight: 600; }
+  @media (min-width: 60rem) {
+    .card--feature { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-xl); align-items: center; }
   }
-  .card--text .title { font-size: var(--step-2); }
+  .card--text .title { font-size: 1.15rem; }
 </style>

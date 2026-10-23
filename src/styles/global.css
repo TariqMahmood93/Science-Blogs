@@ -36,10 +36,10 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-serif);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  font-family: var(--font-sans);
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.022em;
   margin: 0;
   text-wrap: balance;
 }
@@ -109,7 +109,7 @@ a:hover {
   justify-content: center;
   gap: var(--space-2xs);
   min-height: 2.75rem;
-  padding: 0.55rem 1.15rem;
+  padding: 0.55rem 1.3rem;
   border: 1px solid var(--accent);
   border-radius: 999px;
   background: var(--accent);
@@ -212,6 +212,27 @@ textarea:focus-visible {
   ::view-transition-new(root) {
     animation-duration: 180ms;
   }
+}
+
+/* Inverted band, used for newsletter and promos */
+.band-dark {
+  background: #0c1118;
+  color: #f2f5f8;
+  --ink: #f2f5f8;
+  --ink-2: #b4bfca;
+  --rule: #26303b;
+  --rule-strong: #4d5967;
+  --panel: #161d26;
+  --paper: #0c1118;
+  --accent: #8fb6ff;
+  --accent-hover: #b6cfff;
+  --accent-ink: #0c1118;
+  --focus: #fb923c;
+  --tone-established: #82c7a3;
+  --tone-discovery: #93b8ec;
+  --tone-commentary: #e3a0b0;
+  --tone-idea: #bba6ec;
+  --tone-future: #e5b26c;
 }
 
 @media (prefers-reduced-motion: reduce) {

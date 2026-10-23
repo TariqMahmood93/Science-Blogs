@@ -1,5 +1,10 @@
 # QA report (23 October 2026)
 
+## Update 3: clean tech-blog restyle
+- One sans-serif family, white base, image-led cards with deep-coloured cover art, single-row sticky header on wide screens, large featured story, topic tabs on the latest-articles grid, dark spotlight and newsletter bands.
+- 64 pages build; 2,521 internal links resolve; axe-core finds no violations on 18 pages in light and dark themes; no horizontal overflow from 320 px to 1920 px.
+- Header fits on one row from 360 px; on 320 px screens the tools move to a second row.
+
 ## Update 2: research questions, dynamic layouts, founder profile
 - 64 pages build; 21 pages indexed for search (articles and questions); `astro check` 0 errors, 0 warnings.
 - 2,587 internal links resolve. axe-core (WCAG 2.2 AA + best practice) finds no violations on 18 pages in light and dark themes, including the questions hub (filtered and unfiltered), a question page, the filtered article list and About.

@@ -2,14 +2,14 @@
 
 :root {
   /* Colour — light theme (default) */
-  --paper: #fafbfb;
-  --panel: #edf1f3;
-  --ink: #17202b;
-  --ink-2: #485462;
-  --rule: #d3dadf;
-  --rule-strong: #9aa6b1;
-  --accent: #1d4e89;
-  --accent-hover: #123a69;
+  --paper: #ffffff;
+  --panel: #f1f4f7;
+  --ink: #101820;
+  --ink-2: #4b5866;
+  --rule: #dfe4e9;
+  --rule-strong: #a3adb8;
+  --accent: #1452d6;
+  --accent-hover: #0d3fa8;
   --accent-ink: #ffffff;
   --focus: #c2410c;
   --mark-bg: #fde7a6;
@@ -22,8 +22,9 @@
   --tone-future: #82500f;
 
   /* Typography */
-  --font-serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  /* One sans family throughout; --font-serif is kept as an alias so components stay consistent. */
   --font-sans: 'Schibsted Grotesk Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-serif: var(--font-sans);
   --font-code: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   /* Modular scale, ratio ~1.25 from a 1rem base */
@@ -46,28 +47,42 @@
   --space-2xl: 5.5rem;
 
   /* Layout */
-  --measure: 38rem; /* ~70 characters of Newsreader at body size */
-  --page-max: 78rem;
+  --measure: 44rem; /* ~75 characters at body size */
+  --page-max: 82rem;
   --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
 
   /* Shape */
   --radius-s: 3px;
-  --radius-m: 8px;
+  --radius-m: 14px;
   --border: 1px solid var(--rule);
+
+  /* Illustration palettes: deep backgrounds with light contour lines, per content type.
+     Used for cover art in both themes. */
+  --art-established: #0d3b2b;
+  --art-discovery: #0b2457;
+  --art-commentary: #47162a;
+  --art-idea: #261a5c;
+  --art-future: #4a2a06;
+  --art-line: #f4f7fb;
+  --art-dot-established: #7ef0b5;
+  --art-dot-discovery: #8fc0ff;
+  --art-dot-commentary: #ff9db6;
+  --art-dot-idea: #c3adff;
+  --art-dot-future: #ffc46b;
 
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: #12171d;
-    --panel: #1a2129;
+    --paper: #0e1217;
+    --panel: #181e26;
     --ink: #e6eaee;
     --ink-2: #a9b3bd;
     --rule: #2e3842;
     --rule-strong: #56636f;
-    --accent: #93b8ec;
-    --accent-hover: #b9d1f4;
+    --accent: #7fb0ff;
+    --accent-hover: #a9c9ff;
     --accent-ink: #0d1a2c;
     --focus: #fb923c;
     --mark-bg: #5c4a12;
@@ -81,14 +96,14 @@
 }
 
 :root[data-theme='dark'] {
-  --paper: #12171d;
-  --panel: #1a2129;
+  --paper: #0e1217;
+  --panel: #181e26;
   --ink: #e6eaee;
   --ink-2: #a9b3bd;
   --rule: #2e3842;
   --rule-strong: #56636f;
-  --accent: #93b8ec;
-  --accent-hover: #b9d1f4;
+  --accent: #7fb0ff;
+  --accent-hover: #a9c9ff;
   --accent-ink: #0d1a2c;
   --focus: #fb923c;
   --mark-bg: #5c4a12;
