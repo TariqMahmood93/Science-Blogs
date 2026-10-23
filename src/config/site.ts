@@ -22,6 +22,7 @@ export const nav = [
   { label: 'Science', href: '/topics/' },
   { label: 'Artificial Intelligence', href: '/topics/artificial-intelligence/' },
   { label: 'Research Ideas', href: '/type/research-idea/' },
+  { label: 'Questions', href: '/questions/' },
   { label: 'Discoveries', href: '/type/research-discovery/' },
   { label: 'Future & Society', href: '/topics/future-society/' },
   { label: 'About', href: '/about/' },

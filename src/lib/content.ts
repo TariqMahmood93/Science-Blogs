@@ -85,3 +85,17 @@ export function formatDate(d: Date): string {
 export function articleUrl(a: Article) {
   return `/article/${a.id}/`;
 }
+
+export type Question = CollectionEntry<'questions'>;
+
+export async function getQuestions(): Promise<Question[]> {
+  const all = await getCollection('questions');
+  return all.sort((a, b) => a.data.order - b.data.order);
+}
+
+/** How each question status is shown: words plus a fill glyph, never colour alone. */
+export const questionStatus = {
+  open: { label: 'Open', description: 'No agreed answer yet.', fill: 0, dashed: true },
+  debated: { label: 'Actively debated', description: 'Competing answers, with evidence on more than one side.', fill: 0.5, dashed: false },
+  progressing: { label: 'Partly answered', description: 'Real progress, but the core question remains.', fill: 0.75, dashed: false },
+} as const;

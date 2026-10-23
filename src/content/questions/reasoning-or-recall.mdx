@@ -1,0 +1,35 @@
+---
+question: "When a language model solves a problem, is it reasoning or recalling?"
+summary: "Large models score well on many reasoning benchmarks, but those benchmarks may overlap with their training data. Telling generalisation apart from memorisation is harder than it looks."
+category: artificial-intelligence
+status: debated
+tags: [large language models, evaluation, generalisation]
+order: 1
+updatedDate: 2026-10-23
+reviewed: false
+relatedArticles: [ai-discover-something-new]
+featured: true
+---
+## Why it matters
+
+If a model has learned general procedures, we can expect it to handle problems it has never seen. If it is mostly retrieving patterns close to its training data, its performance may collapse on genuinely new cases, which are exactly the cases where we most want help.
+
+## What we know
+
+<Evidence kind="established">
+Modern language models are trained on very large web-scale text collections, and public benchmarks are often published on the same web. Some benchmark questions, or close paraphrases of them, can therefore end up in training data. This problem is usually called benchmark contamination.
+</Evidence>
+
+Researchers also know that performance can change when a problem is reworded, when irrelevant details are added, or when numbers are changed while keeping the structure the same.
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+One view holds that drops in performance under rewording show reliance on surface patterns. Another holds that humans are also sensitive to wording, and that models show real, if imperfect, generalisation. The answer may differ by task, model size and training method.
+</Evidence>
+
+## What would count as progress
+
+- Benchmarks built after a model's training cut-off, or generated fresh for each evaluation.
+- Agreed methods to detect whether specific test items appeared in training data.
+- Tests that vary a problem's surface while holding its logical structure fixed, reported alongside headline scores.

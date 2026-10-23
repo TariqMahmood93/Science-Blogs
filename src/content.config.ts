@@ -31,6 +31,14 @@ const authors = defineCollection({
     bio: z.string().optional(),
     url: z.url().optional(),
     organization: z.boolean().default(false),
+    // Extended profile, shown on the About page for founders and editors.
+    founder: z.boolean().default(false),
+    title: z.string().optional(),
+    affiliation: z.string().optional(),
+    initials: z.string().max(3).optional(),
+    interests: z.array(z.string()).default([]),
+    highlights: z.array(z.object({ label: z.string(), text: z.string(), url: z.url().optional() })).default([]),
+    links: z.array(z.object({ label: z.string(), url: z.url() })).default([]),
   }),
 });
 
@@ -96,4 +104,24 @@ const articles = defineCollection({
       }),
 });
 
-export const collections = { articles, categories, contentTypes, authors };
+const questions = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/questions' }),
+  schema: z.object({
+    question: z.string(),
+    // One or two sentences shown on cards.
+    summary: z.string().max(320),
+    category: reference('categories'),
+    // open: no agreed answer; debated: competing answers with evidence on each side;
+    // progressing: partial answers exist but the core question remains.
+    status: z.enum(['open', 'debated', 'progressing']),
+    tags: z.array(z.string()).default([]),
+    relatedArticles: z.array(z.string()).default([]),
+    featured: z.boolean().default(false),
+    order: z.number().default(100),
+    // false until an editor has checked the explanation; shown on the page.
+    reviewed: z.boolean().default(false),
+    updatedDate: z.coerce.date(),
+  }),
+});
+
+export const collections = { articles, categories, contentTypes, authors, questions };

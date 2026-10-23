@@ -203,6 +203,17 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
+/* Smooth cross-page transitions in browsers that support them; nothing changes elsewhere. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 180ms;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

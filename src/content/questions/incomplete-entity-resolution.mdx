@@ -1,0 +1,33 @@
+---
+question: "How do we match records that describe the same thing when the records are incomplete?"
+summary: "Entity resolution decides whether two records refer to the same person, product or place. Most methods assume the key fields are present; real data often lacks them."
+category: computer-science-cybersecurity
+status: open
+tags: [entity resolution, data integration, missing data]
+order: 5
+updatedDate: 2026-10-23
+reviewed: false
+---
+## Why it matters
+
+Merging customer lists, linking patient records across hospitals, or deduplicating scientific databases all depend on entity resolution. Errors either merge different people into one record or split one person across many.
+
+## What we know
+
+<Evidence kind="established">
+Entity resolution compares records using their attributes, such as names, addresses or product descriptions. Learned approaches, including methods based on pre-trained language models, have improved accuracy on standard benchmarks where records are fairly complete.
+</Evidence>
+
+When attributes are missing, a matcher has less evidence to work with, and it may confuse "unknown" with "different".
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+One strategy is to fill the gaps first and then match; another is to design matchers that reason directly about missing values. Filling first risks inventing evidence that pushes records together; matching directly risks discarding useful partial information.
+</Evidence>
+
+## What would count as progress
+
+- Benchmarks with realistic, controlled levels of missingness.
+- Methods that report how confident a match is when key attributes are absent.
+- Studies of whether imputation before matching helps or harms, and under which conditions.

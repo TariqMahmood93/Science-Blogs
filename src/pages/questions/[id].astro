@@ -1,0 +1,145 @@
+---
+import { render, getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import QuestionCard from '../../components/QuestionCard.astro';
+import FillGlyph from '../../components/FillGlyph.astro';
+import Evidence from '../../components/Evidence.astro';
+import Callout from '../../components/Callout.astro';
+import ShareTools from '../../components/ShareTools.astro';
+import Scrollspy from '../../components/Scrollspy.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
+import { formatDate, getPublishedArticles, getQuestions, questionStatus, slugifyTag, type Question } from '../../lib/content';
+import '../../styles/prose.css';
+
+export async function getStaticPaths() {
+  const questions = await getQuestions();
+  return questions.map((q) => ({ params: { id: q.id }, props: { q, all: questions } }));
+}
+interface Props { q: Question; all: Question[] }
+const { q, all } = Astro.props;
+const { Content, headings } = await render(q);
+const cat = (await getEntry('categories', q.data.category.id))!;
+const st = questionStatus[q.data.status];
+const articles = await getPublishedArticles();
+const related = q.data.relatedArticles.map((id) => articles.find((a) => a.id === id)).filter((a) => a !== undefined);
+const sameTopic = all.filter((o) => o.id !== q.id && o.data.category.id === q.data.category.id).slice(0, 2);
+const more = sameTopic.length ? sameTopic : all.filter((o) => o.id !== q.id).slice(0, 2);
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const sections = headings.filter((h) => h.depth === 2);
+const contact = `/contact/?article=${encodeURIComponent('questions-' + q.id)}#corrections`;
+---
+<BaseLayout title={q.data.question} description={q.data.summary} ogType="article">
+  <ReadingProgress target=".qpage .prose" />
+  <article class="qpage">
+    <header class="wrap head">
+      <nav class="meta crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/questions/">Research questions</a></li>
+          <li><a href={`/questions/?topic=${cat.id}`}>{cat.data.name}</a></li>
+        </ol>
+      </nav>
+      <p class={`status st-${q.data.status}`}><FillGlyph fill={st.fill} dashed={st.dashed} size={18} /> {st.label} question</p>
+      <h1 data-pagefind-meta="title">{q.data.question}</h1>
+      <p class="dek">{q.data.summary}</p>
+    </header>
+
+    <div class="wrap body">
+      <div class="main">
+        {!q.data.reviewed && (
+          <p class="review meta" role="note">Explanation awaiting editor review. It summarises widely accepted background only; sources will be added before review is complete.</p>
+        )}
+        <div class="prose" data-pagefind-body>
+          <span hidden data-pagefind-filter="type">Research question</span>
+          <span hidden data-pagefind-filter="topic">{cat.data.name}</span>
+          <span class="visually-hidden" aria-hidden="true">{q.data.tags.join(', ')}</span>
+          <Content components={{ Evidence, Callout }} />
+        </div>
+
+        <aside class="next">
+          <h2>Working on this?</h2>
+          <p>If you have a hypothesis or a way to test it, we publish well-structured <a href="/type/research-idea/">research ideas</a>. <a href="/submit/">Propose one</a>.</p>
+          <p class="meta">Spotted an error? <a href={contact}>Report a correction</a>.</p>
+          <ShareTools title={q.data.question} url={canonical} />
+        </aside>
+      </div>
+
+      <aside class="glance" aria-labelledby="glance-h">
+        <div class="glance-inner">
+          <h2 id="glance-h">At a glance</h2>
+          <dl>
+            <dt>Status</dt><dd>{st.label}. {st.description}</dd>
+            <dt>Topic</dt><dd><a href={`/topics/${cat.id}/`}>{cat.data.name}</a></dd>
+            <dt>Last updated</dt><dd><time datetime={q.data.updatedDate.toISOString()}>{formatDate(q.data.updatedDate)}</time></dd>
+          </dl>
+          {sections.length > 0 && (
+            <nav aria-label="On this page" class="sections" data-scrollspy>
+              <ol>{sections.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+            </nav>
+          )}
+          {q.data.tags.length > 0 && (
+            <ul class="tags">{q.data.tags.map((t) => <li><a href={`/questions/?q=${encodeURIComponent(t)}`}>{t}</a></li>)}</ul>
+          )}
+        </div>
+      </aside>
+    </div>
+
+    {related.length > 0 && (
+      <section class="wrap block" aria-labelledby="rel-h">
+        <h2 id="rel-h" class="bh">Articles on this question</h2>
+        <div class="grid">{related.map((a) => <ArticleCard article={a!} />)}</div>
+      </section>
+    )}
+
+    <section class="wrap block" aria-labelledby="more-h">
+      <h2 id="more-h" class="bh">More open questions</h2>
+      <div class="grid">{more.map((o) => <QuestionCard q={o} />)}</div>
+      <p class="all"><a href="/questions/">All research questions</a></p>
+    </section>
+  </article>
+  <Scrollspy />
+</BaseLayout>
+
+<style>
+  .head { padding-top: var(--space-xl); display: grid; gap: var(--space-s); }
+  .crumbs ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .crumbs li + li::before { content: '/'; margin-right: 0.4rem; color: var(--rule-strong); }
+  .crumbs a { color: var(--ink-2); }
+  .status { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; color: var(--st); }
+  .st-open { --st: var(--tone-idea); }
+  .st-debated { --st: var(--tone-commentary); }
+  .st-progressing { --st: var(--tone-discovery); }
+  h1 { font-size: var(--step-5); line-height: 1.02; letter-spacing: -0.025em; font-weight: 450; max-width: 20ch; }
+  .dek { font: var(--step-2) / 1.4 var(--font-serif); color: var(--ink-2); max-width: 42ch; }
+
+  .body { margin-top: var(--space-xl); display: grid; gap: var(--space-xl); }
+  @media (min-width: 64rem) {
+    .body { grid-template-columns: minmax(0, var(--measure)) 17rem; justify-content: space-between; }
+    .glance-inner { position: sticky; top: var(--space-m); }
+  }
+  @media (max-width: 63.99rem) { .glance { order: -1; } }
+  .review { padding: var(--space-xs) var(--space-s); border: 1px dashed var(--rule-strong); border-radius: var(--radius-m); margin-bottom: var(--space-m); }
+  .prose :global(h2:first-of-type) { margin-top: 0; }
+
+  .glance-inner { display: grid; gap: var(--space-s); padding: var(--space-m); background: var(--panel); border-radius: var(--radius-m); font-size: var(--step--1); }
+  .glance h2 { font: 600 var(--step-0) / 1.3 var(--font-sans); }
+  dl { margin: 0; display: grid; gap: 0.15rem 0; }
+  dt { font-weight: 600; margin-top: var(--space-2xs); }
+  dd { margin: 0; color: var(--ink-2); }
+  .sections ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.3rem; border-top: var(--border); padding-top: var(--space-s); }
+  .sections a { color: var(--ink-2); text-decoration: none; }
+  .sections a:hover, .sections a[aria-current='true'] { color: var(--ink); text-decoration: underline; }
+  .sections a[aria-current='true'] { font-weight: 600; }
+  .tags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .tags a { display: inline-block; padding: 0.2rem 0.6rem; border: var(--border); border-radius: 999px; color: var(--ink-2); text-decoration: none; background: var(--paper); }
+
+  .next { margin-top: var(--space-xl); padding-top: var(--space-m); border-top: var(--border); display: grid; gap: var(--space-s); }
+  .next h2 { font-size: var(--step-2); }
+  .next > p:not(.meta) { font: var(--step-1) / 1.5 var(--font-serif); }
+
+  .block { margin-top: var(--space-2xl); }
+  .bh { font-size: var(--step-3); margin-bottom: var(--space-m); }
+  .grid { display: grid; gap: var(--space-l); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+  .all { margin-top: var(--space-m); font-weight: 600; }
+</style>

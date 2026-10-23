@@ -1,22 +1,73 @@
 ---
-import PageLayout from '../layouts/PageLayout.astro';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ListingHeader from '../components/ListingHeader.astro';
+import ProfileCard from '../components/ProfileCard.astro';
+import FillGlyph from '../components/FillGlyph.astro';
 import { site } from '../config/site';
+import { getContentTypes } from '../lib/content';
+import '../styles/prose.css';
+
+const people = (await getCollection('authors')).filter((a) => a.data.founder);
+const types = await getContentTypes();
+const founder = people[0];
+const personLd = founder && {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: founder.data.name.replace(/^Dr\.\s*/, ''),
+  honorificPrefix: 'Dr.',
+  jobTitle: founder.data.title,
+  affiliation: { '@type': 'CollegeOrUniversity', name: 'University of Calabria' },
+  sameAs: founder.data.links.map((l) => l.url),
+};
 ---
-<PageLayout title="About" description={`What ${site.name} is, who it is for and how it works.`} intro={site.tagline}>
-  <h2>What we publish</h2>
-  <p>{site.name} is an independent publication about scientific ideas, with a starting focus on artificial intelligence, computer science and trustworthy technology. We explain research, critique new studies, propose questions worth investigating and think carefully about where technology could lead.</p>
-  <h2>Who it is for</h2>
-  <p>Researchers who care about accurate references, students working through difficult ideas, professionals following emerging science, and curious readers who want rigour without a jargon wall.</p>
-  <h2>How to read an article</h2>
-  <p>Every article says what kind of claim it makes, using a small filled circle: the fuller the circle, the more settled the knowledge.</p>
-  <ul>
-    <li><a href="/type/scientific-explainer/">Scientific explainers</a> cover established knowledge.</li>
-    <li><a href="/type/research-discovery/">Research discoveries</a> explain a published study and keep the authors' findings separate from our interpretation.</li>
-    <li><a href="/type/commentary/">Commentary</a> is a signed argument.</li>
-    <li><a href="/type/research-idea/">Research ideas</a> propose a question and how to test it. They are proposals, not results.</li>
-    <li><a href="/type/future-hypothesis/">Future hypotheses</a> explore possible futures and state their assumptions.</li>
-  </ul>
-  <p>Inside articles, passages are marked as established evidence, interpretation, speculation or an open question.</p>
-  <h2>Independence</h2>
-  <p>We carry no advertising and no tracking. Our standards are set out in the <a href="/editorial-policy/">editorial policy</a>.</p>
-</PageLayout>
+<BaseLayout title="About" description={`What ${site.name} is, who runs it and how it works.`} jsonLd={personLd ? [personLd] : undefined}>
+  <ListingHeader title="About the publication" intro={site.tagline} />
+
+  <div class="wrap">
+    {people.map((p) => <ProfileCard person={p} />)}
+
+    <div class="cols">
+      <section class="prose">
+        <h2>What we publish</h2>
+        <p>{site.name} is an independent publication about scientific ideas, with a starting focus on artificial intelligence, computer science and trustworthy technology. We explain research, critique new studies, explain <a href="/questions/">open research questions</a>, propose ideas worth investigating and think carefully about where technology could lead.</p>
+        <h2>Who it is for</h2>
+        <p>Researchers who care about accurate references, students working through difficult ideas, professionals following emerging science, and curious readers who want rigour without a jargon wall.</p>
+        <h2>Independence</h2>
+        <p>We carry no advertising and no tracking. Our standards are set out in the <a href="/editorial-policy/">editorial policy</a>, and anyone can <a href="/contact/#corrections">report an error</a>.</p>
+      </section>
+
+      <section class="howto" aria-labelledby="howto-h">
+        <h2 id="howto-h">How to read an article</h2>
+        <p>Every article says what kind of claim it makes. The fuller the circle, the more settled the knowledge.</p>
+        <ul>
+          {types.map((t) => (
+            <li class={`tone-${t.data.tone}`}>
+              <a href={`/type/${t.id}/`}><FillGlyph fill={1 - t.data.position} dashed={t.data.position > 0.85} size={18} />{t.data.name}</a>
+              <span>{t.data.description}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="meta">Inside articles, passages are also marked as established evidence, interpretation, speculation or an open question.</p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+<style>
+  .cols { margin-top: var(--space-2xl); display: grid; gap: var(--space-xl); }
+  @media (min-width: 64rem) { .cols { grid-template-columns: minmax(0, var(--measure)) minmax(0, 24rem); justify-content: space-between; } }
+  .prose h2:first-child { margin-top: 0; }
+  .howto { display: grid; gap: var(--space-s); align-content: start; padding-top: var(--space-m); border-top: 2px solid var(--ink); }
+  .howto h2 { font-size: var(--step-2); }
+  .howto > p:not(.meta) { font-family: var(--font-serif); font-size: var(--step-1); color: var(--ink-2); }
+  .howto ul { list-style: none; padding: 0; margin: 0; display: grid; }
+  .howto li { display: grid; gap: 0.15rem; padding: var(--space-xs) 0; border-bottom: var(--border); }
+  .howto li a { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; color: var(--tone); text-decoration: none; }
+  .howto li a:hover { text-decoration: underline; }
+  .howto li span { font-size: var(--step--1); color: var(--ink-2); padding-left: 1.75rem; }
+  .tone-established { --tone: var(--tone-established); }
+  .tone-discovery { --tone: var(--tone-discovery); }
+  .tone-commentary { --tone: var(--tone-commentary); }
+  .tone-idea { --tone: var(--tone-idea); }
+  .tone-future { --tone: var(--tone-future); }
+</style>

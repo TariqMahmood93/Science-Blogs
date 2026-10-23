@@ -1,0 +1,31 @@
+---
+question: "Do graph neural networks amplify the biases built into network structure?"
+summary: "Graph neural networks learn from connections between people, papers or accounts. When those connections reflect existing inequality, the model may reinforce it."
+category: artificial-intelligence
+status: debated
+tags: [graph neural networks, fairness, social networks]
+order: 6
+updatedDate: 2026-10-23
+reviewed: false
+---
+## Why it matters
+
+Graph models are used for recommendations, fraud detection and social network analysis. If the structure of the network disadvantages some groups, a model that leans on that structure can pass the disadvantage on.
+
+## What we know
+
+<Evidence kind="established">
+Graph neural networks compute a representation for each node by combining information from its neighbours. Many real networks show homophily: similar people tend to connect with each other. As a result, a node's neighbourhood can encode sensitive attributes even when those attributes are removed from the data.
+</Evidence>
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+Researchers disagree on where to intervene: by rewiring or reweighting edges, by constraining what the model learns, or by adjusting predictions afterwards. Each approach can trade off accuracy against fairness differently, and results vary across datasets.
+</Evidence>
+
+## What would count as progress
+
+- Shared benchmarks with realistic graphs and clearly defined sensitive attributes.
+- Analysis separating bias that comes from features, from structure, and from missing information.
+- Methods whose fairness holds when the graph changes over time.

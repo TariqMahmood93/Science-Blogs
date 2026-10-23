@@ -1,0 +1,33 @@
+---
+question: "How much energy does AI really use, and how should it be reported?"
+summary: "Training and running large models takes substantial electricity, but published figures are inconsistent and often incomplete. Without shared reporting standards, comparisons are hard to trust."
+category: artificial-intelligence
+status: progressing
+tags: [Green AI, energy, sustainability, reporting]
+order: 3
+updatedDate: 2026-10-23
+reviewed: false
+---
+## Why it matters
+
+Decisions about which model to build, deploy or regulate increasingly depend on its environmental cost. If the numbers are unreliable, so are those decisions.
+
+## What we know
+
+<Evidence kind="established">
+Energy use depends on the hardware, how long it runs, how efficiently the data centre is cooled, and the carbon intensity of the local electricity grid. The same computation can therefore have very different carbon footprints in different places and at different times.
+</Evidence>
+
+Training is a one-off cost, while inference (answering queries) repeats every time a model is used. For widely used systems, inference can come to dominate the total over a model's lifetime.
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+Researchers disagree about what should be counted: only the final training run, or also failed experiments, hyperparameter searches, hardware manufacturing and water used for cooling. Different boundaries lead to very different totals.
+</Evidence>
+
+## What would count as progress
+
+- A widely adopted reporting standard, similar to how papers report accuracy.
+- Tools that measure energy directly rather than estimating it from hardware specifications.
+- Studies comparing the accuracy gained per unit of energy, so efficiency becomes a first-class result.

@@ -1,0 +1,51 @@
+---
+import FillGlyph from './FillGlyph.astro';
+import { questionStatus, type Question } from '../lib/content';
+import { getEntry } from 'astro:content';
+interface Props { q: Question; size?: 'l' | 'm'; headingLevel?: 'h2' | 'h3' }
+const { q, size = 'm', headingLevel = 'h3' } = Astro.props;
+const st = questionStatus[q.data.status];
+const cat = await getEntry('categories', q.data.category.id);
+const H = headingLevel;
+---
+<article
+  class:list={['qcard', `qcard--${size}`, `st-${q.data.status}`]}
+  data-question
+  data-topic={q.data.category.id}
+  data-status={q.data.status}
+  data-text={`${q.data.question} ${q.data.summary} ${q.data.tags.join(' ')}`.toLowerCase()}
+>
+  <p class="top">
+    <span class="status"><FillGlyph fill={st.fill} dashed={st.dashed} size={15} />{st.label}</span>
+    <span class="topic">{cat?.data.name}</span>
+  </p>
+  <H class="qtitle"><a href={`/questions/${q.id}/`}>{q.data.question}</a></H>
+  <p class="summary">{q.data.summary}</p>
+</article>
+<style>
+  .qcard {
+    display: grid;
+    gap: var(--space-xs);
+    align-content: start;
+    padding: var(--space-m);
+    border-radius: var(--radius-m);
+    background: var(--panel);
+    border-top: 3px solid var(--st);
+    position: relative;
+  }
+  .st-open { --st: var(--tone-idea); }
+  .st-debated { --st: var(--tone-commentary); }
+  .st-progressing { --st: var(--tone-discovery); }
+  .top { display: flex; flex-wrap: wrap; gap: var(--space-3xs) var(--space-s); align-items: center; font-size: var(--step--1); }
+  .status { display: inline-flex; gap: 0.4rem; align-items: center; font-weight: 600; color: var(--st); }
+  .topic { color: var(--ink-2); }
+  .qtitle { font-size: var(--step-2); line-height: 1.2; }
+  .qtitle a { color: var(--ink); text-decoration: none; }
+  .qtitle a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius-m); }
+  .qtitle a:focus-visible { outline: none; }
+  .qtitle a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .qcard:hover .qtitle a { text-decoration: underline; text-decoration-thickness: 1px; }
+  .summary { font-family: var(--font-serif); color: var(--ink-2); line-height: 1.5; }
+  .qcard--l .qtitle { font-size: var(--step-3); line-height: 1.12; }
+  .qcard--l .summary { font-size: var(--step-1); }
+</style>

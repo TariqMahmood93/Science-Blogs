@@ -1,0 +1,86 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { person: CollectionEntry<'authors'> }
+const { person } = Astro.props;
+const d = person.data;
+---
+<section class="profile" id={`profile-${person.id}`} aria-labelledby={`p-${person.id}`}>
+  <div class="id">
+    <div class="mono" aria-hidden="true">
+      <span>{d.initials ?? d.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}</span>
+    </div>
+    <div class="who">
+      <p class="role">{d.role}</p>
+      <h2 id={`p-${person.id}`}>{d.name}</h2>
+      {d.title && <p class="pos">{d.title}{d.affiliation && <>, {d.affiliation}</>}</p>}
+      {d.links.length > 0 && (
+        <ul class="links">{d.links.map((l) => <li><a href={l.url} rel="me noopener">{l.label}</a></li>)}</ul>
+      )}
+    </div>
+  </div>
+
+  <div class="detail">
+    {d.bio && <p class="bio">{d.bio}</p>}
+    {d.interests.length > 0 && (
+      <div class="interests">
+        <h3>Research interests</h3>
+        <ul>{d.interests.map((i) => <li>{i}</li>)}</ul>
+      </div>
+    )}
+    {d.highlights.length > 0 && (
+      <dl class="hl">
+        {d.highlights.map((h) => (
+          <div>
+            <dt>{h.label}</dt>
+            <dd>{h.text}{h.url && <> <a href={h.url}>Learn more<span class="visually-hidden"> about {h.label.toLowerCase()}</span></a></>}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
+  </div>
+</section>
+<style>
+  .profile {
+    display: grid;
+    gap: var(--space-l);
+    padding: var(--space-l);
+    background: var(--panel);
+    border-radius: var(--radius-m);
+  }
+  @media (min-width: 60rem) {
+    .profile { grid-template-columns: 20rem 1fr; gap: var(--space-xl); padding: var(--space-xl); }
+  }
+  .id { display: grid; gap: var(--space-m); align-content: start; }
+  .mono {
+    width: 7.5rem; aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    position: relative;
+  }
+  .mono::after {
+    content: ''; position: absolute; width: 0.9rem; height: 0.9rem; border-radius: 50%;
+    background: var(--accent); top: 0.55rem; right: 0.95rem;
+  }
+  .mono span { font: 500 2.6rem / 1 var(--font-serif); letter-spacing: -0.02em; }
+  .role { font-weight: 600; color: var(--accent); font-size: var(--step--1); }
+  h2 { font-size: var(--step-4); line-height: 1.05; margin-top: 0.15rem; }
+  .pos { margin-top: var(--space-2xs); color: var(--ink-2); font-size: var(--step--1); line-height: 1.5; }
+  .links { list-style: none; padding: 0; margin: var(--space-s) 0 0; display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .links a {
+    display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0.3rem 0.9rem;
+    border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--paper);
+    color: var(--ink); text-decoration: none; font-weight: 600; font-size: var(--step--1);
+  }
+  .links a:hover { border-color: var(--ink); }
+  .detail { display: grid; gap: var(--space-l); align-content: start; }
+  .bio { font: var(--step-2) / 1.45 var(--font-serif); max-width: 40ch; }
+  h3 { font: 600 var(--step-0) / 1.3 var(--font-sans); margin-bottom: var(--space-xs); }
+  .interests ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .interests li { padding: 0.3rem 0.8rem; border-radius: 999px; background: var(--paper); border: var(--border); font-size: var(--step--1); }
+  .hl { margin: 0; display: grid; gap: 0; border-top: 2px solid var(--ink); }
+  .hl > div { display: grid; gap: 0.15rem var(--space-m); padding: var(--space-s) 0; border-bottom: var(--border); }
+  @media (min-width: 40rem) { .hl > div { grid-template-columns: 8rem 1fr; } }
+  dt { font-weight: 600; font-size: var(--step--1); }
+  dd { margin: 0; font-family: var(--font-serif); font-size: var(--step-1); line-height: 1.45; }
+</style>

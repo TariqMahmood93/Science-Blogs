@@ -1,0 +1,27 @@
+---
+// Marks the section currently being read in any nav with [data-scrollspy].
+---
+<script>
+  const navs = document.querySelectorAll<HTMLElement>('[data-scrollspy]');
+  navs.forEach((nav) => {
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+    const targets = links
+      .map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!targets.length || !('IntersectionObserver' in window)) return;
+    const visible = new Set<HTMLElement>();
+    const update = () => {
+      // The current section is the last heading above the top third of the viewport.
+      let current: HTMLElement | undefined;
+      for (const t of targets) if (t.getBoundingClientRect().top < window.innerHeight * 0.35) current = t;
+      links.forEach((a) => a.setAttribute('aria-current', String(current && a.hash === `#${current.id}`)));
+    };
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting ? visible.add(e.target as HTMLElement) : visible.delete(e.target as HTMLElement)));
+      update();
+    }, { rootMargin: '0px 0px -60% 0px' });
+    targets.forEach((t) => io.observe(t));
+    addEventListener('scroll', update, { passive: true });
+    update();
+  });
+</script>

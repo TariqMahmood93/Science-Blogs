@@ -1,0 +1,34 @@
+---
+question: "Can an AI agent be given limits it reliably cannot exceed?"
+summary: "Agents that act on our behalf are usually told their limits in natural-language instructions. Whether those limits can be enforced, rather than merely requested, is an open engineering and research question."
+category: artificial-intelligence
+status: open
+tags: [AI agents, AI safety, runtime enforcement]
+order: 4
+updatedDate: 2026-10-23
+reviewed: false
+relatedArticles: [trustworthy-ai-agent]
+---
+## Why it matters
+
+An agent that can send email, move files or spend money can cause harm with a single wrong action. Trust depends less on how often the agent is right and more on whether its mistakes stay inside known bounds.
+
+## What we know
+
+<Evidence kind="established">
+Instructions given to a language model influence its behaviour but do not guarantee it. Models can misread instructions, forget them over long tasks, or be redirected by text they encounter while working, a risk known as prompt injection.
+</Evidence>
+
+Software has long relied on enforcement outside the program itself: operating-system permissions, sandboxes, and approval steps for sensitive operations.
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+One position is that agents need the same kind of external enforcement: a separate layer that checks every action against a policy before it runs. The difficulty is that useful agents need broad, flexible permissions, and writing policies that are both safe and permissive enough is hard.
+</Evidence>
+
+## What would count as progress
+
+- Policy languages that non-experts can read and check.
+- Evaluations that measure how often agents violate stated constraints with and without runtime enforcement.
+- Evidence that enforcement layers resist attempts to bypass them.

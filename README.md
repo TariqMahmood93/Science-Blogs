@@ -57,6 +57,37 @@ Copy `.env.example` to `.env` and fill in what you have. Every variable starting
 
 **Corrections:** fix the text, set `updatedDate`, and add an entry under `corrections` with the date and what changed. It is shown on the article.
 
+## Adding a research question
+
+Research questions live in `src/content/questions/<url-slug>.mdx` and appear at `/questions/<url-slug>/`, on the Questions hub (with topic, status and keyword filters), on the homepage rail and on their topic page.
+
+```yaml
+---
+question: "The question, phrased as a reader would ask it?"
+summary: "One or two sentences for cards (max 320 characters)."
+category: artificial-intelligence      # topic id
+status: open                           # open | debated | progressing
+tags: [fairness, missing data]
+relatedArticles: [missing-data-unfair-ai]
+featured: false                        # featured questions get a wide card and lead the homepage rail
+order: 20                              # position on the hub
+updatedDate: 2026-10-23
+reviewed: false                        # set true once an editor has checked it and added sources
+---
+## Why it matters
+## What we know
+## Where the debate is
+## What would count as progress
+```
+
+Use `<Evidence kind="established">` for settled background and `<Evidence kind="interpretation">` for contested readings. Until `reviewed: true`, the page shows an "awaiting editor review" note.
+
+**The 15 questions included were drafted with AI assistance from widely accepted background knowledge.** They contain no citations yet and are marked as awaiting review. Check each one and add sources before setting `reviewed: true`.
+
+## Your profile
+
+The founder profile on About comes from the `tariq-mahmood` entry in `src/content/authors.yaml`: bio, interests, highlights and links. Edit it there. To add more editors to About, give them `founder: true`; to credit someone on an article, add their id to the article's `authors`.
+
 ### Safeguards the build enforces
 - A non-draft, non-sample article with any reference not marked `verified: true` **fails the build**.
 - A `<Cite>` pointing at a reference that doesn't exist fails the build.

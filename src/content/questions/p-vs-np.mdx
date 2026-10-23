@@ -1,0 +1,32 @@
+---
+question: "Is every problem whose solution can be checked quickly also quick to solve?"
+summary: "This is the P versus NP question, one of the most important open problems in mathematics and computer science. Most researchers believe the answer is no, but no proof exists."
+category: mathematics
+status: open
+tags: [computational complexity, mathematics, algorithms]
+order: 13
+updatedDate: 2026-10-23
+reviewed: false
+---
+## Why it matters
+
+Much of modern cryptography relies on some problems being hard to solve even though answers are easy to check. If P equalled NP in a practical way, many of these protections would fail, and many hard optimisation problems would become easy.
+
+## What we know
+
+<Evidence kind="established">
+P is the class of problems that can be solved in polynomial time; NP is the class whose proposed solutions can be verified in polynomial time. Every problem in P is in NP. The question is whether the reverse holds. It is one of the Clay Mathematics Institute's Millennium Prize Problems.
+</Evidence>
+
+Many important problems, such as Boolean satisfiability, are NP-complete: a fast algorithm for any one of them would give fast algorithms for all problems in NP.
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+Most complexity theorists expect that P does not equal NP. Some known proof techniques have been shown to be unable to settle the question, which suggests genuinely new ideas are needed.
+</Evidence>
+
+## What would count as progress
+
+- New lower-bound techniques that avoid the known barriers.
+- Proofs of separation for restricted models of computation that point towards the general case.

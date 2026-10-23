@@ -1,0 +1,34 @@
+---
+question: "How can we measure uncertainty when a model writes rather than classifies?"
+summary: "For classification, a model can say how confident it is in each label. For a paragraph of generated text there is no single right answer, which makes confidence hard to define."
+category: artificial-intelligence
+status: open
+tags: [uncertainty, calibration, large language models]
+order: 7
+updatedDate: 2026-10-23
+reviewed: false
+relatedArticles: [measure-what-ai-does-not-know]
+---
+## Why it matters
+
+Readers need to know which parts of a generated answer to double-check. A system that flags its own weak spots would be far safer than one that sounds equally confident about everything.
+
+## What we know
+
+<Evidence kind="established">
+For prediction tasks with fixed answers, calibration can be measured directly: predictions made with 80% confidence should be right about 80% of the time. Many methods exist to measure and improve calibration in this setting.
+</Evidence>
+
+For open-ended text, approaches include sampling several answers and checking whether they agree in meaning, asking the model to state its confidence, and checking individual claims against sources.
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+It is unclear whether a model's stated confidence reflects anything about its internal state, or is simply more generated text. Agreement between samples is also imperfect: a model can be consistently wrong.
+</Evidence>
+
+## What would count as progress
+
+- Uncertainty scores that predict which individual claims in a long answer are wrong.
+- Evaluations on questions where the true answer is unknown to the model's training data.
+- Interfaces that communicate uncertainty in ways readers actually use.

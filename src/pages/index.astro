@@ -4,8 +4,10 @@ import ArticleCard from '../components/ArticleCard.astro';
 import EvidenceSpectrum from '../components/EvidenceSpectrum.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import FillGlyph from '../components/FillGlyph.astro';
+import QuestionCard from '../components/QuestionCard.astro';
 import { site } from '../config/site';
-import { articleUrl, getCategories, getPublishedArticles } from '../lib/content';
+import { getCollection } from 'astro:content';
+import { articleUrl, getCategories, getPublishedArticles, getQuestions } from '../lib/content';
 
 const articles = await getPublishedArticles();
 const categories = await getCategories();
@@ -14,12 +16,18 @@ const featured = articles.find((a) => a.data.featured) ?? articles[0];
 const picks = articles.filter((a) => a.data.editorsPick && a !== featured).slice(0, 3);
 const spotlight = articles.find((a) => a.data.type.id === 'research-idea');
 const latest = articles.filter((a) => a !== featured).slice(0, 6);
-const questions = articles
-  .map((a) => ({ a, q: a.data.researchQuestion ?? a.data.openQuestion }))
-  .filter((x): x is { a: (typeof articles)[number]; q: string } => Boolean(x.q))
-  .slice(0, 5);
+const allQuestions = await getQuestions();
+const founder = (await getCollection('authors')).find((a) => a.data.founder);
+const questions = [...allQuestions.filter((q) => q.data.featured), ...allQuestions.filter((q) => !q.data.featured)].slice(0, 8);
 const counts = new Map<string, number>();
 for (const a of articles) counts.set(a.data.category.id, (counts.get(a.data.category.id) ?? 0) + 1);
+const qcounts = new Map<string, number>();
+for (const q of allQuestions) qcounts.set(q.data.category.id, (qcounts.get(q.data.category.id) ?? 0) + 1);
+const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const topicMeta = (id: string) => {
+  const parts = [counts.get(id) && plural(counts.get(id)!, 'article'), qcounts.get(id) && plural(qcounts.get(id)!, 'question')].filter(Boolean);
+  return parts.length ? parts.join(', ') : 'Coming soon';
+};
 ---
 <BaseLayout>
   <section class="wrap hero" aria-labelledby="hero-h">
@@ -63,7 +71,7 @@ for (const a of articles) counts.set(a.data.category.id, (counts.get(a.data.cate
         <li>
           <a href={`/topics/${c.id}/`}>
             <span class="tname">{c.data.name}</span>
-            <span class="tcount meta">{counts.get(c.id) ? `${counts.get(c.id)} article${counts.get(c.id) === 1 ? '' : 's'}` : 'Coming soon'}</span>
+            <span class="tcount meta">{topicMeta(c.id)}</span>
           </a>
         </li>
       ))}
@@ -75,27 +83,41 @@ for (const a of articles) counts.set(a.data.category.id, (counts.get(a.data.cate
       <h2 id="latest-h">Latest articles</h2>
       <a href="/articles/">All articles</a>
     </div>
-    <div class="grid">
-      {latest.map((a) => <ArticleCard article={a} />)}
+    <div class="mosaic">
+      {latest[0] && <div class="tile lead"><ArticleCard article={latest[0]} /></div>}
+      {latest.length > 1 && (
+        <div class="tile side">
+          {latest.slice(1, 3).map((a) => <ArticleCard article={a} variant="text" />)}
+        </div>
+      )}
+      {latest.slice(3).map((a) => <div class="tile"><ArticleCard article={a} /></div>)}
     </div>
   </section>
 
   <section class="questions-band block" aria-labelledby="questions-h">
-    <div class="wrap qwrap">
-      <div class="qintro">
-        <h2 id="questions-h">Questions worth investigating</h2>
-        <p>Open problems raised by our articles. None of them has an agreed answer yet.</p>
+    <div class="wrap">
+      <div class="section-head qhead">
+        <div>
+          <h2 id="questions-h">Questions worth investigating</h2>
+          <p class="qsub">Open problems, each explained: why it matters, what is known, and where researchers disagree.</p>
+        </div>
+        <div class="qnav" data-rail-controls hidden>
+          <button type="button" class="rbtn" data-rail-prev aria-label="Previous questions">
+            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button type="button" class="rbtn" data-rail-next aria-label="Next questions">
+            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="m7.5 4 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
       </div>
-      <ul class="qlist">
-        {questions.map(({ a, q }) => (
-          <li>
-            <FillGlyph fill={0} dashed size={18} />
-            <div>
-              <p class="q">{q}</p>
-              <a class="meta" href={articleUrl(a)}>From: {a.data.title}</a>
-            </div>
-          </li>
-        ))}
+      <ul class="rail" data-rail tabindex="0" aria-label="Research questions, scrollable">
+        {questions.map((q) => <li><QuestionCard q={q} /></li>)}
+        <li class="rail-end">
+          <a href="/questions/">
+            <span class="big">{allQuestions.length}</span>
+            <span>See all research questions</span>
+          </a>
+        </li>
       </ul>
     </div>
   </section>
@@ -135,9 +157,35 @@ for (const a of articles) counts.set(a.data.category.id, (counts.get(a.data.cate
         Articles are written and checked by people. We link to primary sources, correct mistakes in the open, and never
         present a hypothesis as a discovery. <a href="/editorial-policy/">Read our editorial policy</a>.
       </p>
+      {founder && (
+        <a class="founder" href="/about/">
+          <span class="fmono" aria-hidden="true">{founder.data.initials}</span>
+          <span><strong>{founder.data.name}</strong>, {founder.data.role?.toLowerCase()}. {founder.data.title}, University of Calabria.</span>
+        </a>
+      )}
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  const rail = document.querySelector<HTMLElement>('[data-rail]');
+  const controls = document.querySelector<HTMLElement>('[data-rail-controls]');
+  if (rail && controls) {
+    controls.hidden = false;
+    const prev = controls.querySelector<HTMLButtonElement>('[data-rail-prev]')!;
+    const next = controls.querySelector<HTMLButtonElement>('[data-rail-next]')!;
+    const step = () => (rail.querySelector('li')?.getBoundingClientRect().width ?? 300) + 24;
+    const sync = () => {
+      prev.disabled = rail.scrollLeft < 8;
+      next.disabled = rail.scrollLeft + rail.clientWidth > rail.scrollWidth - 8;
+    };
+    prev.addEventListener('click', () => rail.scrollBy({ left: -step(), behavior: 'smooth' }));
+    next.addEventListener('click', () => rail.scrollBy({ left: step(), behavior: 'smooth' }));
+    rail.addEventListener('scroll', sync, { passive: true });
+    addEventListener('resize', sync);
+    sync();
+  }
+</script>
 
 <style>
   .block { margin-top: var(--space-2xl); }
@@ -179,18 +227,45 @@ for (const a of articles) counts.set(a.data.category.id, (counts.get(a.data.cate
   .tname { font: 500 var(--step-1) / 1.25 var(--font-serif); }
   .tcount { white-space: nowrap; }
 
-  .grid { display: grid; gap: var(--space-xl) var(--space-l); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
 
   .questions-band { background: var(--panel); padding-block: var(--space-xl); }
-  .qwrap { display: grid; gap: var(--space-l); }
-  @media (min-width: 60rem) { .qwrap { grid-template-columns: 1fr 2fr; } }
-  .qintro h2 { font-size: var(--step-3); }
-  .qintro p { margin-top: var(--space-xs); color: var(--ink-2); max-width: 28ch; }
-  .qlist { list-style: none; margin: 0; padding: 0; display: grid; }
-  .qlist li { display: grid; grid-template-columns: auto 1fr; gap: var(--space-s); padding-block: var(--space-s); border-bottom: 1px solid var(--rule-strong); color: var(--tone-idea); }
-  .qlist li:first-child { padding-top: 0; }
-  .q { font: 500 var(--step-2) / 1.3 var(--font-serif); color: var(--ink); }
-  .qlist a { display: inline-block; margin-top: 0.3rem; }
+  .qhead { align-items: end; }
+  .qsub { margin-top: var(--space-2xs); color: var(--ink-2); max-width: 46ch; }
+  .qnav { display: flex; gap: var(--space-2xs); }
+  .qnav[hidden] { display: none; }
+  .rbtn {
+    display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem;
+    border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--paper); color: var(--ink); cursor: pointer;
+  }
+  .rbtn:hover:not(:disabled) { border-color: var(--ink); }
+  .rbtn:disabled { opacity: 0.4; cursor: default; }
+  .rail {
+    list-style: none; margin: 0; padding: 0 0 var(--space-s);
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(16rem, 22rem); gap: var(--space-m);
+    overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+  .rail:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+  .rail > li { scroll-snap-align: start; display: grid; }
+  .rail :global(.qcard) { background: var(--paper); }
+  .rail-end a {
+    display: grid; align-content: center; gap: var(--space-2xs); height: 100%; min-height: 12rem;
+    padding: var(--space-m); border: 1px dashed var(--rule-strong); border-radius: var(--radius-m);
+    color: var(--ink); text-decoration: none; font-weight: 600;
+  }
+  .rail-end a:hover { border-color: var(--ink); }
+  .rail-end .big { font: 450 var(--step-5) / 1 var(--font-serif); }
+
+  .tile.side { display: grid; gap: var(--space-l); align-content: start; }
+  .tile.side > :global(* + *) { padding-top: var(--space-l); border-top: var(--border); }
+  .mosaic { display: grid; gap: var(--space-xl) var(--space-l); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+  @media (min-width: 64rem) {
+    .mosaic { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tile.lead { grid-column: span 2; }
+    .tile.lead :global(.title) { font-size: var(--step-4); line-height: 1.06; }
+    .tile.lead :global(.dek) { font-size: var(--step-2); max-width: 36ch; }
+    .tile.side { padding-left: var(--space-l); border-left: var(--border); }
+  }
 
   .spotlight .spot-inner { border-left: 4px solid var(--tone-idea); padding-left: var(--space-m); max-width: 50rem; display: grid; gap: var(--space-xs); justify-items: start; }
   .spot-label { display: inline-flex; gap: 0.45rem; align-items: center; color: var(--tone-idea); font-weight: 600; font-size: var(--step--1); }
@@ -203,5 +278,14 @@ for (const a of articles) counts.set(a.data.category.id, (counts.get(a.data.cate
   @media (min-width: 52rem) { .split { grid-template-columns: 1fr 1fr; } }
   .split h2 { font-size: var(--step-3); }
   .lede { margin-top: var(--space-xs); font: var(--step-1) / 1.5 var(--font-serif); color: var(--ink-2); max-width: 38ch; }
+  .founder {
+    display: flex; align-items: center; gap: var(--space-s); margin-top: var(--space-2xs);
+    font: var(--step-0) / 1.4 var(--font-sans); color: var(--ink); text-decoration: none;
+  }
+  .founder:hover strong { text-decoration: underline; }
+  .fmono {
+    flex: none; width: 3rem; height: 3rem; border-radius: 50%; border: 2px solid var(--ink);
+    display: grid; place-items: center; font: 500 1.15rem/1 var(--font-serif); background: var(--paper);
+  }
   .about-text { display: grid; gap: var(--space-s); font: var(--step-1) / 1.55 var(--font-serif); max-width: 38rem; }
 </style>

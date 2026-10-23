@@ -1,0 +1,31 @@
+---
+question: "Can we prove whether a particular dataset was used to train a model?"
+summary: "Authors, data owners and regulators increasingly want to know what went into a model. Detecting this from the model alone is difficult, and the evidence is often statistical rather than conclusive."
+category: computer-science-cybersecurity
+status: open
+tags: [privacy, data provenance, membership inference]
+order: 9
+updatedDate: 2026-10-23
+reviewed: false
+---
+## Why it matters
+
+Copyright, privacy law and research integrity all depend on knowing what data a model learned from. Without reliable methods, claims in either direction are hard to settle.
+
+## What we know
+
+<Evidence kind="established">
+Membership inference attacks try to decide whether a specific example was in a model's training data, often by checking whether the model is unusually confident on it. They are well studied for smaller models and are also a recognised privacy risk.
+</Evidence>
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+For very large models trained on huge corpora, it is debated how reliable these tests are. A model may be confident on text it never saw because similar text was common, which produces false positives.
+</Evidence>
+
+## What would count as progress
+
+- Tests validated on models whose training data is fully known.
+- Watermarking or fingerprinting methods that let data owners check use in advance.
+- Standards for documenting training data, so detection is not the only option.

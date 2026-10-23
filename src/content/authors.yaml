@@ -3,3 +3,43 @@
   role: Editorial team
   organization: true
   bio: Sample author entry. Replace with real editor profiles before launch; never invent credentials.
+
+- id: tariq-mahmood
+  name: Dr. Tariq Mahmood
+  role: Founder and editor
+  founder: true
+  initials: TM
+  title: Postdoctoral researcher
+  affiliation: Department of Computer Science, Modelling, Electronics and Systems Engineering (DIMES), University of Calabria, Italy
+  url: https://scholar.google.com/citations?user=GNi-XUYAAAAJ
+  bio: >-
+    Tariq Mahmood is a postdoctoral researcher at the University of Calabria, where he works on making
+    data-driven AI more reliable, fair and efficient. His research covers how incomplete data is
+    repaired and linked, how those choices affect the fairness of machine learning models, and how
+    much energy AI systems consume. He founded The Research Frontier to explain research clearly while
+    keeping the line between evidence and speculation visible.
+  interests:
+    - Data imputation
+    - Entity resolution
+    - Fairness-aware machine learning
+    - Graph neural networks
+    - Green AI
+    - Trustworthy AI agents
+    - Pashto language technology
+  highlights:
+    - label: Education
+      text: PhD in Information and Communication Technologies, University of Calabria, awarded with Excellent distinction.
+    - label: Research
+      text: Developed SENTI, a system for semantic-aware imputation of missing values in dynamic relational databases, published in Information Fusion (2026).
+      url: https://tariqmahmood93.github.io/SENTI.web/
+    - label: Projects
+      text: Contributes to the Italian national cybersecurity research projects SERICS and Cybersecurity P3.
+    - label: Peer review
+      text: Reviewer for Knowledge-Based Systems, IEEE Sensors and Machine Learning with Applications.
+    - label: Languages
+      text: Speaks Urdu and Pashto, and is interested in building language technology for Pashto.
+  links:
+    - label: Google Scholar
+      url: https://scholar.google.com/citations?user=GNi-XUYAAAAJ
+    - label: SENTI project
+      url: https://tariqmahmood93.github.io/SENTI.web/

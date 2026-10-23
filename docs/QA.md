@@ -1,4 +1,15 @@
-# Stage 5 — QA report (23 October 2026)
+# QA report (23 October 2026)
+
+## Update 2: research questions, dynamic layouts, founder profile
+- 64 pages build; 21 pages indexed for search (articles and questions); `astro check` 0 errors, 0 warnings.
+- 2,587 internal links resolve. axe-core (WCAG 2.2 AA + best practice) finds no violations on 18 pages in light and dark themes, including the questions hub (filtered and unfiltered), a question page, the filtered article list and About.
+- Questions hub: topic, status and keyword filters combine correctly, show a live count, keep state in the URL, and offer "Clear filters" when nothing matches.
+- Homepage question rail scrolls with its buttons, which disable at each end; the rail is keyboard-focusable.
+- Article list: type and topic filters work; grid/list choice persists between visits.
+- Article pages: citation pop-ups open on click or tap, move focus inside, close with Escape and return focus; the table of contents highlights the section being read; a reading-progress bar appears once reading starts.
+- No horizontal overflow at 390 px on the new pages. Page transitions use the browser's built-in view transitions and are off when reduced motion is requested.
+
+## Stage 5 (first release)
 
 All checks below were run against the production build (`npm run build`) served locally in headless Chromium.
 

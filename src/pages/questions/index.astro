@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ListingHeader from '../../components/ListingHeader.astro';
+import QuestionCard from '../../components/QuestionCard.astro';
+import FillGlyph from '../../components/FillGlyph.astro';
+import { getCategories, getQuestions, questionStatus } from '../../lib/content';
+
+const questions = await getQuestions();
+const categories = (await getCategories()).filter((c) => questions.some((q) => q.data.category.id === c.id));
+const statuses = Object.entries(questionStatus) as [keyof typeof questionStatus, (typeof questionStatus)[keyof typeof questionStatus]][];
+---
+<BaseLayout
+  title="Open research questions"
+  description="Open problems in AI, computing and the wider sciences, each explained: why it matters, what we know, where the debate is, and what would count as progress."
+>
+  <ListingHeader
+    title="Questions worth investigating"
+    intro="Open problems, explained. For each one: why it matters, what is established, where researchers disagree, and what would count as progress."
+  >
+    <ul class="legend meta" aria-label="Status key">
+      {statuses.map(([, s]) => (
+        <li><FillGlyph fill={s.fill} dashed={s.dashed} size={15} /><strong>{s.label}:</strong> {s.description}</li>
+      ))}
+    </ul>
+  </ListingHeader>
+
+  <div class="wrap">
+    <div class="filters" data-qfilters hidden>
+      <div class="field search">
+        <label for="qf-text">Filter by keyword</label>
+        <input id="qf-text" type="search" placeholder="e.g. fairness, energy, language" autocomplete="off" />
+      </div>
+      <div class="group" role="group" aria-labelledby="qf-topic-label">
+        <span id="qf-topic-label" class="glabel">Topic</span>
+        <button type="button" class="chip" data-topic="" aria-pressed="true">All</button>
+        {categories.map((c) => <button type="button" class="chip" data-topic={c.id} aria-pressed="false">{c.data.name}</button>)}
+      </div>
+      <div class="group" role="group" aria-labelledby="qf-status-label">
+        <span id="qf-status-label" class="glabel">Status</span>
+        <button type="button" class="chip" data-status="" aria-pressed="true">Any</button>
+        {statuses.map(([id, s]) => <button type="button" class="chip" data-status={id} aria-pressed="false">{s.label}</button>)}
+      </div>
+    </div>
+    <p class="count meta" role="status" aria-live="polite" data-qcount>{questions.length} questions</p>
+
+    <div class="mosaic" data-qgrid>
+      {questions.map((q) => <QuestionCard q={q} size={q.data.featured ? 'l' : 'm'} headingLevel="h2" />)}
+    </div>
+    <div class="empty" data-qempty hidden>
+      <p>No questions match these filters.</p>
+      <button type="button" class="button button--quiet" data-qreset>Clear filters</button>
+    </div>
+
+    <aside class="propose">
+      <h2>Have a question we should cover?</h2>
+      <p>Send us an open problem from your field, with the sources that show it is genuinely open. <a href="/submit/">How to propose one</a>.</p>
+    </aside>
+  </div>
+</BaseLayout>
+
+<script>
+  const box = document.querySelector<HTMLElement>('[data-qfilters]');
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-question]')];
+  const countEl = document.querySelector<HTMLElement>('[data-qcount]')!;
+  const empty = document.querySelector<HTMLElement>('[data-qempty]')!;
+  const text = document.getElementById('qf-text') as HTMLInputElement;
+  if (box) {
+    box.hidden = false;
+    const state = { topic: '', status: '', q: '' };
+    const p = new URLSearchParams(location.search);
+    state.topic = p.get('topic') ?? '';
+    state.status = p.get('status') ?? '';
+    state.q = p.get('q') ?? '';
+    text.value = state.q;
+
+    const apply = () => {
+      const words = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+      let n = 0;
+      for (const c of cards) {
+        const show =
+          (!state.topic || c.dataset.topic === state.topic) &&
+          (!state.status || c.dataset.status === state.status) &&
+          words.every((w) => c.dataset.text!.includes(w));
+        c.hidden = !show;
+        if (show) n++;
+      }
+      box.querySelectorAll<HTMLButtonElement>('[data-topic]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.topic === state.topic)));
+      box.querySelectorAll<HTMLButtonElement>('[data-status]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.status === state.status)));
+      countEl.textContent = n === cards.length ? `${n} questions` : `${n} of ${cards.length} questions`;
+      empty.hidden = n > 0;
+      const q = new URLSearchParams();
+      if (state.topic) q.set('topic', state.topic);
+      if (state.status) q.set('status', state.status);
+      if (state.q) q.set('q', state.q);
+      history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+    };
+    box.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button.chip');
+      if (!b) return;
+      if (b.dataset.topic !== undefined) state.topic = b.dataset.topic;
+      if (b.dataset.status !== undefined) state.status = b.dataset.status;
+      apply();
+    });
+    text.addEventListener('input', () => { state.q = text.value.trim(); apply(); });
+    document.querySelector('[data-qreset]')?.addEventListener('click', () => {
+      state.topic = state.status = state.q = '';
+      text.value = '';
+      apply();
+      text.focus();
+    });
+    apply();
+  }
+</script>
+
+<style>
+  .legend { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-l); }
+  .legend li { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .legend strong { color: var(--ink); }
+
+  .filters { display: grid; gap: var(--space-s); padding: var(--space-m) 0; border-top: 2px solid var(--ink); }
+  .filters[hidden] { display: none; }
+  .search { max-width: 26rem; }
+  .group { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2xs); }
+  .glabel { font-weight: 600; font-size: var(--step--1); min-width: 3.5rem; }
+  .chip {
+    min-height: 2.5rem;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 500 var(--step--1) / 1.2 var(--font-sans);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--ink-2); }
+  .chip[aria-pressed='true'] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .count { margin: var(--space-xs) 0 var(--space-m); }
+
+  .mosaic {
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    grid-auto-flow: dense;
+  }
+  .mosaic > :global([hidden]) { display: none; }
+  @media (min-width: 52rem) {
+    .mosaic > :global(.qcard--l) { grid-column: span 2; }
+  }
+  .empty { padding: var(--space-l); border: 1px dashed var(--rule-strong); border-radius: var(--radius-m); display: grid; gap: var(--space-s); justify-items: start; }
+  .empty[hidden] { display: none; }
+
+  .propose { margin-top: var(--space-2xl); padding-top: var(--space-l); border-top: 2px solid var(--ink); max-width: 40rem; display: grid; gap: var(--space-xs); }
+  .propose h2 { font-size: var(--step-3); }
+  .propose p { font: var(--step-1) / 1.5 var(--font-serif); color: var(--ink-2); }
+</style>

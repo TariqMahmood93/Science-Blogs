@@ -1,0 +1,71 @@
+---
+// Turns inline citations into small pop-ups showing the reference, so readers
+// on phones don't lose their place. Without JavaScript they stay plain links.
+---
+<div class="cite-pop" id="cite-pop" role="dialog" aria-label="Reference" hidden>
+  <p class="cp-text"></p>
+  <p class="cp-actions"><a class="cp-go" href="#references">Go to reference</a><button type="button" class="cp-close">Close</button></p>
+</div>
+<script>
+  const pop = document.getElementById('cite-pop')!;
+  const text = pop.querySelector<HTMLElement>('.cp-text')!;
+  const go = pop.querySelector<HTMLAnchorElement>('.cp-go')!;
+  let opener: HTMLAnchorElement | null = null;
+  const close = (restore = true) => {
+    if (pop.hidden) return;
+    pop.hidden = true;
+    opener?.setAttribute('aria-expanded', 'false');
+    if (restore) opener?.focus();
+    opener = null;
+  };
+  document.querySelectorAll<HTMLAnchorElement>('.cite a').forEach((a) => {
+    a.setAttribute('role', 'button');
+    a.setAttribute('aria-expanded', 'false');
+    a.setAttribute('aria-controls', 'cite-pop');
+    const summary = a.getAttribute('title') ?? '';
+    a.dataset.summary = summary;
+    a.removeAttribute('title');
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (opener === a) return close();
+      close(false);
+      opener = a;
+      const li = document.querySelector(a.hash);
+      const placeholder = li?.classList.contains('unverified');
+      text.textContent = (placeholder ? 'Unverified placeholder. ' : '') + a.dataset.summary;
+      go.href = a.hash;
+      pop.hidden = false;
+      a.setAttribute('aria-expanded', 'true');
+      const r = a.getBoundingClientRect();
+      const w = Math.min(320, innerWidth - 32);
+      pop.style.width = `${w}px`;
+      pop.style.left = `${Math.max(16, Math.min(r.left + scrollX - w / 2, innerWidth - w - 16 + scrollX))}px`;
+      pop.style.top = `${r.bottom + scrollY + 8}px`;
+      go.focus();
+    });
+  });
+  pop.querySelector('.cp-close')!.addEventListener('click', () => close());
+  go.addEventListener('click', () => close(false));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  document.addEventListener('click', (e) => {
+    const t = e.target as Node;
+    if (!pop.hidden && !pop.contains(t) && !(t instanceof Element && t.closest('.cite'))) close(false);
+  });
+</script>
+<style>
+  .cite-pop {
+    position: absolute;
+    z-index: 60;
+    padding: var(--space-s);
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-m);
+    box-shadow: 0 8px 28px rgb(0 0 0 / 0.16);
+    font: var(--step--1) / 1.5 var(--font-sans);
+  }
+  .cite-pop[hidden] { display: none; }
+  .cp-actions { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-2xs); }
+  .cp-close { font: inherit; background: none; border: 0; color: var(--ink-2); cursor: pointer; min-height: 2.25rem; padding: 0 0.25rem; text-decoration: underline; }
+  .cp-go { font-weight: 600; }
+</style>

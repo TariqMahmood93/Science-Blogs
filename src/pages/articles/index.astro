@@ -1,0 +1,141 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ListingHeader from '../../components/ListingHeader.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import FillGlyph from '../../components/FillGlyph.astro';
+import { getCategories, getContentTypes, getPublishedArticles } from '../../lib/content';
+
+// One page with every article and client-side filters. If the archive grows past a few
+// hundred articles, switch back to paginated listings (topic and type pages already paginate).
+const articles = await getPublishedArticles();
+const types = (await getContentTypes()).filter((t) => articles.some((a) => a.data.type.id === t.id));
+const topics = (await getCategories()).filter((c) => articles.some((a) => a.data.category.id === c.id));
+---
+<BaseLayout title="All articles" description="Every article in The Research Frontier, filterable by type and topic.">
+  <ListingHeader title="All articles" intro="Everything we have published, newest first. Narrow it down by the kind of claim an article makes, or by topic." />
+  <div class="wrap">
+    <div class="toolbar" data-afilters hidden>
+      <div class="group" role="group" aria-labelledby="af-type">
+        <span id="af-type" class="glabel">Type</span>
+        <button type="button" class="chip" data-type="" aria-pressed="true">All</button>
+        {types.map((t) => (
+          <button type="button" class={`chip tone-${t.data.tone}`} data-type={t.id} aria-pressed="false">
+            <FillGlyph fill={1 - t.data.position} dashed={t.data.position > 0.85} size={13} />{t.data.plural}
+          </button>
+        ))}
+      </div>
+      <div class="group" role="group" aria-labelledby="af-topic">
+        <span id="af-topic" class="glabel">Topic</span>
+        <button type="button" class="chip" data-topic="" aria-pressed="true">All</button>
+        {topics.map((c) => <button type="button" class="chip" data-topic={c.id} aria-pressed="false">{c.data.name}</button>)}
+      </div>
+      <div class="view" role="group" aria-label="Layout">
+        <button type="button" class="vbtn" data-view="grid" aria-pressed="true">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg>Grid
+        </button>
+        <button type="button" class="vbtn" data-view="list" aria-pressed="false">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M1 2h14v3H1zM1 6.5h14v3H1zM1 11h14v3H1z"/></svg>List
+        </button>
+      </div>
+    </div>
+    <p class="count meta" role="status" aria-live="polite" data-acount>{articles.length} articles</p>
+    <div class="cards" data-acards>
+      {articles.map((a) => (
+        <div class="cell" data-type={a.data.type.id} data-topic={a.data.category.id}>
+          <ArticleCard article={a} headingLevel="h2" />
+        </div>
+      ))}
+    </div>
+    <div class="empty" data-aempty hidden>
+      <p>No articles match both filters yet.</p>
+      <button type="button" class="button button--quiet" data-areset>Clear filters</button>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-afilters]');
+  const cells = [...document.querySelectorAll<HTMLElement>('.cell')];
+  const grid = document.querySelector<HTMLElement>('[data-acards]')!;
+  const count = document.querySelector<HTMLElement>('[data-acount]')!;
+  const empty = document.querySelector<HTMLElement>('[data-aempty]')!;
+  if (bar) {
+    bar.hidden = false;
+    const p = new URLSearchParams(location.search);
+    const state = { type: p.get('type') ?? '', topic: p.get('topic') ?? '', view: 'grid' };
+    try { state.view = localStorage.getItem('articles-view') === 'list' ? 'list' : 'grid'; } catch {}
+    const apply = () => {
+      let n = 0;
+      for (const c of cells) {
+        const show = (!state.type || c.dataset.type === state.type) && (!state.topic || c.dataset.topic === state.topic);
+        c.hidden = !show;
+        if (show) n++;
+      }
+      bar.querySelectorAll<HTMLButtonElement>('[data-type]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.type === state.type)));
+      bar.querySelectorAll<HTMLButtonElement>('[data-topic]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.topic === state.topic)));
+      bar.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
+      grid.classList.toggle('is-list', state.view === 'list');
+      count.textContent = n === cells.length ? `${n} articles` : `${n} of ${cells.length} articles`;
+      empty.hidden = n > 0;
+      const q = new URLSearchParams();
+      if (state.type) q.set('type', state.type);
+      if (state.topic) q.set('topic', state.topic);
+      history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+    };
+    bar.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+      if (!b) return;
+      if (b.dataset.type !== undefined) state.type = b.dataset.type;
+      if (b.dataset.topic !== undefined) state.topic = b.dataset.topic;
+      if (b.dataset.view) {
+        state.view = b.dataset.view;
+        try { localStorage.setItem('articles-view', state.view); } catch {}
+      }
+      apply();
+    });
+    document.querySelector('[data-areset]')?.addEventListener('click', () => { state.type = state.topic = ''; apply(); });
+    apply();
+  }
+</script>
+
+<style>
+  .toolbar { display: grid; gap: var(--space-s); padding: var(--space-m) 0; border-top: 2px solid var(--ink); }
+  .toolbar[hidden] { display: none; }
+  .group, .view { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2xs); }
+  .glabel { font-weight: 600; font-size: var(--step--1); min-width: 3.5rem; }
+  .chip, .vbtn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    min-height: 2.5rem; padding: 0.35rem 0.9rem;
+    border: 1px solid var(--rule-strong); border-radius: 999px;
+    background: var(--paper); color: var(--ink);
+    font: 500 var(--step--1) / 1.2 var(--font-sans); cursor: pointer;
+  }
+  .chip:hover, .vbtn:hover { border-color: var(--ink-2); }
+  .chip[aria-pressed='true'], .vbtn[aria-pressed='true'] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .tone-established { --tone: var(--tone-established); }
+  .tone-discovery { --tone: var(--tone-discovery); }
+  .tone-commentary { --tone: var(--tone-commentary); }
+  .tone-idea { --tone: var(--tone-idea); }
+  .tone-future { --tone: var(--tone-future); }
+  .chip[class*='tone-'] :global(.glyph) { color: var(--tone); }
+  .chip[aria-pressed='true'] :global(.glyph) { color: currentColor; }
+  @media (min-width: 64rem) {
+    .toolbar { grid-template-columns: 1fr auto; }
+    .view { grid-column: 2; grid-row: 1; align-self: start; }
+  }
+  .count { margin: var(--space-xs) 0 var(--space-l); }
+
+  .cards { display: grid; gap: var(--space-xl) var(--space-l); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+  .cell[hidden] { display: none; }
+  .cards.is-list { grid-template-columns: 1fr; gap: 0; }
+  .cards.is-list .cell { padding: var(--space-m) 0; border-bottom: var(--border); }
+  .cards.is-list .cell:first-child { padding-top: 0; }
+  .cards.is-list :global(.card) { grid-template-columns: minmax(6rem, 11rem) 1fr; gap: var(--space-m); align-items: start; }
+  .cards.is-list :global(.card .title) { font-size: var(--step-2); }
+  @media (max-width: 40rem) {
+    .cards.is-list :global(.card) { grid-template-columns: 5.5rem 1fr; }
+    .cards.is-list :global(.card .dek) { display: none; }
+  }
+  .empty { padding: var(--space-l); border: 1px dashed var(--rule-strong); border-radius: var(--radius-m); display: grid; gap: var(--space-s); justify-items: start; }
+  .empty[hidden] { display: none; }
+</style>

@@ -1,0 +1,35 @@
+---
+question: "How should missing data be handled when gaps depend on who you are?"
+summary: "When some groups are recorded less completely than others, the choice of how to fill the gaps can change who a model serves well. There is no agreed method for doing this fairly."
+category: artificial-intelligence
+status: open
+tags: [missing data, imputation, fairness]
+order: 2
+updatedDate: 2026-10-23
+reviewed: false
+relatedArticles: [missing-data-unfair-ai]
+featured: true
+---
+## Why it matters
+
+Real datasets in health, finance, education and public services are full of gaps, and the gaps are rarely spread evenly. A model trained after a careless fix can end up less accurate for exactly the people who were already under-recorded.
+
+## What we know
+
+<Evidence kind="established">
+Statistics distinguishes data missing completely at random, missing at random (dependent on other observed values) and missing not at random (dependent on the unobserved value itself). Simple fixes such as dropping incomplete rows or filling with the average are generally only safe in the first case.
+</Evidence>
+
+Imputation methods range from simple averages to nearest-neighbour approaches, statistical models, multiple imputation and deep learning. They differ in accuracy, cost and how well they preserve differences between groups.
+
+## Where the debate is
+
+<Evidence kind="interpretation">
+It is not settled whether fairness should be built into the imputation step itself, corrected later in the model, or handled by collecting better data. Each choice shifts responsibility to a different stage of the pipeline.
+</Evidence>
+
+## What would count as progress
+
+- Benchmarks that report fairness metrics alongside imputation accuracy, broken down by group.
+- Guidance on which methods are safe under which missingness patterns.
+- Ways to measure fairness when the group label itself is sometimes missing.
