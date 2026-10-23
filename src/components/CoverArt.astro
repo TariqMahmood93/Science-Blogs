@@ -7,8 +7,10 @@ import DataGaps from './covers/DataGaps.astro';
 import AgentBounds from './covers/AgentBounds.astro';
 import Hypotheses from './covers/Hypotheses.astro';
 import Uncertainty from './covers/Uncertainty.astro';
+import Galaxy from './covers/Galaxy.astro';
+import QuantumField from './covers/QuantumField.astro';
 
-export const coverKinds = ['brain', 'code-scan', 'data-gaps', 'agent-bounds', 'hypotheses', 'uncertainty'] as const;
+export const coverKinds = ['brain', 'code-scan', 'data-gaps', 'agent-bounds', 'hypotheses', 'uncertainty', 'galaxy', 'quantum-field'] as const;
 export type CoverKind = (typeof coverKinds)[number];
 
 interface Props {
@@ -18,7 +20,7 @@ interface Props {
   class?: string;
 }
 const { kind, tone, ratio = '16/9', class: className } = Astro.props;
-const C = { brain: Brain, 'code-scan': CodeScan, 'data-gaps': DataGaps, 'agent-bounds': AgentBounds, hypotheses: Hypotheses, uncertainty: Uncertainty }[kind];
+const C = { brain: Brain, 'code-scan': CodeScan, 'data-gaps': DataGaps, 'agent-bounds': AgentBounds, hypotheses: Hypotheses, uncertainty: Uncertainty, galaxy: Galaxy, 'quantum-field': QuantumField }[kind];
 ---
 <div class:list={['cover', className]} data-cover style={`--bg: var(--art-${tone}); --dot: var(--art-dot-${tone}); aspect-ratio: ${ratio};`} aria-hidden="true">
   <C />

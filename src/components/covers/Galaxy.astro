@@ -1,0 +1,70 @@
+---
+// Spiral galaxy seen from a shallow angle: a bright core, two trailing arms
+// of star clusters, and a slow rotation.
+const arm = (phase: number, turns: number, from: number, to: number, count: number) =>
+  Array.from({ length: count }, (_, i) => {
+    const t = from + ((to - from) * i) / (count - 1);
+    const r = 60 + t * 440;
+    const a = phase + t * turns * Math.PI * 2;
+    return {
+      x: 800 + Math.cos(a) * r,
+      y: 450 + Math.sin(a) * r * 0.42,
+      s: 1.4 + (i % 5) * 0.7,
+      o: 0.3 + (1 - t) * 0.6,
+      d: (i % 11) * 0.5,
+    };
+  });
+
+const armA = arm(0, 0.75, 0.08, 1, 46);
+const armB = arm(Math.PI, 0.75, 0.08, 1, 46);
+const bgStars = Array.from({ length: 70 }, (_, i) => ({
+  x: (i * 173) % 1600,
+  y: (i * 97) % 900,
+  r: 0.6 + (i % 4) * 0.5,
+  d: (i % 13) * 0.4,
+}));
+---
+<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" class="galaxy">
+  <defs>
+    <radialGradient id="gal-core" cx="800" cy="450" r="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="var(--art-line)" stop-opacity="0.95" />
+      <stop offset="30%" stop-color="var(--dot)" stop-opacity="0.75" />
+      <stop offset="80%" stop-color="var(--dot)" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="gal-disc" cx="800" cy="450" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="var(--dot)" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="var(--dot)" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <g class="bg-stars">
+    {bgStars.map((s) => <circle cx={s.x} cy={s.y} r={s.r} style={`animation-delay:${s.d}s`} />)}
+  </g>
+
+  <ellipse class="disc" cx="800" cy="450" rx="520" ry="220" fill="url(#gal-disc)" />
+
+  <g class="spiral">
+    <g class="arm">
+      {armA.map((s) => <circle cx={s.x} cy={s.y} r={s.s} opacity={s.o} style={`animation-delay:${s.d}s`} />)}
+    </g>
+    <g class="arm">
+      {armB.map((s) => <circle cx={s.x} cy={s.y} r={s.s} opacity={s.o} style={`animation-delay:${s.d}s`} />)}
+    </g>
+    <circle class="core" cx="800" cy="450" r="130" fill="url(#gal-core)" />
+    <circle class="hot" cx="800" cy="450" r="22" />
+  </g>
+</svg>
+
+<style>
+  .galaxy { width: 100%; height: 100%; display: block; }
+  .bg-stars circle { fill: var(--art-line); opacity: 0.4; animation: twinkle 4.5s ease-in-out infinite; }
+  .disc { opacity: 0.6; animation: breathe 10s ease-in-out infinite; transform-origin: 800px 450px; }
+  .spiral { transform-origin: 800px 450px; animation: swirl 90s linear infinite; }
+  .arm circle { fill: var(--dot); filter: drop-shadow(0 0 4px var(--dot)); animation: twinkle 3.5s ease-in-out infinite; }
+  .core { opacity: 0.9; }
+  .hot { fill: var(--art-line); filter: drop-shadow(0 0 20px var(--art-line)); animation: breathe 4s ease-in-out infinite; transform-origin: 800px 450px; }
+
+  @keyframes swirl { to { transform: rotate(360deg); } }
+  @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.95; } }
+  @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.65; } 50% { transform: scale(1.08); opacity: 0.9; } }
+</style>
