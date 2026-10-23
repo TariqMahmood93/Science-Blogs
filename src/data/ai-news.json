@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "2026-10-23T00:00:00.000Z",
+  "items": [
+    {
+      "title": "Latest AI headlines will appear here once the first daily fetch runs",
+      "url": "https://news.ycombinator.com/",
+      "source": "Hacker News",
+      "date": "2026-10-23T00:00:00.000Z",
+      "summary": "A scheduled GitHub Action pulls fresh items each morning from Hacker News, The Verge, MIT Technology Review and the Google AI blog, then rebuilds the site."
+    }
+  ]
+}

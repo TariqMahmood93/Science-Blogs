@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AiNews from '../components/AiNews.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import ContourArt from '../components/ContourArt.astro';
 import CoverArt from '../components/CoverArt.astro';
@@ -44,6 +45,8 @@ const topicMeta = (id: string) => {
     </div>
     <HeroArt />
   </section>
+
+  <AiNews />
 
   {featured && (
     <section class="wrap featured" aria-label="Featured story">

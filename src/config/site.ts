@@ -6,7 +6,7 @@ export const site = {
   description:
     'Plain-language articles on artificial intelligence, computing and emerging research — each one clear about what is established, what is interpretation and what is still open.',
   locale: 'en',
-  contactEmail: import.meta.env.PUBLIC_CONTACT_EMAIL || '',
+  contactEmail: import.meta.env.PUBLIC_CONTACT_EMAIL || 'mahmood.tariq@dimes.unical.it',
   newsletter: {
     action: import.meta.env.PUBLIC_NEWSLETTER_ACTION || '',
     emailField: import.meta.env.PUBLIC_NEWSLETTER_EMAIL_FIELD || 'email',
@@ -19,7 +19,6 @@ export const site = {
 // Main navigation, shown in the sidebar. `href` may point at a topic, a content type or a page.
 // `icon` names a glyph in src/components/NavIcon.astro.
 export const nav = [
-  { label: 'Home', href: '/', icon: 'home' },
   { label: 'Science', href: '/topics/', icon: 'science' },
   { label: 'Artificial Intelligence', href: '/topics/artificial-intelligence/', icon: 'ai' },
   { label: 'Research Ideas', href: '/type/research-idea/', icon: 'idea' },

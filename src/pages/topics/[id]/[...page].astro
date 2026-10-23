@@ -19,7 +19,12 @@ export const getStaticPaths = (async ({ paginate }) => {
   );
 }) satisfies GetStaticPaths;
 const { page, category } = Astro.props as { page: Page<Article>; category: Category };
-const questions = page.currentPage === 1 ? (await getQuestions()).filter((q) => q.data.category.id === category.id) : [];
+// The Artificial Intelligence topic page intentionally omits the
+// open-questions band — those questions live on /questions/ and would
+// otherwise crowd the first-page listing.
+const questions = page.currentPage === 1 && category.id !== 'artificial-intelligence'
+  ? (await getQuestions()).filter((q) => q.data.category.id === category.id)
+  : [];
 ---
 <BaseLayout title={category.data.name} description={category.data.description}>
   <ListingHeader title={category.data.name} intro={category.data.description}>
