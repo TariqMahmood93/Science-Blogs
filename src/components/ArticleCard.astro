@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import ContourArt from './ContourArt.astro';
+import CoverArt from './CoverArt.astro';
 import TypeMark from './TypeMark.astro';
 import { articleUrl, formatDate, getLookups, readingTime, type Article } from '../lib/content';
 
@@ -33,6 +34,8 @@ const href = articleUrl(article);
     <div class="art">
       {data.heroImage ? (
         <Image src={data.heroImage.src} alt="" widths={[480, 800, 1200]} sizes="(min-width: 60rem) 50vw, 100vw" class="img" />
+      ) : data.cover ? (
+        <CoverArt kind={data.cover} tone={type.data.tone} />
       ) : (
         <ContourArt seed={article.id} tone={type.data.tone} ratio="16/9" />
       )}
@@ -58,8 +61,8 @@ const href = articleUrl(article);
 <style>
   .card { position: relative; display: grid; gap: var(--space-s); align-content: start; }
   .art { overflow: hidden; border-radius: var(--radius-m); }
-  .art :global(.contour), .img { transition: transform 0.4s ease; }
-  .card:hover .art :global(.contour), .card:hover .img { transform: scale(1.025); }
+  .art :global(.contour), .art :global(.cover), .img { transition: transform 0.4s ease; }
+  .card:hover .art :global(.contour), .card:hover .art :global(.cover), .card:hover .img { transform: scale(1.025); }
   .img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
   .body { display: grid; gap: 0.55rem; }
   .kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem var(--space-s); }

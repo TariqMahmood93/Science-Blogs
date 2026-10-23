@@ -1,5 +1,11 @@
 # QA report (23 October 2026)
 
+## Update 4: animated cover illustrations
+- Six original animated SVG covers (brain, code scan, data gaps, agent boundary, hypotheses, uncertainty), coloured by content type.
+- Animations pause off-screen and are switched off when the reader asks for reduced motion (checked: animation-name is `none` under reduced motion).
+- Real photos via `heroImage` were tested: a test image was resized to WebP and shown with its credit, then removed.
+- 64 pages build; 2,573 links resolve; axe-core finds no violations on 18 pages in both themes.
+
 ## Update 3: clean tech-blog restyle
 - One sans-serif family, white base, image-led cards with deep-coloured cover art, single-row sticky header on wide screens, large featured story, topic tabs on the latest-articles grid, dark spotlight and newsletter bands.
 - 64 pages build; 2,521 internal links resolve; axe-core finds no violations on 18 pages in light and dark themes; no horizontal overflow from 320 px to 1920 px.

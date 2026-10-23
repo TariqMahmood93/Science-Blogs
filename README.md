@@ -57,6 +57,23 @@ Copy `.env.example` to `.env` and fill in what you have. Every variable starting
 
 **Corrections:** fix the text, set `updatedDate`, and add an entry under `corrections` with the date and what changed. It is shown on the article.
 
+## Article images
+
+Every article needs an image. There are two ways to give it one.
+
+**Built-in animated illustrations.** Set `cover:` to one of `brain`, `code-scan`, `data-gaps`, `agent-bounds`, `hypotheses` or `uncertainty`. They are original drawings coloured by the article's type. They pause when off-screen and stay still for readers who turn on "reduce motion". Articles with neither a cover nor a photo get a generated contour pattern.
+
+**Real photos.** Put the image file in `src/assets/` and add it to the frontmatter. The site resizes it and converts it to WebP automatically:
+
+```yaml
+heroImage:
+  src: ../../assets/my-photo.jpg
+  alt: What the photo shows, for readers who can't see it
+  credit: Photographer name / Source, licence
+```
+
+A photo replaces the illustration on cards and on the article page. Use only images you have the right to publish — your own, ones licensed for reuse (e.g. Unsplash or Pexels licences, CC BY with attribution), or press images from the original paper's authors with permission — and always fill in `credit`.
+
 ## Adding a research question
 
 Research questions live in `src/content/questions/<url-slug>.mdx` and appear at `/questions/<url-slug>/`, on the Questions hub (with topic, status and keyword filters), on the homepage rail and on their topic page.

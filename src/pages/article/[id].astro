@@ -4,6 +4,7 @@ import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import ContourArt from '../../components/ContourArt.astro';
+import CoverArt from '../../components/CoverArt.astro';
 import TypeMark from '../../components/TypeMark.astro';
 import References from '../../components/References.astro';
 import Cite from '../../components/Cite.astro';
@@ -112,6 +113,8 @@ const contact = `/contact/?article=${encodeURIComponent(article.id)}#corrections
           <Image src={data.heroImage.src} alt={data.heroImage.alt} widths={[640, 1024, 1600]} sizes="(min-width: 78rem) 74rem, 100vw" loading="eager" fetchpriority="high" />
           <figcaption class="meta">{data.heroImage.credit}</figcaption>
         </figure>
+      ) : data.cover ? (
+        <CoverArt kind={data.cover} tone={type.data.tone} ratio="16/9" class="hero-art" />
       ) : (
         <ContourArt seed={article.id} tone={type.data.tone} ratio="16/9" class="hero-art" />
       )}
@@ -232,7 +235,7 @@ const contact = `/contact/?article=${encodeURIComponent(article.id)}#corrections
   .hero figure { margin: 0; }
   .hero :global(img) { width: 100%; border-radius: var(--radius-m); }
   .hero figcaption { margin-top: var(--space-2xs); }
-  .hero :global(.hero-art) { max-height: 26rem; width: 100%; }
+  .hero :global(.hero-art) { max-height: 34rem; width: 100%; }
 
   .layout { margin-top: var(--space-xl); display: grid; gap: var(--space-l); }
   @media (min-width: 64rem) {

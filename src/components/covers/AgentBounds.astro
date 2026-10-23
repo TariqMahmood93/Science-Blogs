@@ -1,0 +1,53 @@
+---
+// An agent at the centre acting on tasks inside a boundary; one action reaches the edge and is stopped.
+const cx = 800, cy = 450, R = 300;
+const tasks = [
+  [-150, -170], [130, -190], [220, 20], [140, 180], [-120, 190], [-230, 10],
+] as const;
+const blocked: [number, number] = [cx + R * Math.cos(-0.5), cy + R * Math.sin(-0.5)];
+---
+<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" class="agent">
+  <g class="dots">
+    {Array.from({ length: 15 }, (_, i) => Array.from({ length: 9 }, (_, j) => <circle cx={i * 110 + 30} cy={j * 110 + 15} r="2" />))}
+  </g>
+  <circle class="zone" cx={cx} cy={cy} r={R} />
+  <circle class="bound" cx={cx} cy={cy} r={R} />
+  <g class="links">
+    {tasks.map(([dx, dy], i) => (
+      <path d={`M${cx} ${cy} L${cx + dx} ${cy + dy}`} pathLength="100" style={`animation-delay:${i * 0.6}s`} />
+    ))}
+  </g>
+  <g class="tasks">
+    {tasks.map(([dx, dy]) => <rect x={cx + dx - 26} y={cy + dy - 26} width="52" height="52" rx="12" />)}
+  </g>
+  <path class="reach" d={`M${cx} ${cy} L${blocked[0]} ${blocked[1]} L${blocked[0] + 150} ${blocked[1] - 82}`} pathLength="100" />
+  <g class="stop" transform={`translate(${blocked[0]} ${blocked[1]})`}>
+    <circle r="26" />
+    <path d="M-10 -10 L10 10 M10 -10 L-10 10" />
+  </g>
+  <g class="core">
+    <circle cx={cx} cy={cy} r="62" class="outer" />
+    <circle cx={cx} cy={cy} r="30" class="inner" />
+  </g>
+</svg>
+<style>
+  .agent { width: 100%; height: 100%; }
+  .dots circle { fill: var(--art-line); opacity: 0.12; }
+  .zone { fill: rgb(255 255 255 / 0.04); }
+  .bound {
+    fill: none; stroke: var(--art-line); stroke-width: 3; stroke-dasharray: 14 12; opacity: 0.7;
+    transform-box: fill-box; transform-origin: center; animation: spin 40s linear infinite;
+  }
+  .links path { stroke: var(--art-line); stroke-width: 2.5; opacity: 0.5; stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw 4s ease-in-out infinite; }
+  .tasks rect { fill: rgb(255 255 255 / 0.08); stroke: var(--art-line); stroke-width: 2.5; opacity: 0.85; }
+  .reach { fill: none; stroke: var(--dot); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 52 100; stroke-dashoffset: 52; animation: reach 4s ease-in-out infinite; }
+  .stop circle { fill: var(--bg); stroke: var(--dot); stroke-width: 4; filter: drop-shadow(0 0 10px var(--dot)); }
+  .stop path { stroke: var(--dot); stroke-width: 5; stroke-linecap: round; }
+  .stop { animation: blink 4s ease-in-out infinite; }
+  .core .outer { fill: none; stroke: var(--dot); stroke-width: 4; filter: drop-shadow(0 0 14px var(--dot)); }
+  .core .inner { fill: var(--dot); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes draw { 0% { stroke-dashoffset: 100; } 40%, 70% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -100; } }
+  @keyframes reach { 0% { stroke-dashoffset: 52; } 45%, 75% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 52; } }
+  @keyframes blink { 0%, 40% { opacity: 0.35; } 50%, 75% { opacity: 1; } 100% { opacity: 0.35; } }
+</style>

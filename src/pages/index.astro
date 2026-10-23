@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import ContourArt from '../components/ContourArt.astro';
+import CoverArt from '../components/CoverArt.astro';
 import EvidenceSpectrum from '../components/EvidenceSpectrum.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import QuestionCard from '../components/QuestionCard.astro';
@@ -75,7 +76,7 @@ const topicMeta = (id: string) => {
     <section class="block band-dark spotlight" aria-labelledby="spot-h">
       <div class="wrap spot">
         <a class="spot-art" href={articleUrl(spotlight)} tabindex="-1" aria-hidden="true">
-          <ContourArt seed={spotlight.id} tone="idea" ratio="4/3" />
+          {spotlight.data.cover ? <CoverArt kind={spotlight.data.cover} tone="idea" ratio="4/3" /> : <ContourArt seed={spotlight.id} tone="idea" ratio="4/3" />}
         </a>
         <div class="spot-text">
           <p class="spot-label">Research idea spotlight</p>

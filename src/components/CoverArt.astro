@@ -1,0 +1,52 @@
+---
+// Original animated cover illustrations, chosen per article with `cover:` in frontmatter.
+// Decorative only: hidden from assistive technology, paused off-screen and when reduced motion is requested.
+import Brain from './covers/Brain.astro';
+import CodeScan from './covers/CodeScan.astro';
+import DataGaps from './covers/DataGaps.astro';
+import AgentBounds from './covers/AgentBounds.astro';
+import Hypotheses from './covers/Hypotheses.astro';
+import Uncertainty from './covers/Uncertainty.astro';
+
+export const coverKinds = ['brain', 'code-scan', 'data-gaps', 'agent-bounds', 'hypotheses', 'uncertainty'] as const;
+export type CoverKind = (typeof coverKinds)[number];
+
+interface Props {
+  kind: CoverKind;
+  tone: string;
+  ratio?: '16/9' | '4/3' | '3/2';
+  class?: string;
+}
+const { kind, tone, ratio = '16/9', class: className } = Astro.props;
+const C = { brain: Brain, 'code-scan': CodeScan, 'data-gaps': DataGaps, 'agent-bounds': AgentBounds, hypotheses: Hypotheses, uncertainty: Uncertainty }[kind];
+---
+<div class:list={['cover', className]} data-cover style={`--bg: var(--art-${tone}); --dot: var(--art-dot-${tone}); aspect-ratio: ${ratio};`} aria-hidden="true">
+  <C />
+</div>
+<script>
+  // Pause animations for covers that are off-screen.
+  const covers = document.querySelectorAll<HTMLElement>('[data-cover]');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) e.target.classList.toggle('is-paused', !e.isIntersecting);
+    });
+    covers.forEach((c) => io.observe(c));
+  }
+</script>
+<style>
+  .cover {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-m);
+    color: var(--art-line);
+    background:
+      radial-gradient(90% 120% at 80% 0%, rgb(255 255 255 / 0.12), transparent 60%),
+      radial-gradient(70% 90% at 10% 100%, rgb(0 0 0 / 0.35), transparent 60%),
+      var(--bg);
+  }
+  .cover :global(svg) { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .cover.is-paused :global(*) { animation-play-state: paused !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .cover :global(*) { animation: none !important; }
+  }
+</style>

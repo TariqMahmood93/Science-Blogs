@@ -1,0 +1,84 @@
+---
+// Side view of a brain built from glowing neural pathways, with signals travelling along them.
+const nodes: [number, number][] = [
+  [610, 360], [700, 300], [800, 270], [910, 280], [1010, 320], [1080, 400], [1060, 500],
+  [960, 560], [850, 570], [740, 540], [650, 470], [760, 400], [880, 380], [980, 430], [860, 470],
+];
+const links: [number, number][] = [
+  [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 0],
+  [1, 11], [11, 12], [12, 3], [12, 13], [13, 5], [13, 14], [14, 8], [11, 10], [11, 14], [2, 12], [14, 7], [12, 4], [9, 11],
+];
+const pulses = [
+  { d: 'M610 360 L700 300 L800 270 L880 380 L980 430 L1060 500', dur: 5.2, delay: 0 },
+  { d: 'M650 470 L760 400 L860 470 L960 560', dur: 4.4, delay: 1.3 },
+  { d: 'M1080 400 L1010 320 L910 280 L880 380 L760 400 L610 360', dur: 6, delay: 2.4 },
+  { d: 'M740 540 L860 470 L880 380 L1010 320', dur: 4.8, delay: 3.1 },
+];
+const stars = Array.from({ length: 46 }, (_, i) => ({
+  x: (i * 337) % 1600,
+  y: (i * 211 + 90) % 900,
+  r: 1 + (i % 3) * 0.8,
+  d: (i % 7) * 0.6,
+}));
+---
+<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" class="brain">
+  <g class="stars">
+    {stars.map((s) => <circle cx={s.x} cy={s.y} r={s.r} style={`animation-delay:${s.d}s`} />)}
+  </g>
+  <ellipse class="halo" cx="850" cy="440" rx="420" ry="300" />
+
+  <g class="outline">
+    <!-- Cerebrum -->
+    <path class="cere" d="M560 520 C 500 440 520 330 610 280 C 670 215 780 195 860 220 C 950 185 1070 210 1120 285 C 1190 320 1210 410 1175 470 C 1200 540 1150 615 1065 622 C 1020 665 935 672 885 642 C 840 668 760 664 725 630 C 650 640 590 600 560 520 Z" />
+    <!-- Cerebellum -->
+    <path d="M1010 640 C 1050 690 1120 700 1160 660 C 1190 630 1185 590 1160 575" />
+    <path d="M1040 650 C 1080 675 1125 670 1150 640" />
+    <!-- Brain stem -->
+    <path d="M900 645 C 905 690 915 730 940 770 M960 640 C 960 690 975 735 1000 770" />
+    <!-- Folds -->
+    <path class="fold" d="M640 330 C 690 360 700 410 660 450" />
+    <path class="fold" d="M720 260 C 760 310 740 360 780 400 C 810 430 800 480 760 520" />
+    <path class="fold" d="M850 230 C 840 290 880 320 870 370" />
+    <path class="fold" d="M960 225 C 950 270 990 300 980 350 C 975 390 1010 410 1040 400" />
+    <path class="fold" d="M1080 300 C 1060 340 1100 370 1130 360" />
+    <path class="fold" d="M700 580 C 760 560 820 590 880 570 C 940 550 1000 590 1060 570" />
+    <path class="fold" d="M900 450 C 950 470 1000 450 1040 480" />
+  </g>
+
+  <g class="links">
+    {links.map(([a, b]) => <line x1={nodes[a][0]} y1={nodes[a][1]} x2={nodes[b][0]} y2={nodes[b][1]} />)}
+  </g>
+  <g class="pulses">
+    {pulses.map((p) => <path d={p.d} pathLength="100" style={`animation-duration:${p.dur}s; animation-delay:${p.delay}s`} />)}
+  </g>
+  <g class="nodes">
+    {nodes.map(([x, y], i) => (
+      <g>
+        <circle class="ring" cx={x} cy={y} r="16" style={`animation-delay:${(i % 5) * 0.7}s`} />
+        <circle class="core" cx={x} cy={y} r="6" />
+      </g>
+    ))}
+  </g>
+</svg>
+<style>
+  .brain { width: 100%; height: 100%; display: block; }
+  .stars circle { fill: var(--art-line); opacity: 0.35; animation: twinkle 4s ease-in-out infinite; }
+  .halo { fill: var(--dot); opacity: 0.1; filter: blur(70px); animation: breathe 6s ease-in-out infinite; transform-origin: 850px 440px; }
+  .outline path { fill: none; stroke: var(--art-line); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+  .outline .cere { fill: rgb(255 255 255 / 0.04); }
+  .outline .fold { stroke-width: 2; opacity: 0.45; }
+  .links line { stroke: var(--dot); stroke-width: 1.4; opacity: 0.45; }
+  .pulses path {
+    fill: none; stroke: var(--dot); stroke-width: 5; stroke-linecap: round;
+    stroke-dasharray: 6 94; stroke-dashoffset: 100;
+    filter: drop-shadow(0 0 6px var(--dot));
+    animation: travel linear infinite;
+  }
+  .nodes .core { fill: var(--dot); filter: drop-shadow(0 0 8px var(--dot)); }
+  .nodes .ring { fill: none; stroke: var(--dot); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; animation: ping 3.5s ease-out infinite; }
+
+  @keyframes travel { to { stroke-dashoffset: 0; } }
+  @keyframes ping { 0% { opacity: 0.7; transform: scale(0.4); } 70%, 100% { opacity: 0; transform: scale(1.8); } }
+  @keyframes breathe { 0%, 100% { opacity: 0.12; transform: scale(1); } 50% { opacity: 0.22; transform: scale(1.06); } }
+  @keyframes twinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.6; } }
+</style>

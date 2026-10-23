@@ -71,6 +71,8 @@ const articles = defineCollection({
         heroImage: z
           .object({ src: image(), alt: z.string().min(1), credit: z.string().min(1) })
           .optional(),
+        // Built-in animated illustration used when there is no heroImage.
+        cover: z.enum(['brain', 'code-scan', 'data-gaps', 'agent-bounds', 'hypotheses', 'uncertainty']).optional(),
         featured: z.boolean().default(false),
         editorsPick: z.boolean().default(false),
         toc: z.boolean().default(true),
