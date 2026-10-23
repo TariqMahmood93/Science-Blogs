@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Daily rebuild to refresh "Latest in AI" headlines on the homepage.
+  schedule:
+    - cron: '0 6 * * *'
 
 permissions:
   contents: read
@@ -33,6 +36,11 @@ jobs:
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
+
+      - name: Refresh AI news
+        # Nice-to-have; a feed outage must not block the deploy.
+        continue-on-error: true
+        run: node scripts/fetch-ai-news.mjs
 
       - name: Build site
         env:

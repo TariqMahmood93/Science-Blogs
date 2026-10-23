@@ -1,0 +1,95 @@
+---
+// "Latest in AI" rail, fed by a small JSON file that a daily GitHub
+// Actions cron refreshes. Imported statically so it is baked into the
+// built HTML — no client-side fetch.
+import news from '../data/ai-news.json';
+
+interface Item { title: string; url: string; source: string; date: string; summary?: string }
+const items: Item[] = Array.isArray(news.items) ? news.items.slice(0, 8) : [];
+const fetchedAt: string | undefined = news.fetchedAt;
+
+const fmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const fmtFull = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+{items.length > 0 && (
+  <section class="ai-news block" aria-labelledby="ain-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2 id="ain-h">Latest in AI</h2>
+          <p class="sub">Headlines from across the web, refreshed each morning. We summarise and link; we do not endorse.</p>
+        </div>
+        {fetchedAt && <p class="meta stamp">Updated {fmtFull.format(new Date(fetchedAt))}</p>}
+      </div>
+
+      <ol class="ain-list" role="list">
+        {items.map((it, i) => (
+          <li class="ain-item">
+            <a class="ain-link" href={it.url} rel="noopener noreferrer" target="_blank">
+              <span class="ain-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <span class="ain-body">
+                <span class="ain-title">{it.title}</span>
+                {it.summary && <span class="ain-summary">{it.summary}</span>}
+                <span class="meta ain-meta">
+                  <span class="ain-source">{it.source}</span>
+                  <time datetime={it.date}>{fmt.format(new Date(it.date))}</time>
+                  <span class="ain-ext" aria-hidden="true">↗</span>
+                </span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+)}
+
+<style>
+  .ai-news { position: relative; }
+  .ai-news .section-head { align-items: end; gap: var(--space-s); }
+  .sub { margin-top: var(--space-2xs); color: var(--ink-2); max-width: 48ch; }
+  .stamp { white-space: nowrap; }
+
+  .ain-list {
+    list-style: none; margin: var(--space-l) 0 0; padding: 0;
+    display: grid; gap: var(--space-m);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 48rem) { .ain-list { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 72rem) { .ain-list { grid-template-columns: repeat(4, 1fr); } }
+
+  .ain-item { display: grid; }
+  .ain-link {
+    display: grid; grid-template-columns: auto 1fr; gap: var(--space-s);
+    height: 100%; padding: var(--space-m);
+    border: var(--border); border-radius: var(--radius-m);
+    color: var(--ink); text-decoration: none; background: var(--paper);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .ain-link:hover {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--ink) 25%, transparent);
+  }
+  .ain-link:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+  .ain-num {
+    font: 700 var(--step-2) / 1 var(--font-sans); letter-spacing: -0.02em;
+    color: color-mix(in srgb, var(--accent) 70%, var(--ink));
+    font-feature-settings: 'tnum';
+  }
+  .ain-body { display: grid; gap: 0.4rem; align-content: start; }
+  .ain-title {
+    font: 600 var(--step-0) / 1.3 var(--font-sans);
+    letter-spacing: -0.005em;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ain-summary {
+    font-size: var(--step--1); line-height: 1.5; color: var(--ink-2);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ain-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem var(--space-s); margin-top: 0.1rem; }
+  .ain-source { font-weight: 600; color: var(--accent); }
+  .ain-ext { margin-left: auto; opacity: 0.5; }
+  .ain-link:hover .ain-ext { opacity: 1; }
+</style>
