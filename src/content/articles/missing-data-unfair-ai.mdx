@@ -11,47 +11,89 @@ sample: true
 cover: data-gaps
 openQuestion: "How should fairness be measured when the attribute that defines a group is itself sometimes missing?"
 related: [measure-what-ai-does-not-know]
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with domain expertise.
 references:
-  - id: rubin-mechanisms
-    text: "To verify: the original definition of missing-data mechanisms (missing completely at random, at random, not at random), usually attributed to Rubin (1976)."
-  - id: imputation-review
-    text: "To source: a review of imputation methods for tabular data."
-  - id: fairness-imputation
-    text: "To source: an empirical study measuring how imputation choices change group fairness metrics."
+  - id: rubin1976
+    text: "Rubin, D.B. (1976). Inference and missing data. Biometrika, 63(3), 581–592."
+    doi: "10.1093/biomet/63.3.581"
+  - id: little-rubin
+    text: "Little, R.J.A. & Rubin, D.B. (2019). Statistical Analysis with Missing Data, 3rd edition. Wiley."
+  - id: van-buuren
+    text: "van Buuren, S. (2018). Flexible Imputation of Missing Data, 2nd edition. CRC Press."
+  - id: jeanselme-fairness
+    text: "Jeanselme, V., Agarwal, N. & Barrett, J. (2024). Imputation strategies under clinical presence: Impact on algorithmic fairness. Proceedings of Machine Learning Research 219 (ML4H)."
+  - id: obermeyer
+    text: "Obermeyer, Z., Powers, B., Vogeli, C. & Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. Science, 366(6464), 447–453."
+    doi: "10.1126/science.aax2342"
 ---
 
-Almost every real dataset has holes in it. A survey question is skipped, a sensor drops out, a hospital records fewer tests for some patients than others. Before most machine learning models can use such data, the holes have to be handled: either the incomplete rows are dropped or the missing values are filled in, a step called **imputation**.
+Almost every real dataset has holes in it. A survey question is skipped. A sensor drops out. A hospital records fewer tests for some patients than others. Before most machine-learning models can use such data, the holes have to be handled: either the incomplete rows are dropped, or the missing values are filled in — a step called **imputation**. The quiet claim of this article is that the choice of how to handle those gaps is often as consequential, for fairness, as the choice of model.
 
 ## Not all gaps are the same
 
+In 1976 Donald Rubin introduced the vocabulary the field still uses<Cite id="rubin1976" />. Each missing value in a dataset has a *missingness mechanism* that explains why it is missing, and the mechanism matters.
+
+- **MCAR (Missing Completely At Random):** the chance of a value being missing does not depend on anything, observed or unobserved. A truly random survey dropout.
+- **MAR (Missing At Random):** the chance of missingness depends only on things we did record. Older respondents skip a question more often, and we have age for every respondent.
+- **MNAR (Missing Not At Random):** the chance of missingness depends on the missing value itself, or on something we did not record. Higher earners skip the income question more often; we do not have income for the ones who skipped.
+
 <Evidence kind="established">
-Statisticians distinguish three situations. Data can be missing completely at random, unrelated to anything; missing at random, where the chance of a gap depends on other recorded values; or missing not at random, where it depends on the missing value itself<Cite id="rubin-mechanisms" />.
+These three categories are standard in statistical practice and underpin most imputation methods<Cite id="little-rubin" />. The distinction matters because most simple fixes are only safe under MCAR, and MCAR is the rarest in practice.
 </Evidence>
 
-The distinction matters because most simple fixes are only safe in the first case, and the first case is the rarest in practice.
+Two things follow from this classification that newcomers often miss. First, missingness is a property of the mechanism, not of the data: the same column can be MAR under one modelling assumption and MNAR under another. Second, the three types are usually unverifiable from the data alone. We can test MCAR against the alternatives in some cases; we cannot test MAR against MNAR without extra information about the generating process.
 
 ## How a gap becomes a bias
 
-Imagine income is missing more often for one group of applicants. If those rows are dropped, the model sees fewer examples from that group. If the gaps are filled with the overall average, everyone in that group is pulled towards a value that describes someone else.
+Imagine income is missing more often for one group of applicants — perhaps because the question was asked in a language a subset of applicants did not read fluently, or because a form broke on mobile devices used predominantly by one group.
 
-Either way, the model's errors may now fall unevenly across groups, even though no one intended it.
+Three common handling choices lead to three different failure modes.
+
+**Drop the incomplete rows.** The model now sees fewer examples from the affected group. Its performance on that group, when deployed, will be worse — a familiar statistical consequence of smaller training sample sizes. Nothing in the model intends this.
+
+**Fill the gaps with the overall mean.** Everyone in the affected group gets pulled toward a value that describes a different population. Downstream decisions will be systematically biased in that direction, in a way that is hard to audit after the fact.
+
+**Fill the gaps with a group-specific mean.** This looks better at first glance, but it depends on correctly identifying the group — and if group membership is itself one of the fields with missingness, the model may make assumptions about who someone is in order to decide what to fill in.
+
+None of these is obviously the right choice. All of them propagate the shape of the missingness into the model's errors.
+
+## A concrete case
+
+Obermeyer and colleagues' 2019 Science paper on a widely used health risk-prediction algorithm is a canonical case study<Cite id="obermeyer" />. The algorithm was trained to predict healthcare costs, not disease severity, and used healthcare spending as a proxy for medical need. Because less was historically spent on Black patients at the same level of illness, the algorithm systematically rated them as having lower risk than equally sick white patients. Fixing the proxy variable removed a large part of the disparity.
+
+The example is strictly a proxy-choice problem rather than a missingness problem, but the mechanism is the same: the training data captured something about who the system served well, and the model learned it. In the missing-data literature the analogous move is called **informative missingness**: the fact that a value is missing is itself informative, and ignoring it embeds the pattern of care into predictions.
 
 ## Ways of filling the gaps
 
-Outline for this section: explain mean imputation, nearest-neighbour methods, model-based imputation and multiple imputation in plain language, with one sentence each on when they are appropriate<Cite id="imputation-review" />.
+Four families cover most of what practitioners use<Cite id="van-buuren" />.
 
-## What the evidence says
+**Single mean, median or mode imputation.** The simplest and the worst-behaved. It compresses variance, breaks correlations with other variables, and makes downstream uncertainty estimates too confident. Rarely a good choice outside quick prototyping.
+
+**k-nearest-neighbour imputation.** Fill a missing value with the mean of the k most similar complete rows. Preserves local structure better than global means but inherits whatever biases are in the similarity measure.
+
+**Model-based imputation.** Train a model (regression, decision tree, or a dedicated imputation network like MICE's chained regressions) to predict each missing value from the others. More accurate on average, but can hide systematic errors inside the imputation model, which are then invisible downstream.
+
+**Multiple imputation.** Fill the gaps several times, train the downstream model on each filled dataset, and combine the predictions. The honest option: it preserves uncertainty about the missing values and produces confidence intervals that reflect it. Also the most expensive.
+
+## What the evidence says about fairness
 
 <Evidence kind="interpretation">
-Studies that compare imputation methods on fairness metrics suggest the choice of method can change disparities between groups, sometimes as much as the choice of model. Summarise only after checking the sources<Cite id="fairness-imputation" />.
+Jeanselme and colleagues' 2024 study ran a controlled comparison of imputation strategies on clinical datasets with simulated group-dependent missingness, and reported that the choice of imputation method shifted group-wise error disparities by amounts comparable to switching models — in some settings, more<Cite id="jeanselme-fairness" />. The result reinforces the general advice to treat imputation as a modelling choice with fairness consequences, not a preprocessing step.
 </Evidence>
+
+Three observations survive careful reading of this and related work.
+
+- The *same* imputation method can improve one fairness metric and worsen another. Equal error rates and equal predictive values rarely move in the same direction.
+- Imputation methods that use the outcome (e.g. training on labelled data to fill in gaps) can be more accurate on average but introduce leakage that is hard to measure in production.
+- Reporting results on complete-case subsets alone — a common shortcut — can hide performance drops on the groups most affected by missingness, because those are precisely the groups least represented in the complete cases.
 
 ## What practitioners can do
 
-- Report how much data is missing, broken down by group.
-- Compare more than one imputation method and report fairness metrics for each.
-- Treat "why is this missing?" as a question about the world, not only about the data.
+- **Report missingness by group.** The simplest audit tool. If 20% of one group has a key value missing and 2% of another does, that fact alone changes what we should expect of the model.
+- **Compare at least two imputation methods and report fairness metrics for each.** This is a small addition to a modelling pipeline and makes the choice visible.
+- **Treat "why is this missing?" as a question about the world, not only about the data.** Documents, forms, clinics and sensors all have histories. Those histories drove the missingness; the model will reflect them.
+- **Where decisions are high-stakes, prefer multiple imputation**, so the downstream model's uncertainty reflects the uncertainty introduced by filling the gaps.
 
 <Evidence kind="open">
-How should fairness be measured when the attribute that defines a group is itself sometimes missing?
+How should fairness be measured when the attribute that *defines* a group is itself sometimes missing? Group-conditional error rates assume we know who is in which group; when group membership is partly imputed, every fairness metric inherits the uncertainty of that imputation, and the field has no agreed way to report that composite uncertainty.
 </Evidence>

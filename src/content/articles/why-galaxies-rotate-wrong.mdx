@@ -10,43 +10,88 @@ editorsPick: true
 sample: true
 cover: galaxy
 openQuestion: "If a direct dark-matter particle detection never arrives, how long should the community keep looking before taking modified-gravity accounts more seriously?"
-aiAssistance: Sample layout for the Physics & Space topic. A real article would be written and checked by a named author with physics expertise.
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with physics expertise.
 references:
-  - id: rotation-curves
-    text: "To source: Rubin & Ford's original paper on galaxy rotation curves, or a modern review covering the same measurements."
-  - id: lambda-cdm-review
-    text: "To source: a review of the standard cosmological model and the independent lines of evidence it is built on."
-  - id: mond-tests
-    text: "To source: a recent test of modified gravity (MOND or a successor) against rotation-curve data at galaxy scale."
+  - id: rubin-ford
+    text: "Rubin, V.C. & Ford, W.K. Jr. (1970). Rotation of the Andromeda nebula from a spectroscopic survey of emission regions. The Astrophysical Journal, 159, 379–403."
+    doi: "10.1086/150317"
+  - id: planck
+    text: "Planck Collaboration. (2020). Planck 2018 results. VI. Cosmological parameters. Astronomy & Astrophysics, 641, A6."
+    doi: "10.1051/0004-6361/201833910"
+  - id: bullet-cluster
+    text: "Clowe, D., Bradač, M., Gonzalez, A.H. et al. (2006). A direct empirical proof of the existence of dark matter. The Astrophysical Journal Letters, 648(2), L109–L113."
+    doi: "10.1086/508162"
+  - id: mond
+    text: "Milgrom, M. (1983). A modification of the Newtonian dynamics as a possible alternative to the hidden mass hypothesis. The Astrophysical Journal, 270, 365–370."
+    doi: "10.1086/161130"
+  - id: xenon
+    text: "XENON Collaboration. (2023). First dark matter search with nuclear recoils from the XENONnT experiment. Physical Review Letters, 131(4), 041003."
+    doi: "10.1103/PhysRevLett.131.041003"
+  - id: hubble-tension
+    text: "Riess, A.G., Yuan, W., Macri, L.M. et al. (2022). A comprehensive measurement of the local value of the Hubble constant with 1 km/s/Mpc uncertainty from the Hubble Space Telescope and the SH0ES team. The Astrophysical Journal Letters, 934(1), L7."
+    doi: "10.3847/2041-8213/ac5c5b"
 ---
 
 This article explains an **established measurement** and lays out two **competing interpretations** of it. The measurement is settled; the explanation is not.
 
 ## What is actually measured
 
-If you plot how fast stars orbit the centre of a spiral galaxy against their distance from that centre, Newtonian gravity predicts the curve should fall off at the edge, the way planets slow down as they move outwards in the Solar System. Across hundreds of galaxies, it doesn't<Cite id="rotation-curves" />. Stars at the edge move about as fast as stars midway in.
+If you plot how fast stars orbit the centre of a spiral galaxy against their distance from that centre, Newtonian gravity predicts the curve should fall off at the edge, the way planets slow down as they move outwards in the Solar System. Across hundreds of galaxies, it doesn't<Cite id="rubin-ford" />. Stars at the edge move about as fast as stars midway in — producing what astronomers call a **flat rotation curve**.
+
+The core observation was first systematised by Vera Rubin and Kent Ford in a 1970 paper on the Andromeda galaxy (M31)<Cite id="rubin-ford" />. Their technique was straightforward: look at how the wavelengths of light from gas clouds across the galaxy are shifted by the Doppler effect, and reconstruct the rotation speed from the shifts. The result at the time was unexpected enough that it took years for the field to accept it. In the following two decades, the same pattern was documented in hundreds of galaxies by different groups using different techniques, including radio measurements of neutral hydrogen in regions well beyond the optical edge.
 
 <Evidence kind="established">
-Rotation curves of spiral galaxies stay flat far beyond the visible disk. This has been measured independently in optical light, in 21-centimetre hydrogen emission and in gravitational lensing by galaxy clusters.
+Rotation curves of spiral galaxies stay flat far beyond the visible disk. The result has been measured independently in optical light, in 21-centimetre hydrogen emission, and in gravitational lensing by galaxy clusters.
 </Evidence>
+
+The gap between measurement and expectation is not small. In many galaxies the implied mass is a factor of five to ten greater than the mass visible as stars and gas. That gap is what the two main interpretations are trying to explain.
 
 ## Two ways out
 
 The data forces one of two conclusions: either there is a lot of mass we cannot see, or the law of gravity is wrong at galactic scales.
 
-1. **Dark matter.** A cold, non-luminous component outweighs the visible stars and gas, and its gravity holds the fast-moving outer stars in. This idea slots cleanly into the standard cosmological model, which also explains the pattern of the cosmic microwave background and the distribution of galaxies<Cite id="lambda-cdm-review" />.
-2. **Modified gravity.** The law relating force to acceleration changes at the tiny accelerations found at the outskirts of galaxies. In its original form (MOND) and its relativistic successors, this reproduces rotation curves without new matter, but struggles with cluster-scale observations<Cite id="mond-tests" />.
+**Dark matter.** A cold, non-luminous component outweighs the visible stars and gas, and its gravity holds the fast-moving outer stars in. This idea slots cleanly into the standard cosmological model, called **Lambda-CDM** — cold dark matter plus a cosmological constant — which also predicts the pattern of the cosmic microwave background and the distribution of galaxies across the universe<Cite id="planck" />. The Planck mission's 2018 measurement of the CMB fits Lambda-CDM to a precision better than one percent on most of its parameters, with dark matter contributing about 27% of the total energy budget and ordinary matter only about 5%.
+
+**Modified gravity.** The law relating force to acceleration changes at the very low accelerations found at the outskirts of galaxies. The original proposal, Modified Newtonian Dynamics (MOND), was published by Mordehai Milgrom in 1983<Cite id="mond" />. In MOND, the acceleration a body feels is governed by `μ(a/a₀) · a = g_N`, where `a₀ ≈ 1.2 × 10⁻¹⁰ m/s²` is a new fundamental constant, `μ` is an interpolating function and `g_N` is the standard Newtonian gravitational acceleration. Below `a₀`, the law behaves differently from Newton. MOND reproduces flat rotation curves without new matter, and it does so with a single parameter.
+
+The two camps have been debating since the mid-1980s. The debate is not symmetric, and it has moved substantially in the last twenty years. The evidence for dark matter from cosmological scales is stronger than the evidence from galaxy scales alone, which is where MOND is at its best.
+
+## Why most cosmologists favour dark matter
+
+Three independent lines of evidence tilt the balance.
+
+**The cosmic microwave background.** The pattern of hot and cold spots in the CMB depends on how matter behaved in the first 380,000 years after the Big Bang. Lambda-CDM fits the entire pattern — the position and height of the acoustic peaks, the polarisation signal — with one global set of parameters<Cite id="planck" />. Modified-gravity theories have struggled to reproduce this without introducing extra fields that look, from the outside, a lot like dark matter.
+
+**Large-scale structure.** The distribution of galaxies on scales of hundreds of millions of light-years matches simulations run under Lambda-CDM to within a few percent on most statistics. The amount of structure present today depends sensitively on how much cold dark matter was around to seed it.
+
+**The Bullet Cluster and similar systems.** The Bullet Cluster is a pair of galaxy clusters that recently collided<Cite id="bullet-cluster" />. In the collision, the hot X-ray-emitting gas (where most of the ordinary matter sits) was slowed by its own pressure, while the galaxies and dark matter passed through unimpeded. Gravitational lensing shows the mass distribution — where things are heavy, regardless of whether they shine — and it is offset from the X-ray gas, lying with the galaxies. The simplest reading is that most of the mass is in a component that does not interact electromagnetically. Modified-gravity accounts of this system exist, but they typically require adding a dark component on top of the modified law, which weakens their appeal.
 
 <Evidence kind="interpretation">
-The weight of evidence currently favours dark matter, mainly because it also accounts for observations at scales much larger than individual galaxies. Modified gravity remains a serious research programme because no dark-matter particle has been directly detected despite decades of searching.
+The weight of evidence currently favours dark matter, mainly because it also accounts for observations at scales much larger than individual galaxies. Modified gravity remains a serious research programme because no dark-matter particle has been directly detected despite decades of searching, and because MOND continues to make surprisingly good predictions for new galaxies before the data is collected.
 </Evidence>
+
+## What the search for dark-matter particles has turned up
+
+If dark matter is a particle, the most studied class of candidates is the Weakly Interacting Massive Particle (WIMP) — a hypothetical particle that would interact through gravity and the weak force but not electromagnetism. Direct-detection experiments look for the rare collisions of a WIMP with an atomic nucleus in a shielded underground detector.
+
+The sensitivity of these experiments has improved by roughly nine orders of magnitude since the 1980s. The current generation — XENONnT, LUX-ZEPLIN, PandaX-4T — reports null results across most of the WIMP parameter space that was considered theoretically motivated in the 1990s<Cite id="xenon" />. This does not rule out dark matter. It rules out specific hypotheses about what dark matter might be made of, and shifts attention toward other candidates: axions, ultra-light dark matter, primordial black holes.
+
+The direct-detection null is one of the quietest big results in modern physics. It is cited in favour of modified gravity by its advocates, and in favour of less-interacting dark-matter candidates by the dark-matter community. Both readings are honest.
+
+## Lambda-CDM's own problems
+
+Even the standard model has unresolved tensions. The most prominent is the **Hubble tension**: direct measurements of the current expansion rate of the universe (using Cepheid-calibrated supernovae) give `H₀ ≈ 73 km/s/Mpc`<Cite id="hubble-tension" />, while predictions from the CMB under Lambda-CDM give `H₀ ≈ 67 km/s/Mpc`. The gap is roughly five standard deviations and has not budged with better data. Several proposed solutions involve new physics in the early universe; none has become the consensus explanation.
+
+A smaller but persistent problem is the "S8 tension": weak-lensing surveys measure slightly less clumpy structure than Lambda-CDM, calibrated to the CMB, predicts. The discrepancy is only two to three sigma, within range of being a systematic error, but it has stayed stable as data has improved.
+
+Modified-gravity theories offer no obvious solution to these tensions either, so the Lambda-CDM problems are not an argument for MOND. They are an argument that even the leading theory is not finished.
 
 ## What would change our mind
 
-- A direct, reproducible detection of a dark-matter particle in a terrestrial experiment.
-- A modified-gravity theory that matches every independent line of cosmological evidence, not just rotation curves.
-- A galaxy that defies both frameworks, requiring a third explanation.
+- A direct, reproducible detection of a dark-matter particle in a terrestrial experiment. A single result would move the balance; a replication across different detectors would close most of the discussion.
+- A modified-gravity theory that matches every independent line of cosmological evidence — rotation curves, the CMB, large-scale structure, cluster collisions — without a dark component. Current relativistic MOND successors (TeVeS, superfluid dark matter) are not there yet.
+- A system that defies both frameworks. A rotating object that behaves inconsistently with Lambda-CDM *and* with MOND would be the strongest kind of evidence for a different account entirely.
 
 <Evidence kind="open">
-If a direct dark-matter particle detection never arrives, how long should the community keep looking before taking modified-gravity accounts more seriously?
+If a direct dark-matter particle detection never arrives, how long should the community keep looking before taking modified-gravity accounts more seriously? There is no deadline; there is a slow, continuous rebalancing of theoretical attention, driven by what the next generation of experiments does and does not find.
 </Evidence>

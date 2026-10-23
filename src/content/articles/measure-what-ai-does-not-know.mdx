@@ -10,37 +10,102 @@ sample: true
 cover: uncertainty
 openQuestion: "How do we measure uncertainty for open-ended outputs, where there is no single right answer?"
 related: [missing-data-unfair-ai]
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with domain expertise.
 references:
-  - id: uncertainty-types
-    text: "To source: a review distinguishing aleatoric from epistemic uncertainty in machine learning."
-  - id: calibration
-    text: "To source: a study measuring the calibration of modern neural networks."
+  - id: hullermeier
+    text: "Hüllermeier, E. & Waegeman, W. (2021). Aleatoric and epistemic uncertainty in machine learning: An introduction to concepts and methods. Machine Learning, 110, 457–506."
+    doi: "10.1007/s10994-021-05946-3"
+  - id: guo-calibration
+    text: "Guo, C., Pleiss, G., Sun, Y. & Weinberger, K.Q. (2017). On calibration of modern neural networks. Proceedings of the 34th International Conference on Machine Learning."
+  - id: brier
+    text: "Brier, G.W. (1950). Verification of forecasts expressed in terms of probability. Monthly Weather Review, 78(1), 1–3."
+  - id: deep-ensembles
+    text: "Lakshminarayanan, B., Pritzel, A. & Blundell, C. (2017). Simple and scalable predictive uncertainty estimation using deep ensembles. Advances in Neural Information Processing Systems 30."
+  - id: conformal
+    text: "Angelopoulos, A.N. & Bates, S. (2023). Conformal prediction: A gentle introduction. Foundations and Trends in Machine Learning, 16(4), 494–591."
+    doi: "10.1561/2200000101"
+  - id: ovadia-shift
+    text: "Ovadia, Y., Fertig, E., Ren, J. et al. (2019). Can you trust your model's uncertainty? Evaluating predictive uncertainty under dataset shift. Advances in Neural Information Processing Systems 32."
 ---
 
-When a weather forecast says 70% chance of rain, we can check it: on days given that forecast, it should rain about seven times in ten. That property is called **calibration**, and it is one of the main ways researchers measure whether a model knows what it does not know.
+When a weather forecast says 70% chance of rain, we can check it: on days given that forecast, it should rain about seven times in ten. That property is called **calibration**, and it is the simplest formal answer to the question of whether a model knows what it does not know. Everything else in this piece is either a refinement of that idea or a response to its limits.
 
 ## Two kinds of not knowing
 
+Not every uncertain prediction is uncertain for the same reason. The literature usually splits reasons into two<Cite id="hullermeier" />.
+
+**Aleatoric uncertainty** comes from the world. A fair coin's next flip is uncertain regardless of how much data you collect; the uncertainty is a property of the process. More training data cannot make an aleatoric prediction sharper, only more honest about the irreducible noise.
+
+**Epistemic uncertainty** comes from the model. A classifier trained on 100 images of handwritten digits is epistemically uncertain about digit 9; a classifier trained on a million is less so. Epistemic uncertainty shrinks with more or better data, and it can in principle be reduced to zero.
+
 <Evidence kind="established">
-Researchers usually separate uncertainty that comes from noise in the world, which more data cannot remove, from uncertainty that comes from the model's limited knowledge, which more data can reduce<Cite id="uncertainty-types" />.
+The aleatoric–epistemic distinction is now standard in machine-learning uncertainty literature, though several authors note that in practice the line between them is set by how the model is written: aleatoric for one modeller may be epistemic for another with a richer model.
 </Evidence>
+
+The distinction matters because the two call for different responses. If a system faces aleatoric uncertainty, the right behaviour is to report a probability and act on it. If it faces epistemic uncertainty, the right behaviour is often to abstain, to ask a human, or to collect more data before acting.
 
 ## Calibration, explained
 
-Outline: explain reliability diagrams and expected calibration error in plain terms, with one worked example<Cite id="calibration" />.
+A model is **well-calibrated** if, among all the predictions it makes with confidence `p`, the fraction that turn out correct is also roughly `p`. The classical measure is the **reliability diagram**: bucket predictions by confidence, plot the fraction correct in each bucket against the bucket's confidence, and look at how close the curve is to the diagonal.
+
+Two numbers condense a reliability diagram:
+
+- **Expected Calibration Error (ECE)** is the average gap between predicted confidence and empirical accuracy, weighted by the number of examples in each bucket. In outline:
 
 ```text
-# Expected calibration error, in outline
 for each confidence bin:
     gap = |accuracy_in_bin - mean_confidence_in_bin|
     ece += (examples_in_bin / total) * gap
 ```
 
+- **Brier score**<Cite id="brier" /> is the mean squared error between the predicted probability and the one-hot outcome. It mixes calibration and sharpness: a model can lower it by being either better-calibrated or more decisive.
+
+Guo and colleagues' 2017 study showed that modern deep networks, trained with cross-entropy, tend to be *over-confident* — the empirical accuracy at 99% predicted confidence is often closer to 90%<Cite id="guo-calibration" />. The same paper documented that a simple post-hoc technique called **temperature scaling** — dividing the logits by a scalar fitted on a validation set — restores calibration in most image classifiers at essentially no cost. The improvement is cheap enough that there is now little excuse for shipping an uncalibrated classifier.
+
+## Methods for epistemic uncertainty
+
+Calibration alone does not say whether a confident prediction is confident for the right reasons. For that we need an estimate of epistemic uncertainty.
+
+**Ensembles.** Train several models with different random seeds and look at how much they disagree. Lakshminarayanan et al. (2017) showed that ensembles of 5–10 neural networks give useful epistemic uncertainty estimates, often outperforming more complex Bayesian methods<Cite id="deep-ensembles" />. The cost is linear in the ensemble size: 10× training compute, 10× inference compute.
+
+**Monte Carlo dropout.** Leave dropout on at inference time and sample several forward passes. Cheaper than ensembles, but the uncertainty estimates it produces are a particular kind of variational approximation whose quality varies by task.
+
+**Bayesian neural networks.** Treat the weights as random variables and infer a posterior over them. Theoretically clean, computationally hard, and in practice usually approximated by one of the methods above.
+
+**Conformal prediction.** Rather than output a single probability, output a *prediction set* that is guaranteed, under mild assumptions, to contain the true answer with a chosen probability<Cite id="conformal" />. The guarantee is distribution-free (it only assumes the test data is exchangeable with calibration data) and it is cheap to add on top of any model. The cost is that the sets can be wide when the model is unsure, which some applications tolerate and others do not.
+
+<Evidence kind="interpretation">
+In most practical settings, a well-tuned deep ensemble plus temperature scaling plus a conformal wrapper covers the uncertainty needs of a classification system. The exotic Bayesian machinery is more useful for research than for production.
+</Evidence>
+
 ## Beyond calibration
 
-- Abstention: letting the model decline to answer, and measuring the accuracy of what it does answer.
-- Out-of-distribution detection: noticing when an input is unlike anything seen in training.
+Calibration is a necessary condition for a model that knows what it does not know, but it is not sufficient. Three further ideas matter in practice.
+
+**Abstention.** Allow the model to say "I don't know". The accuracy on examples it chose to answer should be reported alongside the fraction it declined. A model that answers 60% of examples at 95% accuracy may be more useful than one that answers 100% at 85%.
+
+**Out-of-distribution (OOD) detection.** When an input is unlike anything seen in training, the right response is often not to answer. OOD detection is itself an area of active research; the honest summary is that no single method works everywhere. Ovadia et al. (2019) showed that calibration degrades substantially under distribution shift even for methods that look well-calibrated on the training distribution<Cite id="ovadia-shift" />.
+
+**Selective prediction.** The combination of a confidence score and a threshold: refuse to answer below the threshold, measure accuracy and coverage above it. A clean, auditable interface for high-stakes applications.
+
+## Why open-ended outputs are harder
+
+Everything above assumes a classification or regression setting where "right" has a definition. For large language models the problem is different: there is no single right answer to "explain photosynthesis to a 10-year-old". Current approaches to measuring confidence in generated text include:
+
+- **Self-consistency.** Ask the model the same question several times with different sampling seeds and look at how much the answers agree.
+- **Verbalised confidence.** Ask the model to say how sure it is, then calibrate the verbal output against ground truth where ground truth exists.
+- **Factuality probes.** Compare generated claims against a retrieved source and score the fraction supported.
+
+None of these recover the clean guarantees of calibration for classification. The honest state of the field is that measuring uncertainty for open-ended text is where measuring uncertainty for classification was 15 years ago: lots of proposals, no consensus method.
 
 <Evidence kind="open">
-How do we measure uncertainty for open-ended outputs, like a paragraph of text, where there is no single right answer?
+How do we measure uncertainty for open-ended outputs, like a paragraph of text, where there is no single right answer and no obvious ground truth to calibrate against?
 </Evidence>
+
+## A short checklist for a system that claims to know what it does not know
+
+- Report calibration metrics (ECE or Brier) on held-out data from the same distribution.
+- Report what happens under distribution shift. A model that is well-calibrated on IID data and badly miscalibrated under shift is a liability, not an asset.
+- If the model is used for high-stakes decisions, add a conformal wrapper and report the coverage and set-size statistics.
+- Expose an abstention mechanism and measure accuracy conditional on answering.
+- Keep two numbers close together: how often the system answers, and how accurate it is when it does.
