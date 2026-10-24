@@ -30,9 +30,7 @@
       if (opener === a) return close();
       close(false);
       opener = a;
-      const li = document.querySelector(a.hash);
-      const placeholder = li?.classList.contains('unverified');
-      text.textContent = (placeholder ? 'Unverified placeholder. ' : '') + a.dataset.summary;
+      text.textContent = a.dataset.summary ?? '';
       go.href = a.hash;
       pop.hidden = false;
       a.setAttribute('aria-expanded', 'true');
