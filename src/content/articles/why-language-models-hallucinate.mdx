@@ -1,0 +1,108 @@
+---
+title: Why language models hallucinate — and why training alone cannot fix it
+dek: A fluent wrong answer is not a bug the next release will patch. It is a predictable consequence of how generative models are built, and the research consensus is less optimistic than product marketing suggests.
+type: scientific-explainer
+category: artificial-intelligence
+tags: [hallucination, large language models, generative models, evaluation]
+authors: [editors]
+publishDate: 2026-10-18
+editorsPick: true
+sample: true
+cover: uncertainty
+openQuestion: "When a model is calibrated well enough to decline to answer most of what it does not know, what is the useful remainder — and is that remainder worth the loss of recall?"
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with domain expertise.
+references:
+  - id: ji-survey
+    text: "Ji, Z., Lee, N., Frieske, R. et al. (2023). Survey of hallucination in natural language generation. ACM Computing Surveys, 55(12), 1–38."
+    doi: "10.1145/3571730"
+  - id: openai-hallucinate
+    text: "Kalai, A.T., Nachum, O., Vempala, S.S. & Zhang, E. (2025). Why language models hallucinate. arXiv:2509.04664."
+  - id: xu-hallucination
+    text: "Xu, Z., Jain, S. & Kankanhalli, M. (2024). Hallucination is inevitable: An innate limitation of large language models. arXiv:2401.11817."
+  - id: lewis-rag
+    text: "Lewis, P., Perez, E., Piktus, A. et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems 33."
+  - id: huang-honest
+    text: "Huang, L., Yu, W., Ma, W. et al. (2024). A survey on hallucination in large language models: Principles, taxonomy, challenges, and open questions. ACM Transactions on Information Systems, 43(2), 1–55."
+    doi: "10.1145/3703155"
+---
+
+Chatbots say wrong things that sound right. The industry calls this *hallucination*; it has been the single most durable complaint about large language models since they moved from research tool to product. The common assumption is that hallucination is a bug — something the next model release will reduce. The research consensus is more interesting: hallucination is not one bug, it is a cluster of predictable behaviours with distinct causes, and some of those causes are structural rather than empirical.
+
+## What the word means
+
+The term "hallucination" is a loose cover for at least three different failures<Cite id="ji-survey" />.
+
+- **Factual error.** The model states a claim about the world that is false and verifiable.
+- **Contextual drift.** The model's output contradicts what it was told in the same conversation, or in a document it was asked to use.
+- **Fabrication.** The model invents a citation, a function signature, a court case, an API endpoint — something whose existence can be checked and that does not exist.
+
+These failures have different causes, and conflating them is one reason the public conversation has gone in circles. A model that is bad at (1) may be fine at (2); a model that scores well on short-answer benchmarks may still fabricate references.
+
+<Evidence kind="established">
+Recent surveys separate hallucination into these subtypes and show that mitigations which help one subtype often leave another untouched<Cite id="huang-honest" />.
+</Evidence>
+
+## Why calibration alone does not solve it
+
+The obvious response is: train the model to say "I don't know" when it doesn't. The problem is that current training objectives penalise this.
+
+Pre-training rewards fluent continuation of text. Supervised fine-tuning on human examples rewards helpful-looking answers. Reinforcement learning from human feedback rewards replies that human raters find more satisfying — and raters, understandably, prefer confident-sounding answers to equivocal ones. Each of these optimisers pushes in the same direction: when the model does not know, invent something plausible rather than admit the gap.
+
+Kalai and colleagues' 2025 paper formalised this intuition<Cite id="openai-hallucinate" />. They showed that, under reasonable statistical assumptions, a model trained to maximise likelihood on human-written text *will* assign non-zero probability to outputs that sound right but are not grounded in the data. The paper's argument is that hallucination is not a quirk of a particular architecture; it falls out of the training objective itself.
+
+Xu and colleagues (2024) make a stronger claim: that hallucination is an *innate* limitation of language models at the limits of their training data<Cite id="xu-hallucination" />. Their framing — that the space of possible claims is computationally infinite and the training data is not — explains why bigger models still hallucinate: scaling the model does not scale the data about every possible claim it might make.
+
+## The three structural causes
+
+Three mechanisms, each independently supported by evidence, keep showing up in the literature.
+
+**1. Compression.** A language model is a lossy summary of its training corpus. It stores regularities, not raw text. When queried about something it compressed heavily — a rarely mentioned fact, an obscure person — its output reconstructs from fragments, and the reconstruction may be wrong. More parameters compress less lossily on average but never losslessly.
+
+**2. The sampling problem.** At inference time the model samples token by token from a probability distribution. The right answer may be the most likely continuation at every step, or it may be one small step away from a very wrong one. Decoding strategies (greedy, top-k, nucleus) trade off diversity and fidelity, but none makes the model think about whether it knows.
+
+**3. The optimiser mismatch.** The training signal rewards *looking right* on the training set, not *being right* about claims. When the two diverge — in domains where plausibility and truth come apart — the model will prefer plausibility.
+
+Each of these is a different research direction. Retrieval tackles compression. Constrained decoding tackles sampling. New training objectives (reinforcement learning with verifiable rewards, process supervision) tackle the optimiser mismatch. All three are active and all three have made measurable progress; none has made hallucination go away.
+
+## Retrieval helps but does not finish the job
+
+The most widely deployed mitigation is **retrieval-augmented generation** (RAG): before answering, the system searches a document store and conditions the model on what it found<Cite id="lewis-rag" />. The gain on fact-oriented questions is real and measurable; the model is less likely to fabricate when the right answer is pulled into its context.
+
+RAG has limits worth stating plainly.
+
+- The retrieval step itself can be wrong. If the search returns the wrong document, the model will confidently generate from it.
+- The model may ignore the retrieved context when its parametric prior is strong — a problem sometimes called *context overriding*.
+- Retrieval moves the trust question from the model to the index. A corpus that contains outdated, biased, or malicious documents produces exactly the problems that corpus has.
+
+The practical observation is that RAG reduces one subtype of hallucination (unsupported factual claims) sharply, while leaving contextual drift and the fabrication of implementable-looking artefacts (function signatures, URL endpoints) largely untouched.
+
+## What a careful product does
+
+<Evidence kind="interpretation">
+Treating hallucination as a product problem rather than a model problem produces a shorter list of workable interventions than the research literature's long list. Four show up in every system that keeps hallucination rates low enough to be useful.
+</Evidence>
+
+- **Scope narrowing.** Say explicitly what the system is for, and refuse out-of-scope requests. A model told to summarise a document hallucinates less than one told to answer any question.
+- **Grounded citations.** Return the source alongside the claim. Users can tell when the model has fabricated a citation if the citation does not resolve.
+- **Confidence-conditional UI.** The model's expressed confidence feeds into how the answer is shown. Low-confidence answers get a different visual treatment, or are hidden behind an explicit confirmation.
+- **Measurement in deployment.** Run a hallucination-rate metric on production traffic, not just on benchmarks. Benchmarks are small, old, and often leaked; production traffic is where regressions appear.
+
+## A note on evaluation
+
+Benchmark hallucination rates are hard to compare across studies. Three variables usually matter:
+
+- **The reference distribution.** On open-ended factual questions, state-of-the-art hallucination rates are typically between 3% and 15% on recent surveys<Cite id="huang-honest" />. On fabricated-citation tasks they are higher, because the task requires generating artefacts the training data does not contain.
+- **The scoring method.** Human-rated factuality, automatic entailment classifiers, and retrieval-based verification disagree frequently. Any single number should be read with its scoring method named.
+- **The time of measurement.** Hallucination rates on static benchmarks tend to improve with model generation, but the gains plateau as benchmarks are saturated and new ones become harder to construct.
+
+## Where the field is going
+
+Three directions get the most attention and each has a different theory of change.
+
+- **Process supervision.** Train the model on *how* it answers (chain-of-thought steps rated for correctness), not only *what* it answers. Early evidence suggests gains on mathematical reasoning that transfer to other grounded-reasoning tasks.
+- **Verifier models.** A smaller, specialised model checks the main model's output against a knowledge base. Cheaper than retraining, but inherits the limits of whatever knowledge base it is checking against.
+- **Abstention mechanisms.** Reward the model for refusing to answer when it is unsure, calibrated against a ground-truth signal. Current implementations trade off accuracy against coverage in ways users should see explicitly.
+
+<Evidence kind="open">
+When a model is calibrated well enough to decline to answer most of what it does not know, what is the useful remainder — and is that remainder worth the loss of recall? The honest state of the field is that we do not yet have an application in which the trade-off is settled.
+</Evidence>
