@@ -52,7 +52,6 @@ const href = articleUrl(article);
       <time datetime={data.publishDate.toISOString()}>{formatDate(data.publishDate)}</time>
       <span>{minutes} min read</span>
       {variant === 'feature' && authors && <span>By {authors}</span>}
-      {data.sample && <span class="sample-flag">Sample content</span>}
     </p>
     {variant === 'feature' && <p class="more"><a href={href} tabindex="-1" aria-hidden="true">Read the article</a></p>}
   </div>
