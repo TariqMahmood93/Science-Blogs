@@ -19,6 +19,7 @@ export const site = {
 // Main navigation, shown in the sidebar. `href` may point at a topic, a content type or a page.
 // `icon` names a glyph in src/components/NavIcon.astro.
 export const nav = [
+  { label: 'Latest in AI', href: '/', icon: 'home' },
   { label: 'Science', href: '/topics/', icon: 'science' },
   { label: 'Research Ideas', href: '/type/research-idea/', icon: 'idea' },
   { label: 'Questions', href: '/questions/', icon: 'question' },
