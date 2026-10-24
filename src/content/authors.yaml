@@ -1,5 +1,5 @@
 - id: editors
-  name: The Research Frontier editors
+  name: Editorial team
   role: Editorial team
   organization: true
   bio: Sample author entry. Replace with real editor profiles before launch; never invent credentials.
@@ -16,7 +16,7 @@
     Tariq Mahmood is a postdoctoral researcher at the University of Calabria, where he works on making
     data-driven AI more reliable, fair and efficient. His research covers how incomplete data is
     repaired and linked, how those choices affect the fairness of machine learning models, and how
-    much energy AI systems consume. He founded The Research Frontier to explain research clearly while
+    much energy AI systems consume. He founded this publication to explain research clearly while
     keeping the line between evidence and speculation visible.
   interests:
     - Data imputation

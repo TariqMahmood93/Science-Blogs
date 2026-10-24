@@ -21,7 +21,7 @@ const personLd = founder && {
   sameAs: founder.data.links.map((l) => l.url),
 };
 ---
-<BaseLayout title="About" description={`What ${site.name} is, who runs it and how it works.`} jsonLd={personLd ? [personLd] : undefined}>
+<BaseLayout title="About" description="About this publication, who runs it and how it works." jsonLd={personLd ? [personLd] : undefined}>
   <ListingHeader title="About the publication" intro={site.tagline} />
 
   <div class="wrap">
@@ -30,7 +30,7 @@ const personLd = founder && {
     <div class="cols">
       <section class="prose">
         <h2>What we publish</h2>
-        <p>{site.name} is an independent publication about scientific ideas, with a starting focus on artificial intelligence, computer science and trustworthy technology. We explain research, critique new studies, explain <a href="/questions/">open research questions</a>, propose ideas worth investigating and think carefully about where technology could lead.</p>
+        <p>This is an independent publication about scientific ideas, with a starting focus on artificial intelligence, computer science and trustworthy technology. We explain research, critique new studies, explain <a href="/questions/">open research questions</a>, propose ideas worth investigating and think carefully about where technology could lead.</p>
         <h2>Who it is for</h2>
         <p>Researchers who care about accurate references, students working through difficult ideas, professionals following emerging science, and curious readers who want rigour without a jargon wall.</p>
         <h2>Independence</h2>
