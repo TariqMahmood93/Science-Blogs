@@ -32,6 +32,8 @@ references:
     doi: "10.3847/2041-8213/ac5c5b"
 ---
 
+import RotationCurve from '../../components/figures/RotationCurve.astro';
+
 This article explains an **established measurement** and lays out two **competing interpretations** of it. The measurement is settled; the explanation is not.
 
 ## What is actually measured
@@ -44,7 +46,11 @@ The core observation was first systematised by Vera Rubin and Kent Ford in a 197
 Rotation curves of spiral galaxies stay flat far beyond the visible disk. The result has been measured independently in optical light, in 21-centimetre hydrogen emission, and in gravitational lensing by galaxy clusters.
 </Evidence>
 
-The gap between measurement and expectation is not small. In many galaxies the implied mass is a factor of five to ten greater than the mass visible as stars and gas. That gap is what the two main interpretations are trying to explain.
+The gap between measurement and expectation is not small. For a body in a circular orbit at radius $r$, Newtonian gravity gives rotation speed $v(r) = \sqrt{G\, M(r)/r}$ where $M(r)$ is the mass inside radius $r$. If most of the mass is in the visible disk, $M(r)$ stops growing past the edge and $v(r)$ should fall off as $1/\sqrt{r}$. Instead $v(r)$ stays roughly flat, which requires $M(r)$ to keep growing with $r$ — that is, more mass we cannot see. In many galaxies the implied mass is a factor of five to ten greater than the mass visible as stars and gas.
+
+<RotationCurve />
+
+The chart above lets you add halo mass yourself and watch the fit catch up with the observations. The two interpretations below both try to explain the same gap.
 
 ## Two ways out
 
@@ -52,7 +58,13 @@ The data forces one of two conclusions: either there is a lot of mass we cannot 
 
 **Dark matter.** A cold, non-luminous component outweighs the visible stars and gas, and its gravity holds the fast-moving outer stars in. This idea slots cleanly into the standard cosmological model, called **Lambda-CDM** — cold dark matter plus a cosmological constant — which also predicts the pattern of the cosmic microwave background and the distribution of galaxies across the universe<Cite id="planck" />. The Planck mission's 2018 measurement of the CMB fits Lambda-CDM to a precision better than one percent on most of its parameters, with dark matter contributing about 27% of the total energy budget and ordinary matter only about 5%.
 
-**Modified gravity.** The law relating force to acceleration changes at the very low accelerations found at the outskirts of galaxies. The original proposal, Modified Newtonian Dynamics (MOND), was published by Mordehai Milgrom in 1983<Cite id="mond" />. In MOND, the acceleration a body feels is governed by `μ(a/a₀) · a = g_N`, where `a₀ ≈ 1.2 × 10⁻¹⁰ m/s²` is a new fundamental constant, `μ` is an interpolating function and `g_N` is the standard Newtonian gravitational acceleration. Below `a₀`, the law behaves differently from Newton. MOND reproduces flat rotation curves without new matter, and it does so with a single parameter.
+**Modified gravity.** The law relating force to acceleration changes at the very low accelerations found at the outskirts of galaxies. The original proposal, Modified Newtonian Dynamics (MOND), was published by Mordehai Milgrom in 1983<Cite id="mond" />. In MOND the acceleration a body feels is governed by
+
+$$
+\mu\!\left(\frac{a}{a_0}\right) a = g_N,
+$$
+
+where $a_0 \approx 1.2 \times 10^{-10}\,\mathrm{m/s^2}$ is a new fundamental constant, $\mu$ is an interpolating function (approaching 1 at large $a$ so Newton is recovered, and approaching $a/a_0$ at small $a$ so the law behaves differently), and $g_N$ is the standard Newtonian gravitational acceleration. MOND reproduces flat rotation curves without new matter, and it does so with a single parameter.
 
 The two camps have been debating since the mid-1980s. The debate is not symmetric, and it has moved substantially in the last twenty years. The evidence for dark matter from cosmological scales is stronger than the evidence from galaxy scales alone, which is where MOND is at its best.
 

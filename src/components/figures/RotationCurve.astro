@@ -1,0 +1,169 @@
+---
+// Interactive galaxy rotation curve. The user adjusts how much mass is in a
+// dark-matter halo. The chart shows (a) what Newton predicts from the visible
+// disk alone, (b) a representative observed curve, and (c) the model's
+// prediction once halo mass is added. All curves are schematic — units are
+// galaxy-scale rough and the physics is for intuition, not calibration.
+
+interface Props { id?: string }
+const { id = 'rotcurve' } = Astro.props;
+---
+<figure class="fig" aria-labelledby={`${id}-cap`}>
+  <div class="fig-head">
+    <h3>Interactive: rotation curve of a schematic spiral galaxy</h3>
+    <p class="fig-sub">Drag the slider to add dark-matter halo mass. The Newtonian prediction from the visible disk alone falls off at the edge; the observed curve stays flat; the fitted curve catches up only when the halo contributes.</p>
+  </div>
+  <div class="plot" data-rot-plot={id}>
+    <svg viewBox="0 0 600 320" aria-hidden="true" focusable="false">
+      <!-- gridlines -->
+      <g class="grid">
+        <line x1="60" y1="40" x2="60" y2="280" />
+        <line x1="60" y1="280" x2="580" y2="280" />
+        <line x1="60" y1="100" x2="580" y2="100" class="dash" />
+        <line x1="60" y1="160" x2="580" y2="160" class="dash" />
+        <line x1="60" y1="220" x2="580" y2="220" class="dash" />
+      </g>
+      <!-- axis labels -->
+      <g class="labels">
+        <text x="320" y="310" text-anchor="middle">Distance from centre (kpc)</text>
+        <text x="20" y="160" text-anchor="middle" transform="rotate(-90, 20, 160)">Rotation speed (km/s)</text>
+        <text x="60" y="294" text-anchor="middle">0</text>
+        <text x="320" y="294" text-anchor="middle">25</text>
+        <text x="580" y="294" text-anchor="middle">50</text>
+        <text x="52" y="284" text-anchor="end">0</text>
+        <text x="52" y="164" text-anchor="end">150</text>
+        <text x="52" y="44" text-anchor="end">300</text>
+      </g>
+      <!-- observed data points, roughly flat around v=220 km/s -->
+      <g class="observed" data-obs></g>
+      <!-- Newtonian curve from visible mass alone (falls as 1/sqrt(r)) -->
+      <path class="curve newton" data-newton d="" />
+      <!-- Fitted curve = Newtonian + halo contribution -->
+      <path class="curve fitted" data-fitted d="" />
+    </svg>
+    <div class="legend" aria-hidden="true">
+      <span class="k newton"></span><span>Newtonian prediction (visible disk only)</span>
+      <span class="k fitted"></span><span>Model prediction (disk + dark-matter halo)</span>
+      <span class="k observed"></span><span>Observed rotation (schematic)</span>
+    </div>
+    <div class="control">
+      <label>
+        <span class="ctrl-label">Dark-matter halo mass</span>
+        <input type="range" min="0" max="100" value="0" data-halo />
+        <output data-halo-out>0×</output>
+      </label>
+      <p class="status meta" data-status aria-live="polite">Halo turned off — only the visible disk contributes.</p>
+    </div>
+  </div>
+  <figcaption id={`${id}-cap`} class="fig-cap">Schematic. Observed values follow the pattern Rubin and Ford reported in 1970 for M31 and many spiral galaxies that followed. The halo contribution here is modelled as a simple isothermal profile; real halos are more complex, but the qualitative point — that visible matter alone cannot produce a flat curve — holds.</figcaption>
+</figure>
+
+<script define:vars={{ id }}>
+  (function () {
+    const root = document.querySelector(`[data-rot-plot="${id}"]`);
+    if (!root) return;
+    const svg = root.querySelector('svg');
+    const halo = root.querySelector('[data-halo]');
+    const haloOut = root.querySelector('[data-halo-out]');
+    const status = root.querySelector('[data-status]');
+    const newtonPath = svg.querySelector('[data-newton]');
+    const fittedPath = svg.querySelector('[data-fitted]');
+    const obsG = svg.querySelector('[data-obs]');
+
+    const X0 = 60, X1 = 580, Y0 = 280, Y1 = 40;
+    const R_MAX = 50;      // kpc
+    const V_MAX = 300;     // km/s on axis
+    const vScale = (v) => Y0 + (v / V_MAX) * (Y1 - Y0);
+    const rScale = (r) => X0 + (r / R_MAX) * (X1 - X0);
+
+    // Observed curve, schematic: rises then flattens near 220 km/s.
+    const observed = [];
+    for (let r = 2; r <= R_MAX; r += 3) {
+      const v = 220 * (1 - Math.exp(-r / 4)) + (Math.sin(r * 2.1) * 5);
+      observed.push({ r, v });
+    }
+    for (const o of observed) {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', rScale(o.r));
+      c.setAttribute('cy', vScale(o.v));
+      c.setAttribute('r', '3.5');
+      obsG.appendChild(c);
+    }
+
+    // Visible disk mass: enclosed roughly like 1 - exp(-r/scale). Newtonian
+    // v^2 ∝ M(r)/r. We tune so peak is around v=220 at r≈6, then falls off.
+    const vDisk = (r) => {
+      const Mdisk = 1 - Math.exp(-r / 3.5);
+      const v2 = (Mdisk / Math.max(r, 0.1)) * 220 * 220 * 7; // scaling constant for look
+      return Math.sqrt(Math.max(v2, 0));
+    };
+
+    // Dark-matter halo: isothermal-like contribution, v grows then plateaus.
+    // The slider controls the asymptotic halo contribution in km/s.
+    const vHalo = (r, vInfty) => {
+      const rc = 2.5; // core radius
+      return vInfty * Math.sqrt(1 - (rc / r) * Math.atan(r / rc));
+    };
+
+    const buildPath = (fn) => {
+      let d = '';
+      for (let r = 0.5; r <= R_MAX; r += 0.5) {
+        const v = fn(r);
+        d += (d ? ' L' : 'M') + rScale(r).toFixed(1) + ' ' + vScale(v).toFixed(1);
+      }
+      return d;
+    };
+
+    const update = () => {
+      const t = Number(halo.value) / 100;        // 0..1
+      const vInfty = 220 * t;                     // halo asymptotic contribution
+      haloOut.textContent = t.toFixed(2) + '×';
+      newtonPath.setAttribute('d', buildPath(vDisk));
+      fittedPath.setAttribute('d', buildPath((r) => Math.sqrt(vDisk(r) ** 2 + vHalo(r, vInfty) ** 2)));
+      status.textContent = t === 0
+        ? 'Halo turned off — only the visible disk contributes.'
+        : t < 0.5
+          ? 'A modest halo helps the fit, but the outer stars still look too fast.'
+          : t < 0.95
+            ? 'Add more halo mass and the fit tracks the observed curve further out.'
+            : 'With about this much halo mass, the fit reproduces the flat outer curve.';
+    };
+
+    halo.addEventListener('input', update);
+    update();
+  })();
+</script>
+
+<style>
+  .fig { margin: var(--space-l) 0; display: grid; gap: var(--space-xs); }
+  .fig-head h3 { font-size: var(--step-1); font-weight: 650; letter-spacing: -0.01em; margin: 0; }
+  .fig-sub { font-size: var(--step--1); color: var(--ink-2); line-height: 1.5; margin: 0.35rem 0 0; }
+  .fig-cap { font-size: var(--step--1); color: var(--ink-2); line-height: 1.5; margin-top: var(--space-2xs); }
+  .plot {
+    display: grid; gap: var(--space-xs);
+    padding: var(--space-m);
+    border: 1px solid var(--rule); border-radius: var(--radius-m);
+    background: var(--panel);
+  }
+  .plot svg { width: 100%; height: auto; display: block; }
+  .grid line { stroke: var(--rule-strong); stroke-width: 1; opacity: 0.6; }
+  .grid .dash { stroke: var(--rule); stroke-dasharray: 2 4; }
+  .labels text { fill: var(--ink-2); font: 500 11px / 1 var(--font-sans); font-feature-settings: 'tnum'; }
+  .observed circle { fill: var(--ink); }
+  .curve { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .newton { stroke: var(--tone-commentary); stroke-dasharray: 5 3; }
+  .fitted { stroke: var(--accent); }
+  .legend {
+    display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 0.6rem;
+    font-size: var(--step--1); color: var(--ink-2); align-items: center;
+  }
+  .legend .k { width: 22px; height: 3px; border-radius: 2px; }
+  .legend .k.newton { background: var(--tone-commentary); }
+  .legend .k.fitted { background: var(--accent); }
+  .legend .k.observed { width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
+  .control label { display: grid; gap: 0.35rem; font-size: var(--step--1); font-weight: 600; }
+  .control input[type='range'] { width: 100%; accent-color: var(--accent); }
+  .ctrl-label { display: flex; justify-content: space-between; }
+  .control output { font-weight: 500; color: var(--ink-2); font-feature-settings: 'tnum'; }
+  .status { margin: 0; font-style: italic; }
+</style>

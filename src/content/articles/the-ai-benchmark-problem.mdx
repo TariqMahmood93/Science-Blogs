@@ -24,6 +24,8 @@ references:
     text: "Raji, I.D., Bender, E.M., Paullada, A., Denton, E. & Hanna, A. (2021). AI and the everything in the whole wide world benchmark. Advances in Neural Information Processing Systems 34, Datasets and Benchmarks Track."
 ---
 
+import BenchmarkTradeoff from '../../components/figures/BenchmarkTradeoff.astro';
+
 This is **commentary**: a reasoned argument, signed by its editors. The argument is that AI benchmarks have been simultaneously the most productive and the most misleading tool in the field's recent history, and that reading them well now requires separating three questions that benchmark marketing conflates: *what the benchmark measures*, *what it claims to measure*, and *what readers hear*.
 
 ## A short history, so the critique has somewhere to stand
@@ -43,6 +45,10 @@ Strathern's 1997 paraphrase of the economist Charles Goodhart is the sentence to
 - **Specification gaming.** The model exploits a weakness in the benchmark's design. On a math test with multiple choice, a model that always picks the longest answer scores above chance. On an open-ended coding benchmark, a model that returns deterministic placeholders may hit a surprising fraction of unit tests.
 
 Each of these looks like progress on the metric and often shows up as regression on anything that matters. The gap between the two is not a bug in the field, it is the shape of what happens when any population of researchers works on any shared score.
+
+<BenchmarkTradeoff />
+
+The chart lets you see the pattern on a schematic curve: for a while the measure and the underlying skill rise together, and at some point they come apart. In real benchmarks the gap opens at different rates, but the qualitative story — once a measure becomes a target it stops being a good measure — is what Strathern's paraphrase was pointing at.
 
 ## Problem two: contamination
 

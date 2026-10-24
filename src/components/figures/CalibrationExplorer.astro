@@ -1,0 +1,191 @@
+---
+// Interactive reliability diagram. The user picks a temperature. A synthetic
+// classifier's confidence is rescaled by that temperature, binned into deciles,
+// and plotted against empirical accuracy. The gap to the y=x diagonal is the
+// per-bin calibration error; the summary is Expected Calibration Error (ECE).
+
+interface Props { id?: string }
+const { id = 'calib' } = Astro.props;
+---
+<figure class="fig" aria-labelledby={`${id}-cap`}>
+  <div class="fig-head">
+    <h3>Interactive: temperature scaling on a reliability diagram</h3>
+    <p class="fig-sub">A perfectly calibrated classifier lies on the diagonal: at any confidence <em>p</em> it is right <em>p</em> of the time. Drag the slider to rescale a representative over-confident model's confidences by a temperature <em>T</em>. The gap between the bars and the diagonal is the per-bin calibration error; the number below is Expected Calibration Error.</p>
+  </div>
+  <div class="plot" data-cal-plot={id}>
+    <svg viewBox="0 0 420 320" aria-hidden="true" focusable="false">
+      <!-- axes -->
+      <g class="grid">
+        <line x1="60" y1="30" x2="60" y2="280" />
+        <line x1="60" y1="280" x2="400" y2="280" />
+      </g>
+      <!-- Diagonal, perfect calibration -->
+      <line class="diag" x1="60" y1="280" x2="400" y2="30" />
+      <!-- Bars for each confidence bin -->
+      <g data-bars></g>
+      <g class="labels">
+        <text x="230" y="310" text-anchor="middle">Confidence (predicted probability)</text>
+        <text x="20" y="155" text-anchor="middle" transform="rotate(-90, 20, 155)">Empirical accuracy</text>
+        <text x="60" y="296" text-anchor="middle">0</text>
+        <text x="230" y="296" text-anchor="middle">0.5</text>
+        <text x="400" y="296" text-anchor="middle">1</text>
+        <text x="52" y="284" text-anchor="end">0</text>
+        <text x="52" y="155" text-anchor="end">0.5</text>
+        <text x="52" y="34" text-anchor="end">1</text>
+      </g>
+    </svg>
+    <div class="control">
+      <label>
+        <span class="ctrl-label">Temperature T <output data-t-out>1.00</output></span>
+        <input type="range" min="50" max="400" value="100" step="1" data-temp />
+      </label>
+      <dl class="stats" aria-live="polite">
+        <div><dt>ECE</dt><dd data-ece>0.000</dd></div>
+        <div><dt>Status</dt><dd data-cal-status>Perfectly calibrated.</dd></div>
+      </dl>
+    </div>
+  </div>
+  <figcaption id={`${id}-cap`} class="fig-cap">Synthetic data in the shape of a modern deep-network classifier: overconfident near the top end, lightly underconfident mid-range. Temperature scaling divides the pre-softmax logits by <em>T</em>, which flattens the distribution; T &gt; 1 reduces confidence, T &lt; 1 sharpens it. The curve the diagram chases is the diagonal.</figcaption>
+</figure>
+
+<script define:vars={{ id }}>
+  (function () {
+    const root = document.querySelector(`[data-cal-plot="${id}"]`);
+    if (!root) return;
+    const svg = root.querySelector('svg');
+    const barsG = svg.querySelector('[data-bars]');
+    const tInput = root.querySelector('[data-temp]');
+    const tOut = root.querySelector('[data-t-out]');
+    const eceOut = root.querySelector('[data-ece]');
+    const statusOut = root.querySelector('[data-cal-status]');
+
+    const X0 = 60, X1 = 400, Y0 = 280, Y1 = 30;
+    const toX = (p) => X0 + p * (X1 - X0);
+    const toY = (p) => Y0 - p * (Y0 - Y1);
+
+    // A synthetic sample of (logit, label) pairs built so that the raw-model
+    // reliability diagram is overconfident in the top bins and roughly
+    // calibrated below — the pattern Guo et al. 2017 reported for modern nets.
+    const N = 4000;
+    const samples = [];
+    // Deterministic pseudo-random so the chart is stable between renders.
+    let seed = 0x1a2b3c4d;
+    const rand = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    for (let i = 0; i < N; i++) {
+      // Logit margin against runner-up class; higher = more confident.
+      const z = rand() * 6 - 1;          // range roughly -1 .. 5
+      // True probability of being right lags the softmax of z.
+      // Softmax over (z, 0): p_hat = e^z / (e^z + 1)
+      // We make the true probability p_true = softmax(z/1.6) so that at
+      // high confidences the model is overconfident.
+      const pTrue = Math.exp(z / 1.6) / (Math.exp(z / 1.6) + 1);
+      const label = rand() < pTrue ? 1 : 0;
+      samples.push({ z, label });
+    }
+
+    const BINS = 10;
+
+    const computeBins = (T) => {
+      const bins = Array.from({ length: BINS }, () => ({ n: 0, acc: 0, conf: 0 }));
+      for (const s of samples) {
+        const pHat = Math.exp(s.z / T) / (Math.exp(s.z / T) + 1);
+        let idx = Math.floor(pHat * BINS);
+        if (idx >= BINS) idx = BINS - 1;
+        if (idx < 0) idx = 0;
+        const b = bins[idx];
+        b.n += 1;
+        b.acc += s.label;
+        b.conf += pHat;
+      }
+      for (const b of bins) {
+        if (b.n > 0) {
+          b.acc /= b.n;
+          b.conf /= b.n;
+        }
+      }
+      return bins;
+    };
+
+    const render = (T) => {
+      const bins = computeBins(T);
+      barsG.replaceChildren();
+      let ece = 0;
+      const total = bins.reduce((s, b) => s + b.n, 0);
+      for (let i = 0; i < BINS; i++) {
+        const b = bins[i];
+        if (b.n === 0) continue;
+        const lo = i / BINS, hi = (i + 1) / BINS;
+        const centre = (lo + hi) / 2;
+        const barW = (toX(hi) - toX(lo)) * 0.85;
+        const barX = toX(centre) - barW / 2;
+        // Accuracy bar
+        const accY = toY(b.acc);
+        const barH = Y0 - accY;
+        const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bar.setAttribute('x', String(barX));
+        bar.setAttribute('y', String(accY));
+        bar.setAttribute('width', String(barW));
+        bar.setAttribute('height', String(Math.max(0, barH)));
+        bar.setAttribute('class', 'bar');
+        barsG.appendChild(bar);
+        // Gap marker: thin stripe showing the gap to the diagonal (confidence)
+        const confY = toY(b.conf);
+        const gap = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        gap.setAttribute('x', String(barX));
+        gap.setAttribute('y', String(Math.min(accY, confY)));
+        gap.setAttribute('width', String(barW));
+        gap.setAttribute('height', String(Math.abs(accY - confY)));
+        gap.setAttribute('class', 'gap');
+        barsG.appendChild(gap);
+        ece += (b.n / total) * Math.abs(b.acc - b.conf);
+      }
+      eceOut.textContent = ece.toFixed(3);
+      statusOut.textContent = ece < 0.015
+        ? 'Well calibrated — bars sit on the diagonal.'
+        : ece < 0.04
+          ? 'Close to calibrated; small residual gaps at the top end.'
+          : ece < 0.09
+            ? 'Visibly overconfident in some bins.'
+            : 'Strongly overconfident across the top bins.';
+    };
+
+    const sync = () => {
+      const T = Number(tInput.value) / 100;
+      tOut.textContent = T.toFixed(2);
+      render(T);
+    };
+    tInput.addEventListener('input', sync);
+    sync();
+  })();
+</script>
+
+<style>
+  .fig { margin: var(--space-l) 0; display: grid; gap: var(--space-xs); }
+  .fig-head h3 { font-size: var(--step-1); font-weight: 650; letter-spacing: -0.01em; margin: 0; }
+  .fig-sub { font-size: var(--step--1); color: var(--ink-2); line-height: 1.5; margin: 0.35rem 0 0; }
+  .fig-cap { font-size: var(--step--1); color: var(--ink-2); line-height: 1.5; margin-top: var(--space-2xs); }
+  .plot {
+    display: grid; gap: var(--space-s);
+    padding: var(--space-m);
+    border: 1px solid var(--rule); border-radius: var(--radius-m);
+    background: var(--panel);
+  }
+  @media (min-width: 48rem) { .plot { grid-template-columns: 2fr 1fr; align-items: center; } }
+  .plot svg { width: 100%; height: auto; display: block; }
+  .grid line { stroke: var(--rule-strong); stroke-width: 1; }
+  .diag { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 3 4; }
+  .bar { fill: color-mix(in srgb, var(--accent) 60%, transparent); stroke: var(--accent); stroke-width: 1; }
+  .gap { fill: color-mix(in srgb, var(--tone-commentary) 50%, transparent); }
+  .labels text { fill: var(--ink-2); font: 500 11px / 1 var(--font-sans); font-feature-settings: 'tnum'; }
+  .control label { display: grid; gap: 0.35rem; font-size: var(--step--1); font-weight: 600; }
+  .control input[type='range'] { width: 100%; accent-color: var(--accent); }
+  .ctrl-label { display: flex; justify-content: space-between; }
+  .control output { font-weight: 500; color: var(--ink-2); font-feature-settings: 'tnum'; }
+  .stats { display: grid; grid-template-columns: auto 1fr; gap: 0.35rem var(--space-s); margin: var(--space-s) 0 0; }
+  .stats div { display: contents; }
+  .stats dt { font-weight: 600; color: var(--ink-2); }
+  .stats dd { margin: 0; font-feature-settings: 'tnum'; }
+</style>
