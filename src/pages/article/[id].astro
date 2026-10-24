@@ -76,12 +76,6 @@ const contact = `/contact/?article=${encodeURIComponent(article.id)}#corrections
 >
   <ReadingProgress target=".article .prose" />
   <article class="article">
-    {data.sample && (
-      <div class="sample-banner wrap" role="note">
-        <p><strong>Sample content.</strong> This page shows how the layout handles a {type.data.name.toLowerCase()}. It is an editorial outline, not a published article.</p>
-      </div>
-    )}
-
     <header class="wrap head">
       <nav class="crumbs meta" aria-label="Breadcrumb">
         <ol>
@@ -193,14 +187,6 @@ const contact = `/contact/?article=${encodeURIComponent(article.id)}#corrections
 </BaseLayout>
 
 <style>
-  .sample-banner p {
-    margin-top: var(--space-m);
-    padding: var(--space-xs) var(--space-s);
-    border: 1px dashed var(--rule-strong);
-    border-radius: var(--radius-m);
-    font-size: var(--step--1);
-    color: var(--ink-2);
-  }
   .head { padding-top: var(--space-l); display: grid; gap: var(--space-s); }
   .crumbs ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
   .crumbs li + li::before { content: '/'; margin-right: 0.4rem; color: var(--rule-strong); }
