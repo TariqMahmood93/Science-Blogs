@@ -45,7 +45,8 @@ const fmtFull = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long'
 )}
 
 <style>
-  .ai-news { position: relative; }
+  .ai-news { position: relative; padding-top: var(--space-xl); }
+  @media (min-width: 48rem) { .ai-news { padding-top: var(--space-2xl); } }
   .ai-news .section-head { align-items: end; gap: var(--space-s); }
   .sub { margin-top: var(--space-2xs); color: var(--ink-2); max-width: 48ch; }
   .stamp { white-space: nowrap; }
