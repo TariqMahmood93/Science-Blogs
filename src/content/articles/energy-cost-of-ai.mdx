@@ -1,0 +1,100 @@
+---
+title: "The energy cost of AI: what we know and what we don't"
+dek: Training a model is a large but one-time cost. Inference is small but repeated. Neither is as well-measured as the industry's confident numbers suggest, and the public conversation is still catching up to what the data actually says.
+type: research-discovery
+category: artificial-intelligence
+tags: [energy, environmental impact, large language models, infrastructure]
+authors: [editors]
+publishDate: 2026-10-10
+sample: true
+cover: code-scan
+openQuestion: "If a growing fraction of the world's electricity is going to inference, what should regulators be measuring, and who should they be asking?"
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with domain expertise.
+references:
+  - id: strubell
+    text: "Strubell, E., Ganesh, A. & McCallum, A. (2019). Energy and policy considerations for deep learning in NLP. Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics."
+  - id: patterson
+    text: "Patterson, D., Gonzalez, J., Le, Q. et al. (2021). Carbon emissions and large neural network training. arXiv:2104.10350."
+  - id: luccioni-bloom
+    text: "Luccioni, A.S., Viguier, S. & Ligozat, A.L. (2023). Estimating the carbon footprint of BLOOM, a 176B parameter language model. Journal of Machine Learning Research, 24(253), 1–15."
+  - id: iea-report
+    text: "International Energy Agency. (2024). Electricity 2024: Analysis and forecast to 2026. OECD/IEA, Paris."
+  - id: luccioni-inference
+    text: "Luccioni, A.S., Jernite, Y. & Strubell, E. (2024). Power hungry processing: Watts driving the cost of AI deployment? Proceedings of the 2024 ACM Conference on Fairness, Accountability, and Transparency."
+    doi: "10.1145/3630106.3658542"
+  - id: water
+    text: "Li, P., Yang, J., Islam, M.A. & Ren, S. (2023). Making AI less thirsty: Uncovering and addressing the secret water footprint of AI models. arXiv:2304.03271."
+---
+
+A **research-discovery** article keeps what a study's authors found separate from how we read it. The subject here is awkward precisely because so many of the headline numbers come from studies that disagree with each other, often by an order of magnitude. The point of this piece is not to settle those disagreements — the data to do so does not yet exist in public — but to say what the studies actually measured, what they could not, and what a careful reader should take away.
+
+## Training versus inference, in rough terms
+
+Two energy costs matter and they behave differently.
+
+**Training** is the one-time cost of fitting the model. For a frontier language model in 2024-2025 this is in the ballpark of 10,000 to 100,000 MWh, depending heavily on model size, training duration and hardware generation. The 2019 Strubell et al. paper estimated the training of a single Transformer model with neural architecture search at roughly 626,000 pounds of CO₂-equivalent emissions<Cite id="strubell" />; that number has been revisited many times since, with Patterson and colleagues (2021) arguing that the Strubell estimate overstated by about an order of magnitude once correct hardware and location-specific grid intensities were accounted for<Cite id="patterson" />.
+
+**Inference** is the cost per query, repeated for every user interaction. For a typical chat response (a few hundred output tokens from a frontier-scale model) the energy cost is in the range of fractions of a watt-hour to a few watt-hours, with wide variation depending on model and infrastructure. Luccioni, Jernite and Strubell's 2024 paper measured 88 production-size models and reported that text generation uses roughly 100× the energy of a simple text-classification query on the same model<Cite id="luccioni-inference" />.
+
+<Evidence kind="established">
+At the scale of a frontier LLM deployed at hundreds of millions of users, aggregated inference energy almost certainly exceeds training energy within months of release. Training is a visible, one-time cost; inference is a quiet, continuing one.
+</Evidence>
+
+## What careful studies actually measured
+
+A short tour of the studies most often cited.
+
+**Strubell et al. 2019.** The first widely read estimate of language-model training emissions. The paper's methodology — multiplying training hours by average data-centre power and the US grid's average carbon intensity — was transparent and easy to critique. The specific number for the "neural architecture search" training run (626,000 pounds of CO₂e) got far more attention than the paper's other, more modest estimates. The paper's claim that an NLP model's lifecycle could emit as much as five cars has become shorthand that outlasted the methodology it rested on<Cite id="strubell" />.
+
+**Patterson et al. 2021.** Google's response and reframing. The paper argued that modern cloud data centres, modern accelerator hardware, and location-aware scheduling all substantially reduce the per-training emissions, with specific examples (T5, Meena, GShard) coming in at roughly 1/10 of the Strubell estimate for comparable work<Cite id="patterson" />. The paper is also careful to say what it did not account for: embodied emissions in hardware, future scaling, inference costs.
+
+**Luccioni, Viguier and Ligozat 2023.** A single-model deep audit of BLOOM, Hugging Face's 176B-parameter open model<Cite id="luccioni-bloom" />. The audit covered equipment manufacturing, training compute, and dynamic grid intensity during training, and arrived at approximately 25 tonnes of CO₂e for training (plus a comparable number for inference during the paper's measurement period). The audit remains unusual for its depth: most frontier-model training runs are not audited this carefully in public.
+
+**Luccioni, Jernite and Strubell 2024.** The first large-scale measurement of inference energy across production-scale models<Cite id="luccioni-inference" />. Key findings: text-generation tasks are much more energy-intensive than classification; model size matters more than task type on the generation side; inference energy scales super-linearly with context length.
+
+**IEA 2024.** The International Energy Agency's forecast of data-centre electricity consumption<Cite id="iea-report" />. The report notes that AI, cryptocurrency and traditional data-centre workloads together could consume between 620 and 1,050 TWh in 2026, up from an estimated 460 TWh in 2022. The uncertainty range is wide because the data centre operators do not report workload breakdown.
+
+<Evidence kind="interpretation">
+The pattern across studies: training energy for a given model is now measurable to within a factor of 2-3 by anyone with sufficient access; inference energy is harder to measure because it depends on user behaviour and deployment choices that providers do not routinely disclose; and aggregate industry-level consumption is uncertain by at least a factor of 2 at the time of writing.
+</Evidence>
+
+## What is harder to measure
+
+Three costs are routinely under-reported in the headline numbers.
+
+**Embodied emissions.** The manufacture of GPUs, servers and data-centre infrastructure carries carbon emissions that amortise over the life of the hardware. For frontier-scale deployments with rapid hardware refresh cycles, these are not negligible. The Luccioni BLOOM audit is one of the few public estimates that includes them; most training-run estimates do not.
+
+**Water.** Data centres consume water for cooling. Li et al. (2023) estimated that training GPT-3 directly consumed roughly 700,000 litres of clean fresh water, and that inference for 10-50 prompts might consume on the order of 500ml<Cite id="water" />. Water is grid-independent: solar-powered data centres consume water at a rate determined by the local climate and cooling design, not by the carbon intensity of the electricity.
+
+**Grid-level effects.** When a data centre draws power from the local grid, its demand can shift which generators are dispatched. In many grids this means a solar-labelled data centre causes additional fossil-fuel generation elsewhere. Lifecycle emissions accounting that uses location-and-hour-matched grid data is more honest than averages over a year.
+
+## A note on comparisons
+
+The industry's favourite comparisons — "equivalent to X car-years" or "same as powering N homes" — are rhetorically useful and analytically weak. They assume units of energy and emissions are fungible in ways that policy and infrastructure make them less so.
+
+Three healthier framings are available.
+
+- **Share of local grid.** Data-centre electricity as a fraction of a region's total consumption. In Ireland, this crossed 20% in 2023; in Virginia, it is projected to reach similar levels by the late 2020s.
+- **Marginal grid intensity.** The emissions of the next kilowatt-hour added to the grid, which may be much higher than the average, especially during peak demand.
+- **Price signal.** The electricity price paid by data centres, which affects both their location choice and the pressure they put on local consumers.
+
+## Where the uncertainty actually bites
+
+Three questions have no good public answer at the time of writing.
+
+**How much inference happens.** Frontier model providers do not publish query volumes. Independent estimates vary by factor of 5 or more. Without this number, aggregate inference emissions estimates are necessarily wide.
+
+**How efficient inference will become.** Quantisation, mixture-of-experts routing, speculative decoding and other techniques have cut inference cost per token by roughly an order of magnitude between 2022 and 2025. Whether this trend continues or saturates is one of the determinative questions for projections.
+
+**Rebound effects.** Cheaper inference increases demand (induced-demand economics). A model that uses 10× less energy per query and is used 100× as often has 10× the total impact. Jevons-paradox arguments have been made in several analyses, with mixed support in the data.
+
+## What a careful reader should take away
+
+- Training energy for frontier models is now measurable in rough terms; comparing numbers requires knowing hardware, grid, and whether embodied emissions are included.
+- Inference energy per query is small; aggregated across deployment it typically exceeds training within months.
+- Water and grid-level effects are routinely under-reported in headline emission numbers.
+- Industry-wide projections (IEA, grid operators) agree on the direction of travel — up — and disagree on magnitude by factor-of-2 ranges.
+
+<Evidence kind="open">
+If a growing fraction of the world's electricity is going to inference, what should regulators be measuring, and who should they be asking? The current reporting standards were designed around training runs that providers chose to publish. Inference, by its distributed nature, is harder to audit, and the industry has not converged on a standard for reporting it.
+</Evidence>

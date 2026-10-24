@@ -1,0 +1,103 @@
+---
+title: "The AI benchmark problem: Goodhart's law in a leaderboard age"
+dek: Benchmarks have driven most of the field's progress and most of its hype cycles. The gap between what benchmarks measure and what they are read to measure is now large enough to matter.
+type: commentary
+category: artificial-intelligence
+tags: [benchmarks, evaluation, Goodhart's law, large language models]
+authors: [editors]
+publishDate: 2026-10-12
+sample: true
+cover: hypotheses
+openQuestion: "What would a benchmark that cannot be gamed look like, and would anyone agree it was fair?"
+aiAssistance: Sample long-form commentary drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with domain expertise.
+references:
+  - id: strathern
+    text: "Strathern, M. (1997). 'Improving ratings': Audit in the British university system. European Review, 5(3), 305–321."
+    doi: "10.1017/S1062798700002660"
+  - id: mmlu
+    text: "Hendrycks, D., Burns, C., Basart, S. et al. (2021). Measuring massive multitask language understanding. International Conference on Learning Representations 2021."
+  - id: contamination
+    text: "Sainz, O., Campos, J.A., García-Ferrero, I. et al. (2023). NLP evaluations on in-context learning: Did ChatGPT already see your dataset? Findings of EMNLP 2023."
+  - id: holistic
+    text: "Liang, P., Bommasani, R., Lee, T. et al. (2023). Holistic evaluation of language models. Transactions on Machine Learning Research."
+  - id: raji-crit
+    text: "Raji, I.D., Bender, E.M., Paullada, A., Denton, E. & Hanna, A. (2021). AI and the everything in the whole wide world benchmark. Advances in Neural Information Processing Systems 34, Datasets and Benchmarks Track."
+---
+
+This is **commentary**: a reasoned argument, signed by its editors. The argument is that AI benchmarks have been simultaneously the most productive and the most misleading tool in the field's recent history, and that reading them well now requires separating three questions that benchmark marketing conflates: *what the benchmark measures*, *what it claims to measure*, and *what readers hear*.
+
+## A short history, so the critique has somewhere to stand
+
+Benchmarks have driven most of the measurable progress in machine learning since 2012. ImageNet made computer vision legible. GLUE and SuperGLUE made natural language understanding measurable. The MMLU benchmark<Cite id="mmlu" />, released in 2021, became the yardstick for language-model knowledge; its 57 subjects range from elementary mathematics to professional law to high school biology.
+
+The pattern of use is familiar. A benchmark is proposed. Early models score poorly. Research effort concentrates on the benchmark; scores rise. At some point the leaderboard saturates — the gap between the top model and human performance narrows to within measurement noise — and a new, harder benchmark is proposed. The cycle has produced genuine, measurable progress on tasks the field agrees matter.
+
+It has also produced three durable problems.
+
+## Problem one: Goodhart's law
+
+Strathern's 1997 paraphrase of the economist Charles Goodhart is the sentence to memorise: *"When a measure becomes a target, it ceases to be a good measure."*<Cite id="strathern" />. The pattern is now so routine in AI that the field has invented its own vocabulary for it.
+
+- **Teaching to the test.** When a benchmark becomes the primary training target — not just a measurement — the model learns the benchmark's shortcuts rather than the underlying skill. The score rises; the generalisation to real tasks does not.
+- **Overfitting the leaderboard.** Submissions tune to the specific evaluation protocol — prompt format, answer parser, scoring threshold — rather than the task.
+- **Specification gaming.** The model exploits a weakness in the benchmark's design. On a math test with multiple choice, a model that always picks the longest answer scores above chance. On an open-ended coding benchmark, a model that returns deterministic placeholders may hit a surprising fraction of unit tests.
+
+Each of these looks like progress on the metric and often shows up as regression on anything that matters. The gap between the two is not a bug in the field, it is the shape of what happens when any population of researchers works on any shared score.
+
+## Problem two: contamination
+
+The second problem has sharpened in the LLM era. A benchmark is usually a text file: questions, answers, and sometimes evaluation code. Any such file is likely to have been scraped into the training corpus of a frontier model. If the model has seen the benchmark during training, "performance on the benchmark" measures recall, not skill.
+
+Sainz and colleagues (2023) catalogued contamination across major LLM benchmarks and found that most popular evaluations overlap with the training sets of widely used open-weight models<Cite id="contamination" />. The overlap matters: on contaminated examples the models score much higher than on paired examples designed to be similar but unseen.
+
+<Evidence kind="established">
+Benchmark contamination is now a documented and routine issue in LLM evaluation. Serious evaluations include contamination controls — either by using held-out examples released after the model's training cutoff, or by paraphrasing benchmark items to test the same skill without the exact text.
+</Evidence>
+
+Contamination is hard to rule out completely. Even if a benchmark is new, it may use publicly available materials (textbooks, exams, forums) that overlap with pretraining data in subtle ways. The honest version of a benchmark report says what it did about contamination and leaves the rest to the reader's judgement.
+
+## Problem three: construct validity
+
+A deeper problem than either Goodhart or contamination: the gap between what a benchmark *measures* and what it is *read as measuring*.
+
+Raji and colleagues' 2021 critique of general-purpose benchmarks is the clearest version of this argument<Cite id="raji-crit" />. Their point is that benchmarks typically operationalise an abstract concept — "intelligence", "reasoning", "common sense" — through a specific set of questions. The leap from "high score on these questions" to "has the thing we are trying to measure" is almost never justified. When product marketing talks about a model's "reasoning ability" based on a benchmark score, it is making a philosophical claim backed by a dataset.
+
+Three symptoms of the construct-validity problem are worth naming.
+
+- **Benchmark-task mismatch.** A benchmark tests multiple-choice question answering; the user cares about writing a coherent essay. The benchmark score correlates with essay quality in some populations and not in others.
+- **The leaderboard is not the population.** The population of real users is enormously more diverse than the questions on any benchmark. Scoring well on the benchmark says the model handles those specific questions; it says less about the long tail of actual use.
+- **The 90-percent trap.** When a benchmark is 90% saturated, the remaining 10% is often the hardest and most unrepresentative part of the test. The gap between 90 and 95 may reflect improvement on edge cases that do not matter to users.
+
+<Evidence kind="interpretation">
+The best current large-scale evaluation framework is HELM<Cite id="holistic" />, which tries to address construct validity by running many benchmarks across many dimensions (accuracy, robustness, fairness, efficiency, bias, toxicity). It is better than any single leaderboard. It is still a composite of imperfect measures.
+</Evidence>
+
+## How to read a benchmark number
+
+Four questions worth asking of any benchmark headline, in roughly the order of importance.
+
+**1. What is being measured, precisely?** Not "reasoning", not "intelligence". The specific task, the question format, the answer format, the scoring rule. If the model is being asked to pick A, B, C or D, say so. If it is being asked to generate code that passes unit tests, say that. These are different claims about different skills.
+
+**2. What is the baseline?** A number is only a comparison. "95% on X" means something only in the context of what random chance scores, what the previous state of the art scored, and what humans score. Benchmarks that do not report their baselines are missing the thing a reader needs.
+
+**3. What did the authors do about contamination?** For LLMs this is the single question that most moves the apparent score. The honest answer forms range from "we used examples released after the training cutoff" (strong) to "the benchmark is public but the model's training cutoff predates it" (weak) to "we did not check" (not enough).
+
+**4. What does the benchmark not measure?** Every benchmark has a scope. A model that scores 100% on a math-reasoning benchmark may still fabricate citations, drift from a conversation's thread, or produce unsafe outputs. The score bounds nothing outside its scope.
+
+## The direction of travel
+
+Three ways the field is improving on the benchmark problem:
+
+- **Dynamic benchmarks.** Benchmarks that are updated as models catch up, with new questions generated regularly and old ones retired. BIG-Bench and SWE-Bench Verified are early examples.
+- **Human-in-the-loop evaluation.** Public arenas where users rate model responses in head-to-head comparisons. These sidestep the dataset-contamination problem but introduce their own biases toward longer, more confident-sounding responses.
+- **Task-grounded evaluation.** Measurement on tasks that have external criteria for success — unit tests passing, formal proofs checking, code compiling. These are the strongest guards against gaming, at the cost of being narrower.
+
+Each has limits. The underlying tension does not go away: as long as a benchmark is a measure, the pressure to turn it into a target is there.
+
+## A short closing argument
+
+The best use of benchmarks is as *tripwires*, not as *medals*. A model that scores poorly on a well-designed benchmark probably has a specific weakness worth investigating. A model that scores well on a saturated benchmark has mostly told us that the benchmark is saturated. The second kind of result generates headlines; the first kind generates progress.
+
+<Evidence kind="open">
+What would a benchmark that cannot be gamed look like, and would anyone agree it was fair? The two goals are in tension: an ungameable benchmark is probably one in which the task is adversarially specified against the model's prior, and such benchmarks are often judged "unfair" by whoever's model does worst. The field has no stable answer.
+</Evidence>
