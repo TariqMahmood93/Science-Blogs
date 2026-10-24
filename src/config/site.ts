@@ -24,7 +24,6 @@ export const nav = [
   { label: 'Research Ideas', href: '/type/research-idea/', icon: 'idea' },
   { label: 'Questions', href: '/questions/', icon: 'question' },
   { label: 'Discoveries', href: '/type/research-discovery/', icon: 'discovery' },
-  { label: 'Future & Society', href: '/topics/future-society/', icon: 'future' },
   { label: 'About', href: '/about/', icon: 'about' },
 ] as const;
 
