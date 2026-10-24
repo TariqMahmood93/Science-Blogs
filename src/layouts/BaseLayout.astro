@@ -2,6 +2,7 @@
 import '@fontsource-variable/schibsted-grotesk';
 import 'katex/dist/katex.min.css';
 import '../styles/global.css';
+import BackLink from '../components/BackLink.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../config/site';
@@ -74,6 +75,7 @@ const ld = [orgLd, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [])]
       <Header />
       <div class="content">
         <main id="main" tabindex="-1" data-pagefind-body={pagefind ? '' : undefined}>
+          <BackLink />
           <slot />
         </main>
         <Footer />

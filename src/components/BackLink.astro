@@ -1,0 +1,38 @@
+---
+// Back link rendered at the top of the main content area. The server-rendered
+// element is hidden; it only becomes visible when the client has history to
+// pop back to (either history.length > 1 or a same-origin referrer).
+---
+<div class="backlink-wrap">
+  <button class="backlink" type="button" data-main-back aria-label="Go back" hidden>
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M12 4 6 10l6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Back</span>
+  </button>
+</div>
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-main-back]');
+  if (btn) {
+    const sameOriginReferrer = (() => {
+      try { return !!document.referrer && new URL(document.referrer).origin === location.origin; }
+      catch { return false; }
+    })();
+    if (history.length > 1 || sameOriginReferrer) {
+      btn.hidden = false;
+      btn.addEventListener('click', () => history.back());
+    }
+  }
+</script>
+<style>
+  .backlink-wrap { padding: var(--space-m) var(--gutter) 0; }
+  .backlink {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    min-height: 2.25rem; padding: 0.4rem 0.75rem 0.4rem 0.5rem;
+    background: transparent; color: var(--ink-2); border: 1px solid var(--rule);
+    border-radius: 999px;
+    font: 500 var(--step--1) / 1 var(--font-sans); cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+  .backlink:hover { color: var(--ink); border-color: var(--rule-strong); background: var(--panel); }
+  .backlink:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .backlink[hidden] { display: none; }
+</style>

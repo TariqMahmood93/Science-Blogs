@@ -11,7 +11,7 @@ const articles = await getPublishedArticles();
 const types = (await getContentTypes()).filter((t) => articles.some((a) => a.data.type.id === t.id));
 const topics = (await getCategories()).filter((c) => articles.some((a) => a.data.category.id === c.id));
 ---
-<BaseLayout title="All articles" description="Every article in The Research Frontier, filterable by type and topic.">
+<BaseLayout title="All articles" description="Every article, filterable by type and topic.">
   <ListingHeader title="All articles" intro="Everything we have published, newest first. Narrow it down by the kind of claim an article makes, or by topic." />
   <div class="wrap">
     <div class="toolbar" data-afilters hidden>
