@@ -1,0 +1,174 @@
+---
+// Interactive Goodhart demonstration. The user chooses how much pressure to
+// put on a benchmark. "Benchmark score" rises monotonically with pressure.
+// "Underlying skill" rises at first, then falls as the model learns the
+// benchmark's shortcuts instead of the task. Shows the gap opening up.
+
+interface Props { id?: string }
+const { id = 'bench' } = Astro.props;
+---
+<figure class="fig" aria-labelledby={`${id}-cap`}>
+  <div class="fig-head">
+    <h3>Interactive: Goodhart's law on a benchmark leaderboard</h3>
+    <p class="fig-sub">A single leaderboard concentrates research effort on a benchmark. For a while the leaderboard reflects skill on the underlying task. At some point optimising the measure stops producing progress on the task — the gap is what Goodhart's law describes. Drag the slider to see where that happens on a schematic curve.</p>
+  </div>
+  <div class="plot" data-bench-plot={id}>
+    <svg viewBox="0 0 600 320" aria-hidden="true" focusable="false">
+      <g class="grid">
+        <line x1="60" y1="30" x2="60" y2="280" />
+        <line x1="60" y1="280" x2="580" y2="280" />
+        <line x1="60" y1="92" x2="580" y2="92" class="dash" />
+        <line x1="60" y1="155" x2="580" y2="155" class="dash" />
+        <line x1="60" y1="217" x2="580" y2="217" class="dash" />
+      </g>
+      <path class="curve bench" data-bench-curve d="" />
+      <path class="curve skill" data-skill-curve d="" />
+      <!-- vertical marker and spot markers for current pressure -->
+      <line class="marker" data-marker x1="60" y1="30" x2="60" y2="280" />
+      <circle class="dot dot-b" data-dot-bench cx="60" cy="280" r="5" />
+      <circle class="dot dot-s" data-dot-skill cx="60" cy="280" r="5" />
+      <g class="labels">
+        <text x="320" y="310" text-anchor="middle">Benchmark pressure (research effort per unit of task progress)</text>
+        <text x="20" y="155" text-anchor="middle" transform="rotate(-90, 20, 155)">Score (normalised)</text>
+        <text x="60" y="296" text-anchor="middle">Low</text>
+        <text x="580" y="296" text-anchor="middle">High</text>
+        <text x="52" y="284" text-anchor="end">0</text>
+        <text x="52" y="155" text-anchor="end">0.5</text>
+        <text x="52" y="34" text-anchor="end">1</text>
+      </g>
+    </svg>
+    <div class="legend" aria-hidden="true">
+      <span class="k bench"></span><span>Benchmark score (the measure)</span>
+      <span class="k skill"></span><span>Underlying task skill (what we care about)</span>
+    </div>
+    <div class="control">
+      <label>
+        <span class="ctrl-label">Pressure on the benchmark <output data-p-out>0.0×</output></span>
+        <input type="range" min="0" max="100" value="20" step="1" data-pressure />
+      </label>
+      <dl class="stats" aria-live="polite">
+        <div><dt>Benchmark score</dt><dd data-bval>—</dd></div>
+        <div><dt>Underlying skill</dt><dd data-sval>—</dd></div>
+        <div><dt>Gap</dt><dd data-gval>—</dd></div>
+      </dl>
+      <p class="status meta" data-bench-status></p>
+    </div>
+  </div>
+  <figcaption id={`${id}-cap`} class="fig-cap">Schematic. The specific shape is illustrative: real benchmarks differ in how fast the gap opens, how steeply the benchmark score saturates and whether skill eventually recovers (sometimes it does, through better benchmarks). The qualitative point — that score and skill diverge once a measure becomes a target — is what Strathern distilled from Goodhart.</figcaption>
+</figure>
+
+<script define:vars={{ id }}>
+  (function () {
+    const root = document.querySelector(`[data-bench-plot="${id}"]`);
+    if (!root) return;
+    const svg = root.querySelector('svg');
+    const input = root.querySelector('[data-pressure]');
+    const pOut = root.querySelector('[data-p-out]');
+    const bVal = root.querySelector('[data-bval]');
+    const sVal = root.querySelector('[data-sval]');
+    const gVal = root.querySelector('[data-gval]');
+    const statusOut = root.querySelector('[data-bench-status]');
+    const marker = svg.querySelector('[data-marker]');
+    const dotB = svg.querySelector('[data-dot-bench]');
+    const dotS = svg.querySelector('[data-dot-skill]');
+    const benchPath = svg.querySelector('[data-bench-curve]');
+    const skillPath = svg.querySelector('[data-skill-curve]');
+
+    const X0 = 60, X1 = 580, Y0 = 280, Y1 = 30;
+    const toX = (p) => X0 + p * (X1 - X0);
+    const toY = (v) => Y0 - v * (Y0 - Y1);
+
+    // Benchmark: a saturating curve, 1 - exp(-k x).
+    const benchScore = (p) => 1 - Math.exp(-3.2 * p);
+    // Underlying skill: rises along with benchmark early, then falls back as
+    // the model learns the measure instead of the task. A quadratic hump.
+    const skillScore = (p) => {
+      const rise = 1 - Math.exp(-3.2 * p);
+      // After p ~0.45 the overfit term starts pulling skill back down.
+      const overfit = Math.max(0, (p - 0.45)) ** 2 * 2.2;
+      return Math.max(0, rise - overfit);
+    };
+
+    const buildPath = (fn) => {
+      let d = '';
+      for (let i = 0; i <= 100; i++) {
+        const p = i / 100;
+        d += (i === 0 ? 'M' : ' L') + toX(p).toFixed(1) + ' ' + toY(fn(p)).toFixed(1);
+      }
+      return d;
+    };
+
+    benchPath.setAttribute('d', buildPath(benchScore));
+    skillPath.setAttribute('d', buildPath(skillScore));
+
+    const update = () => {
+      const p = Number(input.value) / 100;
+      const b = benchScore(p);
+      const s = skillScore(p);
+      pOut.textContent = p.toFixed(2) + '×';
+      bVal.textContent = b.toFixed(2);
+      sVal.textContent = s.toFixed(2);
+      gVal.textContent = (b - s).toFixed(2);
+      const x = toX(p);
+      marker.setAttribute('x1', String(x));
+      marker.setAttribute('x2', String(x));
+      dotB.setAttribute('cx', String(x));
+      dotB.setAttribute('cy', String(toY(b)));
+      dotS.setAttribute('cx', String(x));
+      dotS.setAttribute('cy', String(toY(s)));
+      statusOut.textContent = p < 0.3
+        ? 'Early effort — benchmark and underlying skill rise together.'
+        : p < 0.55
+          ? 'Diminishing returns start to show on the benchmark; skill still tracks it.'
+          : p < 0.8
+            ? 'The gap opens: more effort still raises the benchmark but no longer the underlying skill.'
+            : 'Benchmark saturated. Additional effort moves the measure but regresses on the task.';
+    };
+
+    input.addEventListener('input', update);
+    update();
+  })();
+</script>
+
+<style>
+  .fig { margin: var(--space-l) 0; display: grid; gap: var(--space-xs); }
+  .fig-head h3 { font-size: var(--step-1); font-weight: 650; letter-spacing: -0.01em; margin: 0; }
+  .fig-sub { font-size: var(--step--1); color: var(--ink-2); line-height: 1.5; margin: 0.35rem 0 0; }
+  .fig-cap { font-size: var(--step--1); color: var(--ink-2); line-height: 1.5; margin-top: var(--space-2xs); }
+  .plot {
+    display: grid; gap: var(--space-xs);
+    padding: var(--space-m);
+    border: 1px solid var(--rule); border-radius: var(--radius-m);
+    background: var(--panel);
+  }
+  .plot svg { width: 100%; height: auto; display: block; }
+  .grid line { stroke: var(--rule-strong); stroke-width: 1; opacity: 0.6; }
+  .grid .dash { stroke: var(--rule); stroke-dasharray: 2 4; }
+  .labels text { fill: var(--ink-2); font: 500 11px / 1 var(--font-sans); font-feature-settings: 'tnum'; }
+  .curve { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .bench { stroke: var(--accent); }
+  .skill { stroke: var(--tone-established); }
+  .marker { stroke: var(--ink-2); stroke-dasharray: 2 3; }
+  .dot { stroke-width: 2; stroke: var(--paper); }
+  .dot-b { fill: var(--accent); }
+  .dot-s { fill: var(--tone-established); }
+  .legend {
+    display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 0.6rem;
+    font-size: var(--step--1); color: var(--ink-2); align-items: center;
+  }
+  .legend .k { width: 22px; height: 3px; border-radius: 2px; }
+  .legend .k.bench { background: var(--accent); }
+  .legend .k.skill { background: var(--tone-established); }
+  .control label { display: grid; gap: 0.35rem; font-size: var(--step--1); font-weight: 600; }
+  .control input[type='range'] { width: 100%; accent-color: var(--accent); }
+  .ctrl-label { display: flex; justify-content: space-between; }
+  .control output { font-weight: 500; color: var(--ink-2); font-feature-settings: 'tnum'; }
+  .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem var(--space-s);
+    margin: var(--space-xs) 0 0;
+  }
+  .stats div { display: grid; }
+  .stats dt { font-weight: 600; color: var(--ink-2); font-size: var(--step--1); }
+  .stats dd { margin: 0; font-feature-settings: 'tnum'; font-size: var(--step-0); }
+  .status { margin: 0; font-style: italic; font-size: var(--step--1); }
+</style>

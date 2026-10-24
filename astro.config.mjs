@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { unified } from '@astrojs/markdown-remark';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import remarkCite from './src/lib/remark-cite.mjs';
 import { readdirSync, readFileSync } from 'node:fs';
 
@@ -25,7 +27,8 @@ export default defineConfig({
     sitemap({ filter: (page) => !excluded.some((p) => page.endsWith(p)) && !page.includes('/search/') && !page.includes('/tags/') }),
   ],
   markdown: {
-    processor: unified({ remarkPlugins: [remarkCite] }),
+    processor: unified({ remarkPlugins: [remarkCite, remarkMath] }),
+    rehypePlugins: [rehypeKatex],
     shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' } },
   },
 });

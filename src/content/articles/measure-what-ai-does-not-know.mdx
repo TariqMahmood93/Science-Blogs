@@ -28,6 +28,8 @@ references:
     text: "Ovadia, Y., Fertig, E., Ren, J. et al. (2019). Can you trust your model's uncertainty? Evaluating predictive uncertainty under dataset shift. Advances in Neural Information Processing Systems 32."
 ---
 
+import CalibrationExplorer from '../../components/figures/CalibrationExplorer.astro';
+
 When a weather forecast says 70% chance of rain, we can check it: on days given that forecast, it should rain about seven times in ten. That property is called **calibration**, and it is the simplest formal answer to the question of whether a model knows what it does not know. Everything else in this piece is either a refinement of that idea or a response to its limits.
 
 ## Two kinds of not knowing
@@ -46,21 +48,23 @@ The distinction matters because the two call for different responses. If a syste
 
 ## Calibration, explained
 
-A model is **well-calibrated** if, among all the predictions it makes with confidence `p`, the fraction that turn out correct is also roughly `p`. The classical measure is the **reliability diagram**: bucket predictions by confidence, plot the fraction correct in each bucket against the bucket's confidence, and look at how close the curve is to the diagonal.
+A model is **well-calibrated** if, among all the predictions it makes with confidence $p$, the fraction that turn out correct is also roughly $p$. The classical measure is the **reliability diagram**: bucket predictions by confidence, plot the fraction correct in each bucket against the bucket's confidence, and look at how close the curve is to the diagonal.
+
+<CalibrationExplorer />
 
 Two numbers condense a reliability diagram:
 
-- **Expected Calibration Error (ECE)** is the average gap between predicted confidence and empirical accuracy, weighted by the number of examples in each bucket. In outline:
+- **Expected Calibration Error (ECE)** is the average gap between predicted confidence and empirical accuracy, weighted by the number of examples in each bucket:
 
-```text
-for each confidence bin:
-    gap = |accuracy_in_bin - mean_confidence_in_bin|
-    ece += (examples_in_bin / total) * gap
-```
+$$
+\mathrm{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N} \,\left| \mathrm{acc}(B_m) - \mathrm{conf}(B_m) \right|,
+$$
 
-- **Brier score**<Cite id="brier" /> is the mean squared error between the predicted probability and the one-hot outcome. It mixes calibration and sharpness: a model can lower it by being either better-calibrated or more decisive.
+where $B_m$ is the set of examples in confidence bin $m$, $|B_m|$ is its size, $N$ is the total number of examples, and $\mathrm{acc}$ and $\mathrm{conf}$ are the empirical accuracy and the mean predicted confidence in that bin.
 
-Guo and colleagues' 2017 study showed that modern deep networks, trained with cross-entropy, tend to be *over-confident* — the empirical accuracy at 99% predicted confidence is often closer to 90%<Cite id="guo-calibration" />. The same paper documented that a simple post-hoc technique called **temperature scaling** — dividing the logits by a scalar fitted on a validation set — restores calibration in most image classifiers at essentially no cost. The improvement is cheap enough that there is now little excuse for shipping an uncalibrated classifier.
+- **Brier score**<Cite id="brier" /> is the mean squared error between the predicted probability and the one-hot outcome, $\mathrm{BS} = \frac{1}{N}\sum_i (p_i - y_i)^2$. It mixes calibration and sharpness: a model can lower it by being either better-calibrated or more decisive.
+
+Guo and colleagues' 2017 study showed that modern deep networks, trained with cross-entropy, tend to be *over-confident* — the empirical accuracy at 99% predicted confidence is often closer to 90%<Cite id="guo-calibration" />. The same paper documented that a simple post-hoc technique called **temperature scaling** — dividing the logits by a scalar $T$ fitted on a validation set, so $p_i = \mathrm{softmax}(z_i/T)$ — restores calibration in most image classifiers at essentially no cost. The interactive chart above lets you try it: moving $T$ above $1$ pulls the overconfident bins down toward the diagonal; moving it below $1$ pushes them further off.
 
 ## Methods for epistemic uncertainty
 
