@@ -1,0 +1,139 @@
+---
+title: What is missing data, and why does it matter?
+dek: Every real dataset has holes. Understanding what caused each hole — not just filling it — is the difference between a model that works for everyone and one that quietly serves some groups better than others.
+type: scientific-explainer
+category: artificial-intelligence
+tags: [missing data, statistics, imputation, data quality]
+authors: [editors]
+publishDate: 2026-10-23
+editorsPick: true
+sample: true
+cover: data-gaps
+openQuestion: "If a value's absence is itself informative, when is it right to replace it with a plausible number — and when is replacing it the mistake?"
+related: [missing-data-unfair-ai]
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with domain expertise.
+references:
+  - id: rubin1976
+    text: "Rubin, D.B. (1976). Inference and missing data. Biometrika, 63(3), 581–592."
+    doi: "10.1093/biomet/63.3.581"
+  - id: little-rubin
+    text: "Little, R.J.A. & Rubin, D.B. (2019). Statistical Analysis with Missing Data, 3rd edition. Wiley."
+  - id: van-buuren
+    text: "van Buuren, S. (2018). Flexible Imputation of Missing Data, 2nd edition. CRC Press."
+  - id: enders
+    text: "Enders, C.K. (2022). Applied Missing Data Analysis, 2nd edition. Guilford Press."
+  - id: alfano-senti
+    text: "Alfano, G., Greco, S., La Cava, L., Mahmood, T. & Trubitsyna, I. (2026). Semantic-aware data imputation in dynamic relational databases via pre-trained language models. Information Fusion, 133, 104291."
+    doi: "10.1016/j.inffus.2026.104291"
+---
+
+Open any real dataset and you will find holes. A questionnaire with a blank line. A sensor that dropped out during a storm. A medical record missing the test result that was ordered but never delivered. A spreadsheet column where some rows just say *NA*.
+
+**Missing data** is any value that *should* be in a dataset — because the measurement was taken, or should have been taken — but is absent. It is almost universal in applied statistics, and the way we handle it decides whether downstream analyses hold up or quietly go wrong. This article walks through what missing data is, why it happens, how statisticians classify it, and the small but consequential vocabulary — **MCAR**, **MAR** and **MNAR** — that organises nearly every method people use to deal with it.
+
+## A sharper definition
+
+Formally, a dataset is a table whose rows are observations and whose columns are variables. Each cell is a value. A cell is **missing** if the true value exists in the world (or the system of interest) but is not recorded in the data. In notation, we often write $Y = (Y_\text{obs}, Y_\text{mis})$ to split the full data into the part we see and the part we don't, and introduce an indicator matrix $R$ whose entries are 1 where values are observed and 0 where they are missing<Cite id="rubin1976" />.
+
+Two things follow from this definition that newcomers often miss.
+
+- **Missingness is a property of a cell, not a column.** The same column (say, income) can have missing values in some rows and not others.
+- **Missing is not the same as "zero" or "unknown".** A customer with no purchases in the last quarter has zero purchases; that is a value, not a hole. A patient whose blood test was ordered but lost on the way to the lab has a missing value.
+
+## A quick tour of where holes come from
+
+The sources of missingness in practice fall into a handful of patterns:
+
+- **Non-response.** Someone chose not to answer a question on a survey, or missed the follow-up call.
+- **Attrition.** A participant in a long study dropped out, so their later measurements are unavailable.
+- **Instrument failure.** A sensor went offline, a test tube broke, a form field didn't load on a mobile device.
+- **Design-level skipping.** A questionnaire asks "if yes, continue; if no, skip to Q7". The skipped questions are missing by design.
+- **Data pipeline loss.** A record was deleted during a merge, a system clock reset dropped timestamps, a schema change left old rows with new empty columns.
+- **Censoring.** We know the measurement is above or below a threshold but not its exact value (common in survival analysis and in sensor saturation).
+
+Different causes have different consequences, which is why the next distinction matters.
+
+## The three missingness mechanisms
+
+In 1976 Donald Rubin introduced the vocabulary the field still uses<Cite id="rubin1976" />. Each missing value has a **missingness mechanism** — a story about *why* it is missing — and the mechanism controls which methods are safe. The three categories are:
+
+### MCAR: Missing Completely At Random
+
+A value is **MCAR** if the probability of being missing does not depend on anything, observed or unobserved:
+
+$$
+P(R = 0 \mid Y_\text{obs}, Y_\text{mis}) = P(R = 0).
+$$
+
+In words: the holes are scattered as if by a coin flip. Dropping the incomplete rows gives an unbiased, if smaller, sample.
+
+**Real example.** A laboratory assays a thousand blood samples. During processing, a random 2% of samples are accidentally spilled on the floor by a lab technician moving between stations. The spills have nothing to do with the samples themselves — not with the patient, not with the measured value, not with anything we recorded. The resulting missingness is MCAR.
+
+**Why it is rare.** True MCAR requires that nothing — not the person, not the measurement, not the time of day — correlates with the chance of being missing. In the real world, this is almost never exactly true. The *technician's bad day* might coincide with afternoon samples, which may differ systematically from morning ones. MCAR is often a useful approximation; it is rarely the exact truth.
+
+### MAR: Missing At Random
+
+A value is **MAR** if the probability of being missing depends on observed variables but not on the missing value itself:
+
+$$
+P(R = 0 \mid Y_\text{obs}, Y_\text{mis}) = P(R = 0 \mid Y_\text{obs}).
+$$
+
+In words: once you condition on what you have, the gaps are random. The name is misleading — MAR missingness is *not* random in general, only conditionally so.
+
+**Real example.** In a workplace salary survey, older employees skip the "do you understand this new benefits portal?" question more often than younger ones. The reason correlates with *age*, which is recorded for every employee. Among employees of the same age, the probability of skipping is roughly constant. The missingness is MAR with respect to age.
+
+**Why MAR matters.** Most modern imputation methods — multiple imputation, maximum likelihood with the EM algorithm, chained-equation models — are *valid* under MAR. If MAR holds, you can recover unbiased estimates of population quantities by using the observed variables to model the missing ones<Cite id="little-rubin" />.
+
+### MNAR: Missing Not At Random
+
+A value is **MNAR** if the probability of being missing depends on the missing value itself (or on something we did not record):
+
+$$
+P(R = 0 \mid Y_\text{obs}, Y_\text{mis}) \ne P(R = 0 \mid Y_\text{obs}).
+$$
+
+In words: the holes carry a signal about the values that would have filled them. No model that uses only the observed data can fully correct for this without extra assumptions.
+
+**Real example.** In a household income survey, people with very high incomes refuse the income question more often than people with modest incomes, even after controlling for every other variable in the dataset. The probability of a missing income entry depends on income itself. The missingness is MNAR.
+
+A second common MNAR pattern: a chronic-illness patient misses follow-up visits precisely when the disease is getting worse. The missing lab values are correlated with the (unobserved) disease severity.
+
+**Why MNAR is hard.** You cannot test MAR against MNAR from the data alone — both can produce the same observed distribution. The only way out is extra information: a follow-up study, a known mechanism, a sensitivity analysis that tries different MNAR assumptions and reports how the conclusions change<Cite id="enders" />.
+
+<Evidence kind="established">
+The MCAR / MAR / MNAR vocabulary is standard across statistics, biostatistics, machine learning and the social sciences. The three types describe mechanisms rather than observable patterns; two of them (MAR and MNAR) are indistinguishable from the data alone and are told apart by argument about the data-generating process.
+</Evidence>
+
+## Why the distinction matters in practice
+
+If missing data is MCAR, dropping the incomplete rows (**complete-case analysis**) is unbiased but inefficient. If it is MAR, dropping rows is biased; proper multiple imputation or likelihood-based methods are. If it is MNAR, there is no automatic fix: honest analyses state the assumption, run the imputation under it, and then run a *sensitivity analysis* showing how much the conclusion would move under plausible alternative MNAR mechanisms.
+
+Three concrete consequences:
+
+- A clinical trial that drops every patient with a missing outcome from the final analysis assumes MCAR. If sicker patients drop out more, that assumption fails and the apparent treatment effect is inflated.
+- A fairness audit of a model trained on survey data assumes MAR when it imputes missing demographic variables from observed ones. If the people least likely to answer the demographic question also differ in the outcome in ways the covariates miss, the audit will understate disparities.
+- A real-time industrial monitoring system that interpolates across missing sensor readings is implicitly assuming MAR with respect to time. If the sensor dropped out *because* it saturated, that is MNAR and interpolation hides a signal.
+
+## How people handle missing data
+
+A short map of the toolbox<Cite id="van-buuren" /><Cite id="enders" />.
+
+- **Complete-case analysis** (listwise deletion). Drop any row with any missing value. Safe only under MCAR; otherwise biased.
+- **Single-value imputation.** Fill each hole once — with the column mean, the median, a nearest-neighbour value, or a model prediction. Cheap, but it compresses variance and tells the downstream analysis there is more certainty than there is.
+- **Multiple imputation (MI).** Fill the gaps $m$ times from a plausible distribution of the missing values, run the analysis on each imputed dataset, and combine results with Rubin's rules. Preserves uncertainty. The field's workhorse method under MAR.
+- **Likelihood-based methods.** Maximise the likelihood of the observed data directly, without filling in anything, via the EM algorithm or full-information maximum likelihood. Produces unbiased estimates under MAR.
+- **Pattern-mixture and selection models.** Explicit MNAR models that assume a form for the missingness mechanism. Powerful but assumption-heavy.
+- **Semantic and model-aware imputation.** Modern approaches use pre-trained language models or domain knowledge to fill in holes in relational and dynamic data, exploiting information that classical imputation cannot — for example, a recent paper on semantic-aware imputation in dynamic relational databases<Cite id="alfano-senti" />.
+
+## A short checklist for a careful analyst
+
+- **Report missingness explicitly.** How many rows have missing values? Which columns? Is the rate different across groups?
+- **State the assumption.** Is the method you chose valid under MCAR, MAR or MNAR? Which one are you assuming?
+- **Run a sensitivity analysis.** Especially for MNAR, show how the headline conclusion changes under reasonable alternative assumptions.
+- **Prefer multiple imputation when the analysis matters.** Single-value imputation gives the illusion of precision; MI preserves what you actually know.
+- **Audit by group.** Missingness rates often differ across sex, age, race or geography, and imputation can either smooth that out or amplify it.
+
+<Evidence kind="open">
+If a value's absence is itself informative — a patient who skips a visit because they are getting worse, an applicant who declines to state income because it is high — when is it right to replace it with a plausible number, and when is replacing it the mistake?
+</Evidence>
