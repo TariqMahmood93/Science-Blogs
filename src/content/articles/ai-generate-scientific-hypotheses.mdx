@@ -1,6 +1,6 @@
 ---
 title: Can AI generate scientific hypotheses rather than just answers?
-dek: Language models answer questions fluently. A harder test is whether they can propose testable hypotheses that experts judge both new and worth pursuing.
+dek: Language models answer questions fluently. A harder test is whether they can propose testable hypotheses that experts judge both new and worth pursuing — and that then survive being tested.
 type: research-idea
 category: philosophy-of-science
 tags: [scientific discovery, large language models, hypothesis generation, evaluation]
@@ -11,22 +11,44 @@ sample: true
 cover: hypotheses
 researchQuestion: Do hypotheses proposed by language models, given the same literature as a researcher, lead to tests that succeed more often than hypotheses chosen by simple baselines?
 related: [ai-discover-something-new]
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with domain expertise.
 references:
-  - id: hypothesis-gen-study
-    text: "To source: an existing study in which experts rated machine-generated research hypotheses for novelty and feasibility."
-  - id: novelty-metrics
-    text: "To source: work on measuring the novelty of scientific claims against prior literature."
+  - id: wang-hypotheses
+    text: "Wang, Q., Downey, D., Ji, H. & Hope, T. (2024). Scimon: Scientific inspiration machines optimised for novelty. arXiv:2305.14259."
+  - id: majumder-review
+    text: "Majumder, B.P., Surana, H., Agarwal, D. et al. (2024). Position: Data-driven discovery with large generative models. Proceedings of the ICML 2024 Position Paper Track."
+  - id: coscientist
+    text: "Boiko, D.A., MacKnight, R., Kline, B. & Gomes, G. (2023). Autonomous chemical research with large language models. Nature, 624, 570–578."
+    doi: "10.1038/s41586-023-06792-0"
+  - id: baseline-crit
+    text: "Si, C., Yang, D. & Hashimoto, T. (2024). Can LLMs generate novel research ideas? A large-scale human study with 100+ NLP researchers. arXiv:2409.04109."
+  - id: streetlight
+    text: "Kahneman, D. & Tversky, A. (1972). Subjective probability: A judgment of representativeness. Cognitive Psychology, 3, 430–454. On the drift from plausibility to representativeness in human judgement."
 ---
 
-This **research idea** proposes a question and a way to test it. It is a proposal, not a result.
+This is a **research idea**: a question, a hypothesis, a method and the two outcomes that would settle it. It is a proposal, not a result. The structure is deliberate: a research idea is only useful if someone could pick it up and run the experiment.
 
 ## Research question
 
-Do hypotheses proposed by language models, given the same literature as a researcher, lead to tests that succeed more often than hypotheses chosen by simple baselines?
+Do hypotheses proposed by a language model, given the same literature as a researcher, produce experiments that succeed more often than hypotheses chosen by simple baselines in the same field?
+
+The question is deliberately comparative. "Does a model generate good hypotheses?" is unfalsifiable without a baseline — any output can be called a success in the right light. Pinning the comparison to specific baselines makes the result tell us something either way.
 
 ## What is currently known
 
-Outline: summarise studies in which experts rated machine-generated hypotheses for novelty and plausibility<Cite id="hypothesis-gen-study" />. Note that ratings are not the same as experimental success.
+Interest in machine hypothesis generation goes back decades. Herbert Simon's BACON system in the 1980s rediscovered laws like Kepler's third law from clean numerical data. What is new is that the proposals can be stated in natural language, which both widens the range of fields where the approach applies and makes evaluation harder.
+
+Three recent lines of work matter for the question.
+
+First, several groups have shown that language models can **produce hypotheses rated novel by experts**. Wang and colleagues built a system that extracts "literature-driven" ideas and found that trained reviewers rated them more novel than human-written baselines in a biomedical setting<Cite id="wang-hypotheses" />. The Si et al. (2024) study ran a larger comparison with 100+ NLP researchers and reported that model-generated ideas were judged more novel but somewhat less feasible than ones written by their human peers<Cite id="baseline-crit" />.
+
+Second, a growing body of work closes the loop and **tests the proposals**. Boiko and colleagues built a "Coscientist" that proposed and then ran chemistry experiments autonomously, confirming several candidate reactions in a Suzuki-Miyaura coupling study<Cite id="coscientist" />. This is the harder evidence: proposals that actually hold under experiment.
+
+Third, several reviews now argue that **novelty ratings and success rates measure different things**, and that only running the proposals tells us which pipeline is really useful<Cite id="majumder-review" />.
+
+<Evidence kind="established">
+At the time of writing, there is good evidence that language models can produce hypotheses that trained reviewers rate as novel. The evidence that those hypotheses succeed more often than baselines when actually tested is thinner.
+</Evidence>
 
 ## Proposed hypothesis
 
@@ -34,27 +56,48 @@ Outline: summarise studies in which experts rated machine-generated hypotheses f
 Model-generated hypotheses will be rated as more novel than baselines but will not succeed more often when tested, because fluency rewards surprising combinations over well-grounded ones.
 </Evidence>
 
-## Rationale and supporting evidence
+The speculation above is a specific empirical claim. It can be wrong in at least three ways: model hypotheses may succeed more often; they may succeed about as often but on different problems; or the gap may depend sharply on the field. Each of these would be interesting; none would reduce the usefulness of running the experiment.
 
-Novelty is easy to produce by recombination; plausibility depends on knowledge of what has already failed, which is under-reported in the literature models learn from.
+## Rationale
+
+Two mechanisms motivate the specific prediction.
+
+**Novelty is cheap, plausibility is not.** A language model trained on text samples the distribution of what has been written. By recombining pieces of that distribution it can produce claims that have never been written down. But claims unprecedented in the literature are often unprecedented because they already failed quietly, and failures are under-reported.
+
+**Fluency rewards representativeness.** Experts rating hypothesis quality are reading short, well-structured text. In long traditions of judgement research, people conflate representativeness with probability<Cite id="streetlight" />. A hypothesis that sounds like what a bold researcher would say may score high on novelty without being any more likely to hold.
+
+If either mechanism is at work, we would expect the "novelty up, success flat" pattern. If neither is, we should see novelty and success rise together.
 
 ## Potential method
 
-1. Pick a field with cheap, fast experiments (for example a well-studied computational benchmark).
-2. Give a model and two baselines (random recombination of keywords; hypotheses mined from paper future-work sections) the same corpus.
-3. Have blinded experts rate a sample of each for novelty and feasibility<Cite id="novelty-metrics" />.
-4. Run the top-rated hypotheses from each source and record which hold.
+The study we would run has five steps.
+
+1. **Pick a field with cheap, fast experiments** so a reasonable number of hypotheses can actually be tested. Options include: synthetic routes in a well-stocked robotic chemistry lab; benchmark-level claims in machine learning (where a hypothesis can be tested by running a model); or materials prediction with downstream synthesis.
+2. **Define the baselines.** We propose two: (a) random recombination of keywords drawn from the field's recent literature, filtered for grammaticality; (b) hypotheses mined from the "future work" sections of papers published in the last two years. These correspond to a floor (nothing but recombination) and a ceiling (the field's own best guesses).
+3. **Equalise the inputs.** Give the model and the two baselines the same literature window — say, the field's last five years of accepted papers — and the same prompt.
+4. **Blinded expert rating.** Have at least five domain experts rate a stratified sample (say 20 hypotheses from each source) for novelty and feasibility, with inter-rater agreement reported. Blinding to source matters.
+5. **Run the top-rated hypotheses from each source** under the same experimental protocol. Pre-register the success criterion.
+
+The outcome measure is a two-by-two table: for each source, the rate at which top-rated hypotheses survive testing. Everything else is secondary.
 
 ## What would support or falsify it
 
-- **Support:** model hypotheses rated more novel, with success rates no higher than baselines.
-- **Falsify:** model hypotheses succeed significantly more often than both baselines.
+- **Support:** model hypotheses rated significantly more novel, with success rates no higher than baselines (ideally lower on at least one baseline).
+- **Falsify:** model hypotheses succeed significantly more often than *both* baselines, in the sense that the confidence interval on the difference excludes zero.
+
+A third, interesting outcome is partial: model and baseline success rates comparable, but the *kinds* of hypotheses that succeed differ. If so, the question changes from "which is better?" to "which complements which?".
 
 ## Limitations and alternative explanations
 
-- Results in one fast-feedback field may not transfer to slow, expensive sciences.
-- Expert raters may recognise machine-written phrasing despite blinding.
+- Results in one fast-feedback field may not transfer to slow, expensive sciences. Running the same comparison in a slower field (a clinical trial setting, say) would take years.
+- Expert raters may recognise machine-written phrasing despite blinding. Carrying out a phrasing-match check (passing all hypotheses through a stylistic rewrite before rating) is cheap and should be part of the protocol.
+- The "future-work" baseline is itself contaminated: much of it is written by researchers who then publish on those directions. The baseline is a floor, not a ceiling.
+- Training-data contamination is a real risk: if the model has already seen the follow-up paper where a hypothesis succeeded, the "generation" is retrieval. The protocol should use a literature window that ends before the model's training cutoff.
+
+## Why the question matters
+
+If the hypothesis is supported, "AI-generated hypotheses" would be a useful source of novelty filters — a way to widen the set of candidates humans consider — but not a substitute for the slow work of plausibility. If it is falsified, the picture is different: in some fields at least, the model is doing better than the field at picking what to try. In either case the number worth reporting is not how many hypotheses were produced, but what fraction of them held.
 
 ## References
 
-Listed below. All are unverified placeholders in this sample.
+Listed below. Verified where DOIs are given; the arXiv entries are listed by their identifiers.

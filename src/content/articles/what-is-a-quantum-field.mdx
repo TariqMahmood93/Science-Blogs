@@ -9,21 +9,36 @@ publishDate: 2026-10-22
 sample: true
 cover: quantum-field
 openQuestion: "Quantum field theory describes every known non-gravitational force with extreme accuracy, but gravity resists the same treatment. Is the obstacle technical, or is one of the two frameworks wrong?"
-aiAssistance: Sample layout for the Physics & Space topic. A real article would be written and checked by a named author with physics expertise.
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with physics expertise.
 references:
-  - id: qft-textbook
-    text: "To source: a graduate-level quantum field theory textbook used in current university courses."
-  - id: g-2-measurement
-    text: "To source: the latest high-precision measurement of the electron or muon anomalous magnetic moment and the QED prediction it is compared with."
-  - id: higgs-discovery
-    text: "To source: ATLAS and CMS papers on the discovery of the Higgs boson and later measurements of its properties."
+  - id: dirac1927
+    text: "Dirac, P.A.M. (1927). The quantum theory of the emission and absorption of radiation. Proceedings of the Royal Society A, 114(767), 243–265."
+    doi: "10.1098/rspa.1927.0039"
+  - id: feynman-qed
+    text: "Feynman, R.P. (1985). QED: The Strange Theory of Light and Matter. Princeton University Press."
+  - id: schwartz
+    text: "Schwartz, M.D. (2014). Quantum Field Theory and the Standard Model. Cambridge University Press."
+  - id: g2-fermilab
+    text: "Muon g-2 Collaboration. (2023). Measurement of the positive muon anomalous magnetic moment to 0.20 ppm. Physical Review Letters, 131(16), 161802."
+    doi: "10.1103/PhysRevLett.131.161802"
+  - id: electron-g2
+    text: "Fan, X., Myers, T.G., Sukra, B.A.D. & Gabrielse, G. (2023). Measurement of the electron magnetic moment. Physical Review Letters, 130(7), 071801."
+    doi: "10.1103/PhysRevLett.130.071801"
+  - id: higgs-atlas
+    text: "ATLAS Collaboration. (2012). Observation of a new particle in the search for the Standard Model Higgs boson with the ATLAS detector at the LHC. Physics Letters B, 716(1), 1–29."
+    doi: "10.1016/j.physletb.2012.08.020"
+  - id: higgs-cms
+    text: "CMS Collaboration. (2012). Observation of a new boson at a mass of 125 GeV with the CMS experiment at the LHC. Physics Letters B, 716(1), 30–61."
+    doi: "10.1016/j.physletb.2012.08.021"
 ---
 
-This is an **explainer** of a widely accepted framework, not a report of a new result. Where the explanation involves judgement about pictures and metaphors, I say so.
+This is an **explainer** of a widely accepted framework, not a report of a new result. Where the explanation involves judgement about pictures and metaphors, we say so.
 
 ## From particles to fields
 
-The common picture is wrong but useful: an electron is a tiny ball flying through space. The picture that reproduces experiments is different. The electron field exists everywhere, at all times, and an electron is a localised excitation of that field — a ripple with a definite energy and momentum<Cite id="qft-textbook" />. The same holds for every known matter particle and every force carrier: each has its own field.
+The common picture is wrong but useful: an electron is a tiny ball flying through space. The picture that reproduces experiments is different. The electron field exists everywhere, at all times, and an electron is a localised excitation of that field — a ripple with a definite energy and momentum<Cite id="schwartz" />. The same holds for every known matter particle and every force carrier: each has its own field.
+
+This is not a metaphor. In quantum field theory the field is the mathematical object that appears in the fundamental equations; particles are what you get when you quantise it. The order of priority was fixed by Paul Dirac in 1927, when he quantised the electromagnetic field and derived the spontaneous emission of light from excited atoms as a consequence<Cite id="dirac1927" />. The paper is now a century old; the picture it introduced is the one every modern treatment of elementary physics starts from.
 
 <Evidence kind="established">
 Quantum field theory, built on this picture, produces predictions that match experiment to twelve significant figures in the best-tested case, the magnetic moment of the electron.
@@ -33,25 +48,53 @@ Quantum field theory, built on this picture, produces predictions that match exp
 
 Two features of the theory only make sense if the field, not the particle, is the basic object.
 
-1. **Particle number is not conserved.** In a quantum field, particles can be created and destroyed by energy exchange — pair production, Higgs decays, radioactive emission. A theory of fixed little balls cannot describe this; a theory of excitations in a field does so naturally.
-2. **Vacuum is not empty.** The lowest-energy state of each field still has quantum fluctuations. These are not a philosophical quibble: they shift atomic energy levels (the Lamb shift) and change the magnetic moment of the electron, both measured to high precision<Cite id="g-2-measurement" />.
+**Particle number is not conserved.** In a quantum field, particles can be created and destroyed by energy exchange. Pair production creates an electron and a positron out of a photon's energy. A Higgs boson decays into two photons, or into a bottom-antibottom pair. Radioactive beta decay turns a neutron into a proton plus an electron plus an antineutrino. A theory of fixed little balls cannot describe any of this; a theory of excitations in a field does so naturally.
+
+**Vacuum is not empty.** The lowest-energy state of each field still has quantum fluctuations. These are not a philosophical quibble: they shift atomic energy levels and change the magnetic moment of charged particles, both measured to high precision.
+
+The electron's **anomalous magnetic moment** `g−2` is the canonical example. The Dirac equation alone predicts `g = 2` exactly. Including the effect of the electron field exchanging virtual photons with itself gives `g − 2 ≈ α/π`, a result Julian Schwinger calculated in 1948 — the first calculation to use what are now called Feynman diagrams. Decades of better calculations and better experiments have followed. The current best measurement for the electron, from the Harvard group, gives `(g−2)/2 = 0.00115965218059(13)`, matching the Standard Model prediction to about one part in `10¹²`<Cite id="electron-g2" />. There is no other case in science where theory and experiment agree to that precision.
+
+The muon tells a slightly different story. The Fermilab Muon g-2 experiment measured the muon's anomalous magnetic moment to 0.20 parts per million in 2023<Cite id="g2-fermilab" />. The experimental value is in some tension with the Standard Model prediction, but the size of the tension depends on which theoretical calculation is used: lattice-QCD estimates of a particular hadronic contribution now sit closer to the experimental value than earlier dispersive estimates did. The muon anomaly is one of the places where quantum field theory's extraordinary precision stops being extraordinary, and where new physics might show up first — or might turn out to have been a calculational misstep.
 
 <Evidence kind="interpretation">
-Textbooks sometimes say the vacuum "boils with virtual particles". That phrase is a metaphor for a mathematical expansion. The measurable effects are real; the little particles popping in and out are a visualisation of the maths, not a direct observation.
+Textbooks sometimes say the vacuum "boils with virtual particles". That phrase is a metaphor for a mathematical expansion. The measurable effects — Lamb shift, Casimir force, anomalous magnetic moments — are real; the little particles popping in and out are a visualisation of the maths, not a direct observation.
 </Evidence>
 
 ## The Higgs case
 
-The 2012 discovery of the Higgs boson at the Large Hadron Collider was the discovery of an excitation of a field that had been predicted since the 1960s<Cite id="higgs-discovery" />. The experiment did not confirm "a particle existed". It confirmed that the Higgs field exists, by producing a ripple in it with the predicted properties.
+The discovery of the Higgs boson in July 2012 was, from this point of view, the discovery of a field that had been predicted since the 1960s. The ATLAS and CMS collaborations at CERN each independently reported observation of a new boson with a mass near 125 GeV in signatures consistent with the Standard Model Higgs<Cite id="higgs-atlas" /><Cite id="higgs-cms" />. The combined significance of the two experiments crossed the five-standard-deviation threshold the particle physics community uses for a discovery claim.
+
+The experiments did not confirm "a particle existed" in the little-ball sense. They confirmed that the Higgs field exists, by producing ripples in it with the predicted properties. The decay channels seen so far — into pairs of photons, into pairs of Z bosons, into pairs of W bosons, and more recently into pairs of tau leptons and bottom quarks — all match the Standard Model's predictions for the couplings of the Higgs field to the other fields. The remaining precision tests of the Higgs sector are the main physics programme of the LHC and its successors.
 
 <Evidence kind="established">
 Every known non-gravitational force and matter particle is now described within quantum field theory, and this framework is the backbone of the Standard Model.
 </Evidence>
 
+## Gauge invariance, in a sentence
+
+A technical ingredient worth naming, because it is the organising principle of the Standard Model. **Gauge invariance** is the requirement that the theory's predictions be independent of certain redundant choices of description, like the choice of coordinates. Imposing gauge invariance on free matter fields *forces* the existence of specific force-carrying fields: the electromagnetic field for the electron, the gluon field for quarks, the W and Z fields for weak interactions. Which is to say: the forces are not added by hand; they are consequences of a symmetry.
+
+The three forces of the Standard Model all follow this pattern. The elegance of the result is why some physicists call quantum field theory "the deepest theory we have", and it is also why gravity's resistance to the same treatment is such a persistent puzzle.
+
 ## Where the picture ends
 
-Gravity, so far, resists the same treatment. Treating general relativity as a quantum field theory of a graviton field produces infinities that cannot be removed by the standard techniques. Whether this is a solvable technical problem or a sign that one of the two frameworks must change is an open research question.
+Gravity, so far, resists the same treatment. Treating general relativity as a quantum field theory of a graviton field produces infinities that cannot be removed by the standard techniques. The technique that works for the other three forces — renormalisation — fails here because gravity's coupling becomes stronger with energy in a way the other forces' do not.
+
+Three directions get the most attention.
+
+- **String theory** replaces point particles with one-dimensional objects (strings) and derives a graviton as one of their vibrational modes. The theory produces no infinities of the usual kind but requires extra spatial dimensions and has no unique prediction for the universe we see.
+- **Loop quantum gravity** quantises spacetime itself, treating area and volume as discrete at the Planck scale. It makes gravity renormalisable but has not reproduced the low-energy predictions of general relativity to the precision we have measured them.
+- **Asymptotically safe gravity** proposes that gravity's coupling flows to a finite fixed point at very high energies, so the usual infinities are tamed. Numerical evidence for this fixed point exists in approximations; a complete proof does not.
+
+Each of these programmes has existed for decades. None has yet been tested against experiment, because the energies at which quantum-gravity effects become large are far beyond anything we can produce.
+
+## What a careful reader should take away
+
+- Quantum field theory is extraordinarily well-tested at low energies. The anomalous magnetic moment matches to 12 significant figures<Cite id="electron-g2" />.
+- The vacuum is not empty, and the measurable consequences of that fact are the strongest test of the framework.
+- The Higgs discovery completed a prediction made half a century earlier<Cite id="higgs-atlas" /><Cite id="higgs-cms" />. The framework is now the backbone of all non-gravitational physics.
+- Gravity remains outside this picture. Whether that is a technical obstacle or a sign that one of the two frameworks needs to change is the central open question of fundamental physics.
 
 <Evidence kind="open">
-Quantum field theory describes every known non-gravitational force with extreme accuracy, but gravity resists the same treatment. Is the obstacle technical, or is one of the two frameworks wrong?
+Quantum field theory describes every known non-gravitational force with extreme accuracy, but gravity resists the same treatment. Is the obstacle technical, or is one of the two frameworks — quantum theory itself or general relativity — the one that needs to change?
 </Evidence>

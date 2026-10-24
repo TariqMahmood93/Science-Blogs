@@ -10,51 +10,95 @@ featured: true
 sample: true
 cover: brain
 openQuestion: "How should a publication describe a result when no single person understood why the model proposed it?"
-aiAssistance: Sample outline drafted with AI assistance for layout testing. A real article would be written and checked by a named editor.
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with domain expertise.
 references:
   - id: discovery-def
-    text: "To source: a philosophy-of-science account distinguishing discovery from justification."
-  - id: ml-science-review
-    text: "To source: a recent review of machine learning used in scientific discovery, ideally peer-reviewed."
-  - id: verification-case
-    text: "To source: a documented case where a machine-generated result was later confirmed by independent experiment."
+    text: "Reichenbach, H. (1938). Experience and Prediction. University of Chicago Press. The source of the distinction between the context of discovery and the context of justification."
+  - id: alphafold
+    text: "Jumper, J., Evans, R., Pritzel, A. et al. (2021). Highly accurate protein structure prediction with AlphaFold. Nature, 596, 583–589."
+    doi: "10.1038/s41586-021-03819-2"
+  - id: gnome
+    text: "Merchant, A., Batzner, S., Schoenholz, S.S. et al. (2023). Scaling deep learning for materials discovery. Nature, 624, 80–85."
+    doi: "10.1038/s41586-023-06735-9"
+  - id: fun-search
+    text: "Romera-Paredes, B., Barekatain, M., Novikov, A. et al. (2024). Mathematical discoveries from program search with large language models. Nature, 625, 468–475."
+    doi: "10.1038/s41586-023-06924-6"
+  - id: autonomous-lab
+    text: "Burger, B., Maffettone, P.M., Gusev, V.V. et al. (2020). A mobile robotic chemist. Nature, 583, 237–241."
+    doi: "10.1038/s41586-020-2442-2"
 ---
 
-This is a **future hypothesis**: it describes a possible scenario and states its assumptions. Nothing here reports a finding.
+This is a **future hypothesis**: it describes a possible scenario and states the assumptions behind it. Nothing here reports a finding. The point of the piece is to make the question tractable — to say what would count as an answer either way — not to argue for one.
+
+## The question, stated carefully
+
+The headline "AI discovered X" has become routine. Some of those headlines describe real results: a protein structure that no one knew<Cite id="alphafold" />, a stable crystal that had not been synthesised<Cite id="gnome" />, a mathematical construction nobody had written down<Cite id="fun-search" />. Others describe pattern-matching dressed up as insight. Separating the two is harder than it sounds, because *discovery* is not a single thing. It is a word we use for at least three different events: noticing a pattern, naming a new entity, and showing that a claim about the world is true.
+
+The question this article asks is narrower than the headlines: **can a learning system propose a true, new, useful claim that an independent group confirms, and that would not have been produced by a reasonable human alternative in a comparable timeframe?** The three qualifiers — true, new, useful — matter, and so does the baseline. Without them, novelty collapses into recombination and discovery collapses into search.
 
 ## The assumptions behind the question
 
-Three assumptions shape any answer, and readers may reasonably reject each one.
+Three assumptions shape any answer. Readers may reasonably reject each one, and the force of any conclusion depends on which they accept.
 
-1. A discovery is a claim that is new, true and useful, not just a pattern in data.
-2. A claim only becomes a discovery once people can check it independently.
-3. Machine learning systems will keep improving at proposing claims that are cheap to test.
+1. **Discovery is a claim about the world, not just a pattern in data.** A regularity in a dataset is not yet a discovery; it is a candidate. The candidate becomes a discovery when it is tested, published and either confirmed or revised.
+2. **A claim only becomes a discovery once people can check it independently.** Reproducibility is not optional. A result nobody else can reach is a conjecture, however striking.
+3. **Machine learning systems will keep improving at proposing claims that are cheap to test.** Where testing is expensive — a human trial, a particle-physics measurement, a long-duration climate experiment — the picture may look different.
 
 <Evidence kind="interpretation">
-Under these assumptions the interesting question is not whether a model can produce something novel, which is easy, but whether it can produce novel claims that survive testing more often than chance.
+Under these assumptions, the interesting question is not whether a model can produce something novel, which is easy, but whether it can produce novel claims that survive testing more often than reasonable baselines.
 </Evidence>
 
-## What counts as discovery
+## What philosophers have long distinguished
 
-Philosophers have long separated the moment an idea appears from the work of showing it is right<Cite id="discovery-def" />. That distinction matters here: models are good at the first and depend on people and instruments for the second.
+Hans Reichenbach drew a line in 1938 between the *context of discovery* — the historical process by which an idea first appears — and the *context of justification* — the work of showing that the idea is true<Cite id="discovery-def" />. The distinction has been contested ever since, but it is still useful. Machines are already very good at the first and depend on people and instruments for the second.
+
+If we accept the Reichenbach split, three observations follow:
+
+- A machine that proposes a good hypothesis has done something that used to require a scientist's intuition. That is a real change in what the tools of science look like.
+- It has not, by itself, made a discovery. Whatever is proposed still has to pass the independent-check stage.
+- The person or team who designed the loop between proposing and checking has done something new too: they have changed where the hard work of science lives.
 
 ## Where machines already contribute
 
-An outline for this section: survey the fields where machine learning proposes candidates (molecules, materials, proofs, protein structures) and people or experiments confirm them<Cite id="ml-science-review" />. Each example should name the system, the claim and the independent check.
+Four classes of result are worth separating, because they place the human and the machine in different roles.
+
+**1. Structure prediction.** DeepMind's AlphaFold predicts protein structures from amino-acid sequences and in 2021 released predictions for about 350,000 human proteins at a quality comparable to experimental determination for a large fraction of the proteome<Cite id="alphafold" />. The predictions are not "discoveries" in the strict sense — they are candidates — but the Protein Data Bank's growth since then shows that experimentalists treat them as useful starting points for crystallography and cryo-EM work.
+
+**2. Materials proposals.** Google DeepMind's GNoME system in 2023 proposed about 2.2 million candidate inorganic crystals, of which roughly 380,000 were predicted stable by the model's energy criterion<Cite id="gnome" />. An autonomous laboratory at Berkeley then synthesised a subset. The question of how to count these — as discoveries, as predictions, or as a very fast candidate pipeline — depends on which of the three event-types above the reader has in mind.
+
+**3. Mathematical constructions.** FunSearch (Romera-Paredes et al., 2024) combined a large language model with an evaluator to search for new mathematical objects. It produced lower bounds on cap-set sizes that improved on previous human results<Cite id="fun-search" />. Here the test is immediate: either the construction has the claimed property or it does not. The system did not prove a new theorem; it found a new instance of an open combinatorial problem.
+
+**4. Autonomous experimentation.** Burger and colleagues ran a mobile robotic chemist that selected its own experiments in a photocatalysis search, finding an improved catalyst in a few days<Cite id="autonomous-lab" />. The closed loop — propose, test, update — is what interests philosophers of science: it compresses the discovery-justification distinction into a single running process.
+
+<Evidence kind="established">
+Across these four classes, machines have produced candidate claims (and in the mathematical case, confirmed claims) that would otherwise have taken longer or not have been produced at all.
+</Evidence>
 
 ## The scenario
 
-Suppose testing becomes automated in some fields, for instance robotic labs that run experiments proposed by a model. The loop between proposing and checking would tighten, and the share of human judgement in each step would shrink<Cite id="verification-case" />.
+Suppose the autonomous-experimentation loop becomes routine for a non-trivial class of claims — small molecules, materials, software security proofs, perhaps parts of condensed-matter physics. The loop between proposing and checking tightens. The share of human judgement in each step shrinks, though the role of humans in choosing what to search for stays large.
 
 <Evidence kind="speculation">
-In that scenario, credit for a discovery might sit with the people who designed the loop and chose what to test, not with the model or the instrument alone.
+In that scenario, credit for a discovery might sit with the people who designed the loop and chose what to test, rather than with the model or the instrument alone. The idea of a single discoverer may be no more useful here than in a modern particle-physics collaboration, where papers already carry hundreds of names.
 </Evidence>
+
+Two side-effects would follow. First, the ratio of candidates to confirmed claims would get worse. A system that proposes a million candidates and confirms a thousand is useful; it is also a flood of unconfirmed material that other researchers must learn to ignore. Second, provenance would become more important than credit: readers would need to know which parts of a chain were produced by a model and which by instruments and people, because the failure modes are different.
 
 ## What would change our mind
 
-- Evidence that model-proposed hypotheses are confirmed no more often than those chosen by simple baselines.
-- Cases where confirmation depended mostly on human reinterpretation of an output that was originally wrong.
+- Evidence that model-proposed hypotheses in a given field are confirmed *less* often than well-designed baselines (random recombination of known candidates, expert-written hypotheses, future-work sections mined from the recent literature).
+- Cases where confirmation depended mostly on humans reinterpreting a wrong output. If "the model found it" is being used to describe post hoc rescue by a researcher, the credit assignment is misleading.
+- Replication crises inside AI-driven pipelines themselves: candidate materials that cannot be synthesised, candidate molecules that fail in vitro, candidate theorems that are retracted. Not a reason to abandon the pipelines, but a reason to count more cautiously.
+
+## How a publication should talk about this
+
+A short style note, since the question matters for every piece we publish about AI-assisted science:
+
+- Say "a model proposed" or "a model generated" when the artefact is a candidate.
+- Say "a result was confirmed by X" when a human or an instrument has checked it.
+- Attribute the discovery, where one exists, to the research group — not to the model and not to the instrument alone.
+- Separate the two numbers: candidates produced and candidates confirmed.
 
 <Evidence kind="open">
-How should a publication describe a result when no single person understood why the model proposed it?
+How should a publication describe a result when no single person understood *why* the model proposed it, even though the result itself turned out to be correct?
 </Evidence>
