@@ -1,0 +1,137 @@
+---
+title: What is a relational database — and what makes it dynamic?
+dek: Fifty-five years after Codd's paper, the relational model is still what most of the world's structured data is stored in. The quiet, important fact is that real relational databases are not static — they change under you, and that changes which problems are hard.
+type: scientific-explainer
+category: computer-science-cybersecurity
+tags: [relational database, SQL, data management, dynamic data]
+authors: [editors]
+publishDate: 2026-10-23
+sample: true
+cover: code-scan
+openQuestion: "If a relational database is always being updated, how should statistical and machine-learning methods designed for static tables adapt — and when does the usual pretence that the table is a snapshot stop being safe?"
+related: [missing-data-unfair-ai, what-is-missing-data]
+aiAssistance: Sample long-form article drafted with AI assistance for layout and content testing. A real article would be written and checked by a named editor with database expertise.
+references:
+  - id: codd1970
+    text: "Codd, E.F. (1970). A relational model of data for large shared data banks. Communications of the ACM, 13(6), 377–387."
+    doi: "10.1145/362384.362685"
+  - id: date-textbook
+    text: "Date, C.J. (2003). An Introduction to Database Systems, 8th edition. Pearson."
+  - id: ramakrishnan
+    text: "Ramakrishnan, R. & Gehrke, J. (2003). Database Management Systems, 3rd edition. McGraw-Hill."
+  - id: stonebraker-newsql
+    text: "Stonebraker, M. (2010). SQL databases v. NoSQL databases. Communications of the ACM, 53(4), 10–11."
+    doi: "10.1145/1721654.1721659"
+  - id: alfano-senti
+    text: "Alfano, G., Greco, S., La Cava, L., Mahmood, T. & Trubitsyna, I. (2026). Semantic-aware data imputation in dynamic relational databases via pre-trained language models. Information Fusion, 133, 104291."
+    doi: "10.1016/j.inffus.2026.104291"
+---
+
+If you have ever filled in a form online, booked a flight, read a bank statement or opened almost any administrative system, you have interacted with a **relational database**. It is the single most-deployed idea in computing that most people have never heard the name of. This article explains what a relational database is, how it is organised, how it is queried, and what people mean when they say it is **dynamic** — and why the dynamic part changes which problems become hard.
+
+## The idea, and where it came from
+
+In 1970 Edgar F. Codd, an IBM researcher, published a paper proposing that structured data should be organised as **relations** — sets of tuples where each tuple has values drawn from fixed domains<Cite id="codd1970" />. The practical consequence was that data could be modelled as **tables** of rows and columns, independent of how the data was physically stored. Programs no longer had to know whether a record sat in track 47 of a disk pack; they asked a declarative query for *what* they wanted, and a database engine figured out *how* to get it.
+
+The relational model displaced the hierarchical and network databases that preceded it, and by the mid-1980s it was the mainstream way to run business data. The query language — **SQL** (Structured Query Language) — became an ISO standard and is still, in 2026, the one most data engineers reach for first<Cite id="ramakrishnan" />.
+
+<Evidence kind="established">
+The relational model is the dominant structured-data paradigm for business, scientific and administrative information systems. More recent approaches (key-value stores, document databases, graph databases) complement rather than replace it, and most of them have added a SQL interface in the years since 2015.
+</Evidence>
+
+## The pieces of a relational database
+
+A relational database is a collection of **tables** (relations). Each table has:
+
+- A **name** (`Students`, `Courses`, `Enrollments`).
+- A set of **columns** (attributes), each with a declared **type** (`integer`, `varchar(100)`, `date`).
+- Zero or more **rows** (tuples), each a complete record whose values match the column types.
+- A **primary key**: a column or set of columns whose values uniquely identify a row.
+- Optional **foreign keys**: columns that reference the primary keys of other tables, so you can link records together.
+
+A canonical worked example — a tiny university schema:
+
+| Table | Columns | Primary key |
+|---|---|---|
+| `Students` | `student_id`, `name`, `enrol_year`, `major` | `student_id` |
+| `Courses` | `course_id`, `title`, `department`, `credits` | `course_id` |
+| `Enrollments` | `student_id`, `course_id`, `semester`, `grade` | `(student_id, course_id, semester)` |
+
+`Enrollments.student_id` is a foreign key into `Students.student_id`. `Enrollments.course_id` is a foreign key into `Courses.course_id`. The database engine will refuse to insert an enrolment that references a student who does not exist, or a course that does not exist — a property called **referential integrity**.
+
+To find every course a student is taking this semester, we write:
+
+```sql
+SELECT c.title, c.credits
+FROM Enrollments e
+JOIN Courses c ON e.course_id = c.course_id
+WHERE e.student_id = 42
+  AND e.semester = '2026-fall';
+```
+
+The query is declarative: it says *what* we want, not *how* to compute it. The database planner picks indexes, orders the join, decides whether to stream or buffer, and returns rows.
+
+## Why the design matters
+
+Three ideas, from Codd's paper onward, have survived every attempt to replace them.
+
+**Independence of logical and physical layout.** A query refers to tables and columns; the engine chooses the physical layout. Adding an index, changing the storage format or moving data to a new disk should not change the query.
+
+**Declarative integrity.** The schema declares what makes the data valid: primary keys, foreign keys, uniqueness, allowed value ranges, non-null constraints. The engine enforces these for every insert and update, so bad data is rejected at the gate rather than discovered later.
+
+**Transactions and ACID.** A **transaction** is a sequence of operations that either all happen or none happen (atomicity), leaves the database in a valid state (consistency), is isolated from other concurrent transactions (isolation) and survives power loss once committed (durability). Transferring money between accounts is the canonical example — the debit and the credit must happen together or not at all.
+
+This set of properties is what makes a relational database trustworthy for operational systems. Alternatives give some of them up for different trade-offs — eventual consistency across data centres, flexibility of document schemas — but when correctness really matters, the ACID guarantees are hard to replace<Cite id="stonebraker-newsql" />.
+
+## Normalisation, in one paragraph
+
+A schema is **normalised** when every piece of information lives in exactly one place. Storing the student's name on every enrolment row would allow it to disagree between rows; normalisation says to store it once in `Students` and reference it by `student_id`. There is a formal theory of normal forms (1NF, 2NF, 3NF, BCNF, 4NF, 5NF) with precise definitions, but the practical goal is simple: avoid redundancy, make updates safe<Cite id="date-textbook" />.
+
+## What "dynamic" means
+
+A **dynamic relational database** is one in which the data changes over time — new rows are inserted, existing rows are updated, old rows are deleted, and sometimes the schema itself evolves (new columns, new tables, new constraints). Almost every real database is dynamic in this sense.
+
+The word carries weight because many of the tools we build on top of databases quietly assume a **static** snapshot. A machine-learning model trained on the enrolments table in September may be deployed against the enrolments table in December, which has new semesters, new students, retired courses, corrected grades. A statistical imputation of missing values computed on last week's data may be wrong this week.
+
+Three kinds of change matter.
+
+- **Append-only growth.** New students enrol every term; the table grows but old rows do not change. The simplest case.
+- **Updates.** A grade changes after a successful appeal. A student's major is corrected. The row with the same primary key now has different values than it did an hour ago.
+- **Deletions.** A test student added by mistake is removed. A privacy regulation requires a particular record to disappear. The row is simply gone.
+
+Alongside the data, the **schema** can change too: a new column is added for "preferred pronouns", a column is split (e.g. "name" into "first_name" and "surname"), a table is added for a new programme. Older rows may have missing values in the newly added columns, by design.
+
+## A concrete example
+
+Imagine a hospital's electronic health record. It is a relational database with tables for patients, visits, orders, measurements, prescriptions and discharges. Every day:
+
+- Hundreds of new rows are inserted as patients arrive, labs run and clinicians type notes.
+- Some rows are updated as corrections come in — a mis-typed dose, a lab value re-measured, a diagnosis refined.
+- A few rows are deleted or merged, usually under strict audit requirements.
+- The schema is extended once a quarter: a new coding standard, a new form, a new vital sign the hospital now tracks.
+
+A static treatment of this data — "take a snapshot, run the model" — will miss three things:
+
+1. **Information arriving late.** A test result that comes back the following day looks like missing data at the time of the first analysis.
+2. **Corrections overriding earlier values.** A model trained on a snapshot before corrections learns from values that are later known to be wrong.
+3. **Schema evolution.** A new column is empty for everyone recorded before it existed. That empty-ness is informative — those rows are older — not simply missing at random.
+
+Dynamic-aware methods treat the database as a stream of changes rather than a single table. They need to answer questions about correctness ("is my view of the data up to date?"), about efficiency ("can I update my model incrementally, or must I retrain?") and about statistical validity ("is the way values are becoming missing changing over time?").
+
+## Where this connects to our other articles
+
+Dynamic relational databases are exactly where the missing-data problem gets harder. Imputing a value in a static table is already a non-trivial decision; imputing in a database that keeps changing adds the question of *when* the imputation was valid and whether re-training is required. A recent paper by Alfano and colleagues (2026) proposes a *semantic-aware* approach that uses pre-trained language models to perform incremental imputation on dynamic relational databases without retraining from scratch<Cite id="alfano-senti" />, and in fairness-sensitive settings the dynamic view also changes which group a particular row belongs to over time.
+
+More generally: once a database is treated as dynamic, every analysis has to decide which snapshot it is reporting on, how fresh the result is, and how a user is supposed to interpret an answer that may be different in an hour.
+
+## A short checklist for working with relational data
+
+- **Know the schema before writing a query.** Not only the column names but also the primary keys, the foreign keys, and the constraints.
+- **Prefer SQL joins to application-level merging.** The database engine is better at this than almost any script.
+- **Use transactions for anything that touches more than one table.** A half-finished update is almost always worse than no update.
+- **Treat the database as changing.** Record the time at which each analysis was run and the snapshot it saw.
+- **Model missingness explicitly.** Column-level null rates often shift over time as new data arrives or schemas evolve. See the companion article on [missing data](/article/what-is-missing-data/).
+
+<Evidence kind="open">
+If a relational database is always being updated, how should statistical and machine-learning methods designed for static tables adapt — and when does the usual pretence that the table is a snapshot stop being safe? The question is open across clinical data, operational analytics and fairness audits alike.
+</Evidence>
